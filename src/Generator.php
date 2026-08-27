@@ -177,7 +177,11 @@ final class Generator
         }
     }
 
-    /** Resolves a possibly-prefixed QName against $contextNode's in-scope namespace bindings. @return array{0: string, 1: string} [namespaceURI, localName] */
+    /**
+     * Resolves a possibly-prefixed QName against $contextNode's in-scope namespace bindings.
+     *
+     * @return array{0: string, 1: string} [namespaceURI, localName]
+     */
     private function resolveQName(\DOMElement $contextNode, string $qname): array
     {
         [$prefix, $local] = Naming::splitQName($qname);
@@ -196,6 +200,8 @@ final class Generator
     }
 
     /**
+     * @param array<string, true> &$seenGroups
+     *
      * @return array{0: \DOMElement, 1: ?\DOMElement}[] [element, enclosing xs:choice particle] pairs,
      *                                                  xs:sequence/xs:choice/xs:all nesting flattened, xs:group refs inlined. The enclosing choice
      *                                                  is the innermost xs:choice ancestor within this particle tree (null if the element sits
@@ -205,10 +211,14 @@ final class Generator
      */
     private function collectParticleElements(\DOMElement $particle, array &$seenGroups = [], ?\DOMElement $enclosingChoice = null): array
     {
-        $xp = $this->xpath($particle->ownerDocument);
+        $xp = $this->xpath($this->ownerDocOf($particle));
         $ownChoice = 'choice' === $particle->localName ? $particle : $enclosingChoice;
         $elements = [];
-        foreach ($xp->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $particle) as $child) {
+        foreach ($this->query($xp, 'xs:element | xs:sequence | xs:choice | xs:all | xs:group', $particle) as $child) {
+            if (!$child instanceof \DOMElement) {
+                $this->warn('non-element node in particle content, skipping');
+                continue;
+            }
             if ('element' === $child->localName) {
                 $elements[] = [$child, $ownChoice];
                 continue;
@@ -265,7 +275,11 @@ final class Generator
         return [$key, $registry[$key]];
     }
 
-    /** @return \DOMElement[] */
+    /**
+     * @param array<string, true> &$seenGroups
+     *
+     * @return array{0: \DOMElement, 1: ?\DOMElement}[]
+     */
     private function collectGroupRefElements(\DOMElement $groupRef, array &$seenGroups): array
     {
         [$key, $group] = $this->resolveNamedRef($groupRef, $this->groups, $seenGroups, 'group');
@@ -276,23 +290,35 @@ final class Generator
             return $this->groupElementsCache[$key];
         }
 
-        $xp = $this->xpath($group->ownerDocument);
-        $groupParticle = $xp->query('xs:sequence | xs:choice | xs:all', $group)->item(0);
+        $xp = $this->xpath($this->ownerDocOf($group));
+        $groupParticle = $this->query($xp, 'xs:sequence | xs:choice | xs:all', $group)->item(0);
         $result = $groupParticle instanceof \DOMElement ? $this->collectParticleElements($groupParticle, $seenGroups) : [];
 
         return $this->groupElementsCache[$key] = $result;
     }
 
-    /** @return \DOMElement[] xs:attribute nodes, attributeGroup refs resolved recursively */
+    /**
+     * @param array<string, true> &$seenGroups
+     *
+     * @return \DOMElement[] xs:attribute nodes, attributeGroup refs resolved recursively
+     */
     private function collectAttributes(\DOMElement $container, array &$seenGroups = []): array
     {
-        $xp = $this->xpath($container->ownerDocument);
+        $xp = $this->xpath($this->ownerDocOf($container));
 
         $attrs = [];
-        foreach ($xp->query('xs:attribute', $container) as $attr) {
+        foreach ($this->query($xp, 'xs:attribute', $container) as $attr) {
+            if (!$attr instanceof \DOMElement) {
+                $this->warn('non-element xs:attribute node, skipping');
+                continue;
+            }
             $attrs[] = $attr;
         }
-        foreach ($xp->query('xs:attributeGroup', $container) as $ref) {
+        foreach ($this->query($xp, 'xs:attributeGroup', $container) as $ref) {
+            if (!$ref instanceof \DOMElement) {
+                $this->warn('non-element xs:attributeGroup node, skipping');
+                continue;
+            }
             [$key, $attributeGroup] = $this->resolveNamedRef($ref, $this->attributeGroups, $seenGroups, 'attributeGroup');
             if (!$attributeGroup instanceof \DOMElement) {
                 continue;

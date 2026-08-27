@@ -39,19 +39,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 4
-			path: src/Generator.php
-
-		-
-			message: '#^Binary operation "\." between mixed and ''\#'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 5
-			path: src/Generator.php
-
-		-
-			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 5
+			count: 1
 			path: src/Generator.php
 
 		-
@@ -69,49 +57,7 @@ parameters:
 		-
 			message: '#^Cannot call method item\(\) on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
 			identifier: method.nonObject
-			count: 9
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot use array destructuring on DOMElement\.$#'
-			identifier: offsetAccess.nonArray
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectAttributes\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectAttributes\(\) should return array\<DOMElement\> but returns array\<DOMNameSpaceNode\|DOMNode\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) should return array\<DOMElement\> but returns array\<array\<int, DOMElement\|null\>\>\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectParticleElements\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectParticleElements\(\) should return array\<array\{DOMElement, DOMElement\|null\}\> but returns array\<array\{mixed, mixed\}\>\.$#'
-			identifier: return.type
-			count: 1
+			count: 8
 			path: src/Generator.php
 
 		-
@@ -163,12 +109,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:resolveQName\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Method Xsd2Php\\Generator\:\:resolveSimpleTypeRef\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -207,29 +147,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$doc of method Xsd2Php\\Generator\:\:xpath\(\) expects DOMDocument, DOMDocument\|null given\.$#'
 			identifier: argument.type
-			count: 8
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$groupRef of method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$local of static method Xsd2Php\\Naming\:\:xsPrimitiveToPhp\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
+			count: 5
 			path: src/Generator.php
 
 		-
 			message: '#^Parameter \#1 \$particle of method Xsd2Php\\Generator\:\:collectParticleElements\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$refNode of method Xsd2Php\\Generator\:\:resolveNamedRef\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Generator.php
@@ -271,12 +193,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#3 \$seen of method Xsd2Php\\Generator\:\:resolveNamedRef\(\) expects array\<string, true\>, array given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \$dateOnly of class Xsd2Php\\Property constructor expects bool, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -303,18 +219,6 @@ parameters:
 		-
 			message: '#^Parameter \$phpType of class Xsd2Php\\Property constructor expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Part \$local \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Part \$refLocal \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
 			count: 1
 			path: src/Generator.php
 
