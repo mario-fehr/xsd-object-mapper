@@ -20,59 +20,59 @@ schema, not only against this test suite's own hand-written fixtures.
 
 ## Particle structure
 
-| Construct | Generator | Synthetic test |
-|---|---|---|
-| `xs:sequence` | ✅ | ✅ |
-| `xs:choice` | ✅ (nullable properties + an `ExactlyOneOf` class constraint) | ✅ |
-| `xs:all` | ✅ (same code path as sequence/choice) | ❌ |
-| `xs:group` (definition + `ref=`) | ✅ (resolved recursively, cycle detection) | ✅ |
-| `xs:attributeGroup` (`ref=`) | ✅ (resolved recursively, cached) | ✅ |
-| `minOccurs`/`maxOccurs` (incl. `unbounded`) | ✅ | ✅ |
-| `xs:any` (wildcard content) | ⚠️ falls back to `string` | ❌ |
-| `xs:anyAttribute` | ❌ | ❌ |
+| Construct                                   | Generator                                                     | Synthetic test |
+| ------------------------------------------- | ------------------------------------------------------------- | -------------- |
+| `xs:sequence`                               | ✅                                                            | ✅             |
+| `xs:choice`                                 | ✅ (nullable properties + an `ExactlyOneOf` class constraint) | ✅             |
+| `xs:all`                                    | ✅ (same code path as sequence/choice)                        | ❌             |
+| `xs:group` (definition + `ref=`)            | ✅ (resolved recursively, cycle detection)                    | ✅             |
+| `xs:attributeGroup` (`ref=`)                | ✅ (resolved recursively, cached)                             | ✅             |
+| `minOccurs`/`maxOccurs` (incl. `unbounded`) | ✅                                                            | ✅             |
+| `xs:any` (wildcard content)                 | ⚠️ falls back to `string`                                     | ❌             |
+| `xs:anyAttribute`                           | ❌                                                            | ❌             |
 
 ## Type derivation
 
-| Construct | Generator | Synthetic test |
-|---|---|---|
-| `xs:simpleContent` (extension, text + attributes) | ✅ | ✅ |
-| `xs:complexContent` extension (inheritance) | ✅ (facets merge across a chain of named-simpleType restrictions too) | ✅ |
-| `xs:complexContent` restriction | ⚠️ treated like extension, with a warning | ❌ |
-| Facets: `pattern`, `minLength`/`maxLength`/`length`, `min/maxInclusive`, `min/maxExclusive`, `totalDigits`/`fractionDigits` | ✅ | ✅ |
-| `xs:enumeration` → PHP backed enum | ✅ | ✅ |
-| `whiteSpace` facet | ❌ | ❌ |
-| `xs:union` | ⚠️ falls back to `string` | ❌ |
-| `xs:list` | ⚠️ falls back to `string`, with a diagnostic note | ❌ |
-| `mixed="true"` (text + element mixed content) | ❌ | ❌ |
-| `abstract="true"` (complexType) | ❌ | ❌ |
-| `substitutionGroup` | ❌ | ❌ |
-| `xs:redefine` / `xs:override` | ❌ | ❌ |
+| Construct                                                                                                                   | Generator                                                             | Synthetic test |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------- |
+| `xs:simpleContent` (extension, text + attributes)                                                                           | ✅                                                                    | ✅             |
+| `xs:complexContent` extension (inheritance)                                                                                 | ✅ (facets merge across a chain of named-simpleType restrictions too) | ✅             |
+| `xs:complexContent` restriction                                                                                             | ⚠️ treated like extension, with a warning                             | ❌             |
+| Facets: `pattern`, `minLength`/`maxLength`/`length`, `min/maxInclusive`, `min/maxExclusive`, `totalDigits`/`fractionDigits` | ✅                                                                    | ✅             |
+| `xs:enumeration` → PHP backed enum                                                                                          | ✅                                                                    | ✅             |
+| `whiteSpace` facet                                                                                                          | ❌                                                                    | ❌             |
+| `xs:union`                                                                                                                  | ⚠️ falls back to `string`                                             | ❌             |
+| `xs:list`                                                                                                                   | ⚠️ falls back to `string`, with a diagnostic note                     | ❌             |
+| `mixed="true"` (text + element mixed content)                                                                               | ❌                                                                    | ❌             |
+| `abstract="true"` (complexType)                                                                                             | ❌                                                                    | ❌             |
+| `substitutionGroup`                                                                                                         | ❌                                                                    | ❌             |
+| `xs:redefine` / `xs:override`                                                                                               | ❌                                                                    | ❌             |
 
 ## Element/attribute declarations
 
-| Construct | Generator | Synthetic test |
-|---|---|---|
-| `default=` / `fixed=` | ✅ (doc-comment hint only, doesn't change nullability or serialization) | ✅ |
-| `nillable="true"` | — (not a generator concern; handled at the serializer-integration layer by whatever consumes the generated classes) | — |
-| `use="required"`/`"optional"` | ✅ | ✅ |
-| `use="prohibited"` | ❌ mishandled — treated the same as `"optional"` instead of forbidding the attribute | ❌ |
-| `ref=` (element) | ✅ | ✅ |
-| `ref=` (attribute) | ⚠️ warns and skips | ✅ |
-| Global vs. anonymous (inline) type | ✅ | ✅ |
-| `elementFormDefault`/`attributeFormDefault`/`form=` | ✅ | ✅ (only `qualified` exercised) |
+| Construct                                           | Generator                                                                                                           | Synthetic test                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `default=` / `fixed=`                               | ✅ (doc-comment hint only, doesn't change nullability or serialization)                                             | ✅                              |
+| `nillable="true"`                                   | — (not a generator concern; handled at the serializer-integration layer by whatever consumes the generated classes) | —                               |
+| `use="required"`/`"optional"`                       | ✅                                                                                                                  | ✅                              |
+| `use="prohibited"`                                  | ❌ mishandled — treated the same as `"optional"` instead of forbidding the attribute                                | ❌                              |
+| `ref=` (element)                                    | ✅                                                                                                                  | ✅                              |
+| `ref=` (attribute)                                  | ⚠️ warns and skips                                                                                                  | ✅                              |
+| Global vs. anonymous (inline) type                  | ✅                                                                                                                  | ✅                              |
+| `elementFormDefault`/`attributeFormDefault`/`form=` | ✅                                                                                                                  | ✅ (only `qualified` exercised) |
 
 ## Identity constraints
 
-| Construct | Generator | Bewertung |
-|---|---|---|
-| `xs:key` / `xs:keyref` / `xs:unique` | — | Deliberately not a generator concern: identity constraints validate cross-references *within* one XML instance document, they don't affect the shape of the generated PHP classes. |
+| Construct                            | Generator | Bewertung                                                                                                                                                                          |
+| ------------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `xs:key` / `xs:keyref` / `xs:unique` | —         | Deliberately not a generator concern: identity constraints validate cross-references _within_ one XML instance document, they don't affect the shape of the generated PHP classes. |
 
 ## Namespace handling
 
-| Construct | Generator |
-|---|---|
-| `xs:import` (cross-namespace) | ❌ not followed |
-| `xs:include` (same-namespace) | ❌ not followed — callers must list every contributing file explicitly in `Config::$xsdPaths` |
-| Multiple `targetNamespace`s in one run | ✅ |
+| Construct                              | Generator                                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `xs:import` (cross-namespace)          | ❌ not followed                                                                               |
+| `xs:include` (same-namespace)          | ❌ not followed — callers must list every contributing file explicitly in `Config::$xsdPaths` |
+| Multiple `targetNamespace`s in one run | ✅                                                                                            |
 
 See `backlog.md` for the reasoning and status behind every ❌/⚠️ row above.

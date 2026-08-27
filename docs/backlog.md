@@ -21,7 +21,7 @@ explains the reasoning for.
   `xs:sequence | xs:choice | xs:all` together everywhere, so the code path is shared with
   sequence/choice, but that assumption itself has never been falsified by an isolated test.
 - **`resolveNamedRef()`'s `$seenGroups` cycle detection is too coarse** — threaded by reference
-  through the *entire* particle tree of one `collectParticleElements()` call, including across
+  through the _entire_ particle tree of one `collectParticleElements()` call, including across
   sibling branches, not just along one reference path. A group referenced twice from independent
   places within the same complexType (legitimate reuse, not a real cycle) gets misreported as
   "circular ref" on the second occurrence and its elements are silently dropped. Fix would need

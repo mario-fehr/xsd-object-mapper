@@ -4,7 +4,7 @@
 
 Some named simpleTypes carry a semantic meaning beyond their structural facets — e.g. an email-shaped
 string, a country-code string — that `symfony/validator` has purpose-built constraints for
-(`Assert\Email`, `Assert\Country`). That meaning can only be inferred from the XSD type's *name*, a
+(`Assert\Email`, `Assert\Country`). That meaning can only be inferred from the XSD type's _name_, a
 heuristic, not something derivable from facets alone, and not something the package can know for any
 given consumer's schema in general.
 

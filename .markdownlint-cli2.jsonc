@@ -1,0 +1,7 @@
+{
+  "ignores": ["vendor/**", "node_modules/**", ".references/**", "CLAUDE.md"],
+  "config": {
+    // long, unwrapped prose lines are this repo's convention (see .prettierrc.json's proseWrap: preserve)
+    "MD013": false
+  }
+}

@@ -2,6 +2,7 @@
 /composer.lock
 /.phpunit.cache/
 /.php-cs-fixer.cache
+/node_modules/
 
 # superpowers plugin: subagent-driven-development scratch (briefs, reports, ledger, diffs)
 /.superpowers/

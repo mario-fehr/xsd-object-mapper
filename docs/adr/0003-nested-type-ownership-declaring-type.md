@@ -5,7 +5,7 @@
 `Generator::collectProperties()` recurses into a base `complexType` on `complexContent`/`xs:extension`.
 An inline anonymous nested type (e.g. an element with an inline `complexType`/`simpleType` child, no
 `type="..."` attribute) is generated under a synthesized nested PHP namespace built from an "owner"
-class name. The recursion originally passed the *extending subclass's* owner down into the base-type
+class name. The recursion originally passed the _extending subclass's_ owner down into the base-type
 recursion, not the base type's own identity — so a base type with an inline nested type, extended by
 N subclasses, generated N structurally identical nested classes for the same field instead of one.
 
