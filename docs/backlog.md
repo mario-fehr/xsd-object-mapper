@@ -46,8 +46,9 @@ explains the reasoning for.
 ## Config options
 
 `Config`'s constructor only takes `xsdPaths`/`namespaceMap`/`attributeStrategy`. Comparing against
-`goetas-webservices/xsd2php`, `WsdlToPhp/PackageGenerator`, and `janephp/janephp`'s generator config
-surfaces (see `reference-repos.md`) surfaces options worth considering:
+`goetas-webservices/xsd2php`, `WsdlToPhp/PackageGenerator`, `janephp/janephp`, and
+`makinacorpus/php-xsd-gen`'s generator config surfaces (see `reference-repos.md`) surfaces options
+worth considering:
 
 - **Class prefix/suffix** — a global naming prefix/suffix for generated classes
   (`WsdlToPhp/PackageGenerator`'s `GeneratorOptions::PREFIX`/`SUFFIX`), to avoid collisions with a
@@ -74,11 +75,25 @@ surfaces (see `reference-repos.md`) surfaces options worth considering:
   configurable.
 - **`skip-null-values`/`include-null-value`** — `janephp`. Serializer-context null-handling flag;
   would need the generator to also emit Symfony Serializer context attributes, which it doesn't yet.
+- **Property accessor style as a config axis** — `makinacorpus/php-xsd-gen`'s
+  `property_promotion`/`property_public`/`property_readonly`/`property_getter`/`property_setter`
+  (individually togglable, `readonly` + `setter` together rejected as invalid). Currently the
+  generated property style (readonly public vs. getter/setter vs. promoted constructor param) is
+  fixed in the generator, not configurable — the most substantial gap of this batch.
+- **`class_factory_method`** — `makinacorpus/php-xsd-gen`. Generates a static `create()` accepting
+  either a ready instance or an associative array keyed by XSD property name.
+- **Strict-mode toggles for missing/colliding types** — `makinacorpus/php-xsd-gen`'s
+  `type_missing_error`/`type_override_error`: hard-fail instead of silently ignoring a missing
+  referenced type or silently overwriting on a type-name collision. Related to, but distinct from,
+  the `$seenGroups` cycle-detection bug above.
 
 Deliberately not pursued (checked, ruled out): `naming_strategy`/`path_generator`/
 `namespace_dictates_directories` (this generator's PSR-4 output layout is a fixed contract, not
 configurable by design); `known_locations`/`known_namespace_locations` (conflicts with the deliberate
-"no xs:include/xs:import-following" design, see `Config::$xsdPaths` docblock); a `validation` on/off
+"no xs:include/xs:import-following" design, see `Config::$xsdPaths` docblock);
+`makinacorpus/php-xsd-gen`'s `class_constructor` public/private toggle (its own stated rationale is
+SOAP-tooling-specific, doesn't apply here); its `property_defaults` (unimplemented even in that
+source repo, no mature prior art to compare against); a `validation` on/off
 toggle (already solved via `PropertyAttributeStrategy` composition — omit the validator strategy);
 `enums-as-objects` (already structurally covered by PHP `enum` typing); `allow-external-refs`/
 `external-ref-allowed-hosts` (only relevant if import/include-following is ever introduced).
