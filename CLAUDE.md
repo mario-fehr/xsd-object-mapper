@@ -10,11 +10,13 @@ Standalone XSD-to-PHP generator library. Candidate for eventual Packagist public
 
 ## Planning
 
-Committed spec/plan/adr workflow (overrides the global local/uncommitted `_plans/` convention — design rationale for this package is worth keeping, unlike ephemeral ticket-driven work):
+Committed spec/plan/adr workflow (overrides the global local/uncommitted `_plans/` convention — design rationale for this package is worth keeping, unlike ephemeral ticket-driven work). Driven by the `superpowers` plugin, not written by hand:
 
-- `docs/adr/NNNN-slug.md` — durable architecture decisions. One per decision, written once, kept forever. Template: `.claude/templates/adr_template.md`.
-- `docs/specs/YYYY-MM-DD-slug-design.md` — WHY before a feature is built: problem, goals/non-goals, API, edge cases, testing strategy. No task breakdown. Template: `.claude/templates/spec_template.md`.
-- `docs/plans/YYYY-MM-DD-slug.md` — WHAT/HOW: numbered tasks, each a failing-test → implement → passing-test → commit loop, referencing the spec. Template: `.claude/templates/plan_template.md`.
+- New feature/change: `brainstorming` skill first, then `writing-plans` — writes `docs/specs/YYYY-MM-DD-slug-design.md` (WHY: problem, goals/non-goals, API, edge cases, testing) and `docs/plans/YYYY-MM-DD-slug.md` (WHAT/HOW: numbered tasks, each a failing-test → implement → passing-test → commit loop).
+- Implementation: `subagent-driven-development` or `executing-plans` to run the plan.
+- Durable design decision worth keeping forever (not a feature-specific plan): `docs/adr/NNNN-slug.md`, one per decision.
+- `.superpowers/` is the plugin's own ephemeral scratch (briefs/reports/ledger/diffs) — gitignored, never committed.
+- Manual fallback templates (if the plugin's own shape ever needs a nudge): `.claude/templates/{adr,spec,plan}_template.md`.
 
 No ticket IDs (date+slug instead), no branch/MR sections — solo lib, no GitLab remote workflow (yet).
 

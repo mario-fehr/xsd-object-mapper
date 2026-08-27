@@ -1,3 +1,27 @@
 /vendor/
 /composer.lock
 /.phpunit.cache/
+
+# superpowers plugin: subagent-driven-development scratch (briefs, reports, ledger, diffs)
+/.superpowers/
+
+# JetBrains (PhpStorm, IntelliJ, ...)
+/.idea/
+
+# VSCode
+/.vscode/
+
+# Vim
+*.swp
+*.swo
+Session.vim
+.netrwhist
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Emacs
+*~
+\#*\#
+.\#*
