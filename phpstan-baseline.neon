@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Property Xsd2Php\\Attribute\\CompositeAttributeStrategy\:\:\$strategies \(list\<Xsd2Php\\Attribute\\PropertyAttributeStrategy\>\) does not accept array\<int\<0, max\>\|string, Xsd2Php\\Attribute\\PropertyAttributeStrategy\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Attribute/CompositeAttributeStrategy.php
-
-		-
 			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:attributesFor\(\) should return list\<array\{fqcn\: string, args\: string\}\> but returns array\.$#'
 			identifier: return.type
 			count: 2

@@ -14,7 +14,7 @@ final readonly class CompositeAttributeStrategy implements PropertyAttributeStra
 
     public function __construct(PropertyAttributeStrategy ...$strategies)
     {
-        $this->strategies = $strategies;
+        $this->strategies = array_values($strategies);
     }
 
     public function attributesFor(Property $property): array
