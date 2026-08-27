@@ -45,7 +45,10 @@ final class FixtureDriftToolTest extends TestCase
 
         $this->assertSame(0, $exitCode);
         $this->assertFileExists($this->baselineFile);
-        $baseline = json_decode(file_get_contents($this->baselineFile), true);
+        $baselineJson = file_get_contents($this->baselineFile);
+        $this->assertIsString($baselineJson);
+        $baseline = json_decode($baselineJson, true);
+        $this->assertIsArray($baseline);
         $this->assertSame(1, $baseline['xs:sequence']);
     }
 
@@ -75,7 +78,10 @@ final class FixtureDriftToolTest extends TestCase
 
         [, $exitCode] = $this->runTool(['--update-baseline']);
         $this->assertSame(0, $exitCode);
-        $baseline = json_decode(file_get_contents($this->baselineFile), true);
+        $baselineJson = file_get_contents($this->baselineFile);
+        $this->assertIsString($baselineJson);
+        $baseline = json_decode($baselineJson, true);
+        $this->assertIsArray($baseline);
         $this->assertSame(2, $baseline['xs:sequence']);
 
         [$output, $exitCode] = $this->runTool();
@@ -98,7 +104,11 @@ final class FixtureDriftToolTest extends TestCase
             XSD;
     }
 
-    /** @return array{0: string, 1: int} [combined stdout+stderr, exit code] */
+    /**
+     * @param list<string> $extraArgs
+     *
+     * @return array{0: string, 1: int} [combined stdout+stderr, exit code]
+     */
     private function runTool(array $extraArgs = []): array
     {
         $cmd = 'php '.escapeshellarg($this->toolPath).' '.implode(' ', array_map(escapeshellarg(...), $extraArgs)).' 2>&1';

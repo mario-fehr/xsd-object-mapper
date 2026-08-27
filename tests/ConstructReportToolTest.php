@@ -106,6 +106,7 @@ final class ConstructReportToolTest extends TestCase
 
         $decoded = json_decode($json, true);
         $this->assertIsArray($decoded);
+        /** @var array<string, int> $decoded */
 
         return $decoded;
     }
