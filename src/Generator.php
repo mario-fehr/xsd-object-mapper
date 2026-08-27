@@ -122,7 +122,11 @@ final class Generator
         return $node->ownerDocument ?? throw new \RuntimeException('DOMElement without ownerDocument (detached node)');
     }
 
-    /** Wraps DOMXPath::query(), which is declared |false for a malformed XPath expression - unreachable for this generator's own static, hardcoded expressions. */
+    /**
+     * Wraps DOMXPath::query(), which is declared |false for a malformed XPath expression - unreachable for this generator's own static, hardcoded expressions.
+     *
+     * @return \DOMNodeList<\DOMNameSpaceNode|\DOMNode>
+     */
     private function query(\DOMXPath $xp, string $expression, ?\DOMNode $context = null): \DOMNodeList
     {
         $result = $xp->query($expression, $context);
@@ -161,7 +165,14 @@ final class Generator
                     continue;
                 }
                 $property = self::SCHEMA_NAME_BUCKETS[$node->localName];
-                $this->{$property}[$targetNs.'#'.$node->getAttribute('name')] = $node;
+                $key = $targetNs.'#'.$node->getAttribute('name');
+                match ($property) {
+                    'complexTypes' => $this->complexTypes[$key] = $node,
+                    'simpleTypes' => $this->simpleTypes[$key] = $node,
+                    'elements' => $this->elements[$key] = $node,
+                    'groups' => $this->groups[$key] = $node,
+                    'attributeGroups' => $this->attributeGroups[$key] = $node,
+                };
             }
         }
     }

@@ -151,12 +151,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:query\(\) return type with generic class DOMNodeList does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Method Xsd2Php\\Generator\:\:resolveParticleType\(\) should return array\{kind\: string, phpType\: string, dateOnly\?\: bool\} but returns array\.$#'
 			identifier: return.type
 			count: 5
@@ -331,30 +325,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$attributeGroups \(array\<string, DOMElement\>\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$complexTypes \(array\<string, DOMElement\>\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$elements \(array\<string, DOMElement\>\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$groups \(array\<string, DOMElement\>\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, array\>\.$#'
 			identifier: assign.propertyType
 			count: 2
@@ -362,12 +332,6 @@ parameters:
 
 		-
 			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, non\-empty\-array\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$simpleTypes \(array\<string, DOMElement\>\) does not accept mixed\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Generator.php
