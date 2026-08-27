@@ -6,11 +6,8 @@ namespace Xsd2Php;
 
 use DOMDocument;
 use DOMElement;
-use DOMNodeList;
 use DOMXPath;
-use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
-use WeakMap;
 
 /**
  * Parses a pool of XSD files with DOMDocument/DOMXPath and emits readonly,
@@ -31,15 +28,15 @@ final class Generator
     private const string XS_NS = 'http://www.w3.org/2001/XMLSchema';
     private const array STRING_FALLBACK = ['kind' => 'scalar', 'phpType' => 'string'];
 
-    /** @var array<string, DOMElement> keyed by "{namespaceURI}#{localName}" */
+    /** @var array<string, \DOMElement> keyed by "{namespaceURI}#{localName}" */
     private array $complexTypes = [];
-    /** @var array<string, DOMElement> */
+    /** @var array<string, \DOMElement> */
     private array $simpleTypes = [];
-    /** @var array<string, DOMElement> */
+    /** @var array<string, \DOMElement> */
     private array $attributeGroups = [];
-    /** @var array<string, DOMElement> */
+    /** @var array<string, \DOMElement> */
     private array $groups = [];
-    /** @var array<string, DOMElement> all global top-level xs:element declarations */
+    /** @var array<string, \DOMElement> all global top-level xs:element declarations */
     private array $elements = [];
 
     /** @var array<string, string> fqcn cache, keyed by "{namespaceURI}#{localName}" */
@@ -55,19 +52,19 @@ final class Generator
     /** @var array<string, true> base keys currently being resolved, detects complexContent/extension cycles */
     private array $basePropertiesInProgress = [];
 
-    /** @var array<string, array{0: DOMElement, 1: ?DOMElement}[]> collectGroupRefElements() result cache, keyed by group key */
+    /** @var array<string, array{0: \DOMElement, 1: ?\DOMElement}[]> collectGroupRefElements() result cache, keyed by group key */
     private array $groupElementsCache = [];
-    /** @var array<string, DOMElement[]> collectAttributes() result cache for attributeGroup refs, keyed by attributeGroup key */
+    /** @var array<string, \DOMElement[]> collectAttributes() result cache for attributeGroup refs, keyed by attributeGroup key */
     private array $attributeGroupCache = [];
 
-    /** @var WeakMap<DOMDocument, DOMXPath> */
-    private WeakMap $xpathCache;
+    /** @var \WeakMap<\DOMDocument, \DOMXPath> */
+    private \WeakMap $xpathCache;
 
-    private Filesystem $filesystem;
+    private readonly Filesystem $filesystem;
 
     public function __construct(private readonly Config $config)
     {
-        $this->xpathCache = new WeakMap();
+        $this->xpathCache = new \WeakMap();
         $this->filesystem = new Filesystem();
     }
 
@@ -91,9 +88,9 @@ final class Generator
             $namespace = $this->namespaceFor($xsdNs)->phpNamespace;
             $xp = $this->xpath($el->ownerDocument);
             $inlineComplex = $xp->query('xs:complexType', $el)->item(0);
-            if ($inlineComplex instanceof DOMElement) {
+            if ($inlineComplex instanceof \DOMElement) {
                 $this->buildComplexClass($inlineComplex, Naming::toClassName($local), $namespace);
-            } elseif ($el->getAttribute('type') !== '') {
+            } elseif ('' !== $el->getAttribute('type')) {
                 $typeInfo = $this->resolveParticleType($el, Naming::toClassName($local), $namespace);
                 $this->note("root element '{$key}' aliases {$typeInfo['phpType']}");
             }
@@ -105,16 +102,17 @@ final class Generator
     private function namespaceFor(string $xsdNamespaceUri): NamespaceMapping
     {
         return $this->config->namespaceMap[$xsdNamespaceUri]
-            ?? throw new RuntimeException("No PHP namespace mapped for XSD namespace '{$xsdNamespaceUri}'");
+            ?? throw new \RuntimeException("No PHP namespace mapped for XSD namespace '{$xsdNamespaceUri}'");
     }
 
-    private function xpath(DOMDocument $doc): DOMXPath
+    private function xpath(\DOMDocument $doc): \DOMXPath
     {
         if (!isset($this->xpathCache[$doc])) {
-            $xp = new DOMXPath($doc);
+            $xp = new \DOMXPath($doc);
             $xp->registerNamespace('xs', self::XS_NS);
             $this->xpathCache[$doc] = $xp;
         }
+
         return $this->xpathCache[$doc];
     }
 
@@ -135,22 +133,23 @@ final class Generator
         ));
 
         foreach ($this->config->xsdPaths as $file) {
-            $dom = new DOMDocument();
+            $dom = new \DOMDocument();
             $dom->load($file);
             $xp = $this->xpath($dom);
             $targetNs = $dom->documentElement?->getAttribute('targetNamespace') ?? '';
 
             foreach ($xp->query($query) as $node) {
                 $property = self::SCHEMA_NAME_BUCKETS[$node->localName];
-                $this->{$property}[$targetNs . '#' . $node->getAttribute('name')] = $node;
+                $this->{$property}[$targetNs.'#'.$node->getAttribute('name')] = $node;
             }
         }
     }
 
     /** Resolves a possibly-prefixed QName against $contextNode's in-scope namespace bindings. @return array{0: string, 1: string} [namespaceURI, localName] */
-    private function resolveQName(DOMElement $contextNode, string $qname): array
+    private function resolveQName(\DOMElement $contextNode, string $qname): array
     {
         [$prefix, $local] = Naming::splitQName($qname);
+
         return [$contextNode->lookupNamespaceURI($prefix) ?? '', $local];
     }
 
@@ -165,24 +164,24 @@ final class Generator
     }
 
     /**
-     * @return array{0: DOMElement, 1: ?DOMElement}[] [element, enclosing xs:choice particle] pairs,
-     *   xs:sequence/xs:choice/xs:all nesting flattened, xs:group refs inlined. The enclosing choice
-     *   is the innermost xs:choice ancestor within this particle tree (null if the element sits
-     *   under xs:sequence/xs:all only) - callers use it to treat choice-branch elements as mutually
-     *   exclusive alternatives (nullable, "exactly one of" constraint) instead of independently
-     *   required siblings, which xs:sequence-style flattening alone would wrongly imply.
+     * @return array{0: \DOMElement, 1: ?\DOMElement}[] [element, enclosing xs:choice particle] pairs,
+     *                                                  xs:sequence/xs:choice/xs:all nesting flattened, xs:group refs inlined. The enclosing choice
+     *                                                  is the innermost xs:choice ancestor within this particle tree (null if the element sits
+     *                                                  under xs:sequence/xs:all only) - callers use it to treat choice-branch elements as mutually
+     *                                                  exclusive alternatives (nullable, "exactly one of" constraint) instead of independently
+     *                                                  required siblings, which xs:sequence-style flattening alone would wrongly imply.
      */
-    private function collectParticleElements(DOMElement $particle, array &$seenGroups = [], ?DOMElement $enclosingChoice = null): array
+    private function collectParticleElements(\DOMElement $particle, array &$seenGroups = [], ?\DOMElement $enclosingChoice = null): array
     {
         $xp = $this->xpath($particle->ownerDocument);
-        $ownChoice = $particle->localName === 'choice' ? $particle : $enclosingChoice;
+        $ownChoice = 'choice' === $particle->localName ? $particle : $enclosingChoice;
         $elements = [];
         foreach ($xp->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $particle) as $child) {
-            if ($child->localName === 'element') {
+            if ('element' === $child->localName) {
                 $elements[] = [$child, $ownChoice];
                 continue;
             }
-            if ($child->localName === 'group') {
+            if ('group' === $child->localName) {
                 foreach ($this->collectGroupRefElements($child, $seenGroups) as [$el, $intrinsicChoice]) {
                     $elements[] = [$el, $intrinsicChoice ?? $ownChoice];
                 }
@@ -190,6 +189,7 @@ final class Generator
             }
             $elements = [...$elements, ...$this->collectParticleElements($child, $seenGroups, $ownChoice)];
         }
+
         return $elements;
     }
 
@@ -200,39 +200,44 @@ final class Generator
      * between the two ref kinds the way they previously did (attributeGroup silently swallowed
      * the first two cases instead of warning).
      *
-     * @param array<string, DOMElement> $registry
-     * @param array<string, true> $seen
-     * @return array{0: string, 1: ?DOMElement} [key, resolved node - null if unresolved]
+     * @param array<string, \DOMElement> $registry
+     * @param array<string, true>        $seen
+     *
+     * @return array{0: string, 1: ?\DOMElement} [key, resolved node - null if unresolved]
      */
-    private function resolveNamedRef(DOMElement $refNode, array $registry, array &$seen, string $kindLabel): array
+    private function resolveNamedRef(\DOMElement $refNode, array $registry, array &$seen, string $kindLabel): array
     {
         $refAttr = $refNode->getAttribute('ref');
-        if ($refAttr === '') {
+        if ('' === $refAttr) {
             $this->warn("inline xs:{$kindLabel} definition (no ref=) is not supported, skipping");
+
             return ['', null];
         }
 
         [$ns, $local] = $this->resolveQName($refNode, $refAttr);
-        $key = $ns . '#' . $local;
+        $key = $ns.'#'.$local;
 
         if (isset($seen[$key])) {
             $this->warn("circular xs:{$kindLabel} ref involving '{$local}', stopping");
+
             return [$key, null];
         }
         if (!isset($registry[$key])) {
             $this->warn("unknown {$kindLabel} ref '{$local}'");
+
             return [$key, null];
         }
 
         $seen[$key] = true;
+
         return [$key, $registry[$key]];
     }
 
-    /** @return DOMElement[] */
-    private function collectGroupRefElements(DOMElement $groupRef, array &$seenGroups): array
+    /** @return \DOMElement[] */
+    private function collectGroupRefElements(\DOMElement $groupRef, array &$seenGroups): array
     {
         [$key, $group] = $this->resolveNamedRef($groupRef, $this->groups, $seenGroups, 'group');
-        if ($group === null) {
+        if (!$group instanceof \DOMElement) {
             return [];
         }
         if (isset($this->groupElementsCache[$key])) {
@@ -241,13 +246,13 @@ final class Generator
 
         $xp = $this->xpath($group->ownerDocument);
         $groupParticle = $xp->query('xs:sequence | xs:choice | xs:all', $group)->item(0);
-        $result = $groupParticle instanceof DOMElement ? $this->collectParticleElements($groupParticle, $seenGroups) : [];
+        $result = $groupParticle instanceof \DOMElement ? $this->collectParticleElements($groupParticle, $seenGroups) : [];
 
         return $this->groupElementsCache[$key] = $result;
     }
 
-    /** @return DOMElement[] xs:attribute nodes, attributeGroup refs resolved recursively */
-    private function collectAttributes(DOMElement $container, array &$seenGroups = []): array
+    /** @return \DOMElement[] xs:attribute nodes, attributeGroup refs resolved recursively */
+    private function collectAttributes(\DOMElement $container, array &$seenGroups = []): array
     {
         $xp = $this->xpath($container->ownerDocument);
 
@@ -257,7 +262,7 @@ final class Generator
         }
         foreach ($xp->query('xs:attributeGroup', $container) as $ref) {
             [$key, $attributeGroup] = $this->resolveNamedRef($ref, $this->attributeGroups, $seenGroups, 'attributeGroup');
-            if ($attributeGroup === null) {
+            if (!$attributeGroup instanceof \DOMElement) {
                 continue;
             }
             if (isset($this->attributeGroupCache[$key])) {
@@ -268,6 +273,7 @@ final class Generator
             $this->attributeGroupCache[$key] = $resolved;
             $attrs = [...$attrs, ...$resolved];
         }
+
         return $attrs;
     }
 
@@ -282,6 +288,7 @@ final class Generator
 
         if (!isset($this->simpleTypes[$key])) {
             $this->warn("unknown simpleType '{$key}', falling back to string");
+
             return $this->resolvedSimple[$key];
         }
 
@@ -291,12 +298,13 @@ final class Generator
         // xs:list/xs:restriction/xs:union are mutually exclusive per the XSD schema-for-schema -
         // a simpleType has at most one of them, so a combined query is unambiguous.
         $listOrRestriction = $xp->query('xs:list | xs:restriction', $node)->item(0);
-        if ($listOrRestriction instanceof DOMElement && $listOrRestriction->localName === 'list') {
+        if ($listOrRestriction instanceof \DOMElement && 'list' === $listOrRestriction->localName) {
             $this->note("simpleType '{$key}' is xs:list, mapped to plain string");
             $this->resolvedSimple[$key] = self::STRING_FALLBACK;
+
             return self::STRING_FALLBACK;
         }
-        if (!$listOrRestriction instanceof DOMElement) {
+        if (!$listOrRestriction instanceof \DOMElement) {
             return $this->resolvedSimple[$key] = $this->fallbackScalar("simpleType '{$key}' is xs:union or has an unsupported restriction, mapped to plain string");
         }
         $restriction = $listOrRestriction;
@@ -304,10 +312,11 @@ final class Generator
         $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
 
         $enumerations = $xp->query('xs:enumeration', $restriction);
-        if ($enumerations->length > 0 && $baseInfo['kind'] === 'scalar') {
+        if ($enumerations->length > 0 && 'scalar' === $baseInfo['kind']) {
             [$xsdNs, $local] = explode('#', $key, 2);
             $result = $this->toEnumResult($local, $enumerations, $baseInfo['phpType'], $this->namespaceFor($xsdNs)->phpNamespace);
             $this->resolvedSimple[$key] = $result;
+
             return $result;
         }
 
@@ -316,7 +325,7 @@ final class Generator
         // this level itself adds. This level's facets win on a key collision (e.g. a tighter
         // maxLength further down the chain).
         $baseInfo = $this->mergeFacets($baseInfo, $restriction);
-        if ($baseInfo['kind'] === 'scalar') {
+        if ('scalar' === $baseInfo['kind']) {
             // the type as directly referenced (not an ancestor further up a restriction chain,
             // if $baseInfo already carried one from resolving its own base) - semantic-type
             // alias matching keys off this name.
@@ -325,6 +334,7 @@ final class Generator
         }
 
         $this->resolvedSimple[$key] = $baseInfo;
+
         return $baseInfo;
     }
 
@@ -332,19 +342,21 @@ final class Generator
     private function fallbackScalar(string $reason): array
     {
         $this->note($reason);
+
         return self::STRING_FALLBACK;
     }
 
     /** Merges $restriction's own facets onto $typeInfo's (already possibly inherited) ones - own facets win on key collision. No-op if $typeInfo isn't a scalar. */
-    private function mergeFacets(array $typeInfo, DOMElement $restriction): array
+    private function mergeFacets(array $typeInfo, \DOMElement $restriction): array
     {
-        if ($typeInfo['kind'] !== 'scalar') {
+        if ('scalar' !== $typeInfo['kind']) {
             return $typeInfo;
         }
         $facets = [...($typeInfo['facets'] ?? []), ...$this->extractFacets($restriction)];
-        if ($facets !== []) {
+        if ([] !== $facets) {
             $typeInfo['facets'] = $facets;
         }
+
         return $typeInfo;
     }
 
@@ -355,7 +367,7 @@ final class Generator
      *
      * @return array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int}
      */
-    private function extractFacets(DOMElement $restriction): array
+    private function extractFacets(\DOMElement $restriction): array
     {
         /** @var array<string, bool> which facet keys are integer-valued */
         static $intFacets = ['length' => true, 'minLength' => true, 'maxLength' => true, 'totalDigits' => true, 'fractionDigits' => true];
@@ -368,7 +380,7 @@ final class Generator
 
         $facets = [];
         foreach ($restriction->childNodes as $child) {
-            if (!$child instanceof DOMElement || $child->namespaceURI !== self::XS_NS || !isset($knownFacets[$child->localName])) {
+            if (!$child instanceof \DOMElement || self::XS_NS !== $child->namespaceURI || !isset($knownFacets[$child->localName])) {
                 continue;
             }
             if (isset($facets[$child->localName])) {
@@ -382,111 +394,117 @@ final class Generator
     }
 
     /** Resolves either "xs:string" style primitives or a reference to another named simpleType. */
-    private function resolvePrimitiveOrNamedSimpleType(DOMElement $contextNode, string $qname): array
+    private function resolvePrimitiveOrNamedSimpleType(\DOMElement $contextNode, string $qname): array
     {
         [$ns, $local] = $this->resolveQName($contextNode, $qname);
-        $key = $ns . '#' . $local;
-        if ($ns !== self::XS_NS && isset($this->simpleTypes[$key])) {
+        $key = $ns.'#'.$local;
+        if (self::XS_NS !== $ns && isset($this->simpleTypes[$key])) {
             return $this->resolveSimpleTypeRef($key);
         }
-        return ['kind' => 'scalar', 'phpType' => Naming::xsPrimitiveToPhp($local), 'dateOnly' => $local === 'date'];
+
+        return ['kind' => 'scalar', 'phpType' => Naming::xsPrimitiveToPhp($local), 'dateOnly' => 'date' === $local];
     }
 
     /** Wraps ensureEnumClass()'s result as a resolveXxxType()-style type-info array. */
-    private function toEnumResult(string $name, DOMNodeList $enumerations, string $backingPhpType, string $namespace): array
+    private function toEnumResult(string $name, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): array
     {
         return ['kind' => 'enum', 'phpType' => $this->ensureEnumClass($name, $enumerations, $backingPhpType, $namespace), 'dateOnly' => false];
     }
 
-    private function ensureEnumClass(string $simpleTypeName, DOMNodeList $enumerations, string $backingPhpType, string $namespace): string
+    private function ensureEnumClass(string $simpleTypeName, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): string
     {
-        $backing = $backingPhpType === 'int' ? 'int' : 'string';
+        $backing = 'int' === $backingPhpType ? 'int' : 'string';
         $className = Naming::toClassName($simpleTypeName);
 
         $usedCaseNames = [];
         $cases = [];
         foreach ($enumerations as $enum) {
-            /** @var DOMElement $enum */
+            /** @var \DOMElement $enum */
             $value = $enum->getAttribute('value');
             $caseName = Naming::toClassName($value);
             $baseCaseName = $caseName;
             $i = 2;
             while (isset($usedCaseNames[$caseName])) {
-                $caseName = $baseCaseName . '_' . $i++;
+                $caseName = $baseCaseName.'_'.$i++;
             }
             $usedCaseNames[$caseName] = true;
-            $literal = $backing === 'int' ? (string) (int) $value : var_export($value, true);
+            $literal = 'int' === $backing ? (string) (int) $value : var_export($value, true);
             $cases[] = "    case {$caseName} = {$literal};";
         }
 
         $body = implode("\n", $cases);
         $code = <<<PHP
-        <?php
+            <?php
 
-        declare(strict_types=1);
+            declare(strict_types=1);
 
-        namespace {$namespace};
+            namespace {$namespace};
 
-        /**
-         * XSD simpleType: {$simpleTypeName}
-         */
-        enum {$className}: {$backing}
-        {
-        {$body}
-        }
+            /**
+             * XSD simpleType: {$simpleTypeName}
+             */
+            enum {$className}: {$backing}
+            {
+            {$body}
+            }
 
-        PHP;
+            PHP;
 
         $this->writeFile($this->pathFor($namespace, $className), $code);
-        return $namespace . '\\' . $className;
+
+        return $namespace.'\\'.$className;
     }
 
     /**
-     * Resolves the type of an xs:element or xs:attribute node: named @type ref,
+     * Resolves the type of an xs:element or xs:attribute node: named @var ref,
      * or an inline anonymous xs:complexType/xs:simpleType child.
      *
      * @return array{kind: string, phpType: string, dateOnly?: bool}
      */
-    private function resolveParticleType(DOMElement $node, string $ownerClassName, string $ownerNamespace): array
+    private function resolveParticleType(\DOMElement $node, string $ownerClassName, string $ownerNamespace): array
     {
         $typeAttr = $node->getAttribute('type');
-        if ($typeAttr !== '') {
+        if ('' !== $typeAttr) {
             [$ns, $local] = $this->resolveQName($node, $typeAttr);
-            $key = $ns . '#' . $local;
-            if ($ns !== self::XS_NS && isset($this->complexTypes[$key])) {
+            $key = $ns.'#'.$local;
+            if (self::XS_NS !== $ns && isset($this->complexTypes[$key])) {
                 return ['kind' => 'class', 'phpType' => $this->ensureComplexClass($key)];
             }
+
             return $this->resolvePrimitiveOrNamedSimpleType($node, $typeAttr);
         }
 
         $xp = $this->xpath($node->ownerDocument);
-        $nestedNamespace = $ownerNamespace . '\\' . $ownerClassName;
+        $nestedNamespace = $ownerNamespace.'\\'.$ownerClassName;
 
         // xs:complexType/xs:simpleType are mutually exclusive per the XSD schema-for-schema - an
         // element/attribute has at most one, so a combined query is unambiguous.
         $inlineType = $xp->query('xs:complexType | xs:simpleType', $node)->item(0);
-        if ($inlineType instanceof DOMElement && $inlineType->localName === 'complexType') {
+        if ($inlineType instanceof \DOMElement && 'complexType' === $inlineType->localName) {
             $anonName = Naming::toClassName($node->getAttribute('name'));
             $className = $this->buildComplexClass($inlineType, $anonName, $nestedNamespace);
+
             return ['kind' => 'class', 'phpType' => $className];
         }
 
-        if ($inlineType instanceof DOMElement) {
+        if ($inlineType instanceof \DOMElement) {
             $restriction = $xp->query('xs:restriction', $inlineType)->item(0);
-            if (!$restriction instanceof DOMElement) {
+            if (!$restriction instanceof \DOMElement) {
                 return $this->fallbackScalar("inline simpleType without xs:restriction on '{$node->getAttribute('name')}', mapped to plain string");
             }
 
             $enumerations = $xp->query('xs:enumeration', $restriction);
             if ($enumerations->length > 0) {
-                $anonName = Naming::toClassName($node->getAttribute('name')) . 'Enum';
+                $anonName = Naming::toClassName($node->getAttribute('name')).'Enum';
                 $base = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
+
                 // nested under the owner's namespace, like inline complex types above, so two
                 // unrelated owners with a same-named inline enum member don't collide on output
                 return $this->toEnumResult($anonName, $enumerations, $base['phpType'], $nestedNamespace);
             }
 
             $base = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
+
             return $this->mergeFacets($base, $restriction);
         }
 
@@ -501,7 +519,7 @@ final class Generator
      *   namedType: ?string, doc: ?string
      * }>
      */
-    private function collectProperties(DOMElement $ctNode, string $ownerClassName, string $ownerNamespace): array
+    private function collectProperties(\DOMElement $ctNode, string $ownerClassName, string $ownerNamespace): array
     {
         $xp = $this->xpath($ctNode->ownerDocument);
 
@@ -514,25 +532,25 @@ final class Generator
         $contentContainer = $ctNode;
         $baseProperties = [];
 
-        if ($content instanceof DOMElement && $content->localName === 'complexContent') {
+        if ($content instanceof \DOMElement && 'complexContent' === $content->localName) {
             $ext = $xp->query('xs:extension', $content)->item(0);
-            if (!$ext instanceof DOMElement) {
+            if (!$ext instanceof \DOMElement) {
                 // xs:restriction narrows/redefines the base content model rather than adding to
                 // it; treated like extension (union of base + local content) rather than
                 // implemented properly. Warn loud instead of silently generating a wrong shape.
                 $ext = $xp->query('xs:restriction', $content)->item(0);
                 $this->warn("'{$ownerClassName}' uses complexContent/xs:restriction, treated as extension");
             }
-            /** @var DOMElement $ext */
+            /* @var DOMElement $ext */
             [$baseNs, $baseLocal] = $this->resolveQName($ext, $ext->getAttribute('base'));
-            $baseKey = $baseNs . '#' . $baseLocal;
-            if ($baseLocal !== '' && $baseLocal !== 'anyType' && isset($this->complexTypes[$baseKey])) {
+            $baseKey = $baseNs.'#'.$baseLocal;
+            if ('' !== $baseLocal && 'anyType' !== $baseLocal && isset($this->complexTypes[$baseKey])) {
                 $baseProperties = $this->resolveBaseProperties($baseKey);
             }
             $contentContainer = $ext;
-        } elseif ($content instanceof DOMElement) {
+        } elseif ($content instanceof \DOMElement) {
             $ext = $xp->query('xs:extension', $content)->item(0);
-            /** @var DOMElement $ext */
+            /** @var \DOMElement $ext */
             $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($ext, $ext->getAttribute('base'));
             $properties[] = $this->makeProperty('value', false, true, false, false, $baseInfo, null);
             $contentContainer = $ext;
@@ -540,16 +558,16 @@ final class Generator
 
         $properties = [...$baseProperties, ...$properties];
 
-        /** @var array<int, array{particle: DOMElement, members: array{phpName: string, srcEl: DOMElement}[], directChildCount: int}> keyed by spl_object_id() of the enclosing xs:choice particle */
+        /** @var array<int, array{particle: \DOMElement, members: array{phpName: string, srcEl: \DOMElement}[], directChildCount: int}> keyed by spl_object_id() of the enclosing xs:choice particle */
         $choiceGroups = [];
 
         foreach ($xp->query('xs:sequence | xs:choice | xs:all', $contentContainer) as $particle) {
             foreach ($this->collectParticleElements($particle) as [$el, $choiceParticle]) {
-                /** @var DOMElement $el */
+                /** @var \DOMElement $el */
                 $refAttr = $el->getAttribute('ref');
-                if ($refAttr !== '' && !$el->hasAttribute('name')) {
+                if ('' !== $refAttr && !$el->hasAttribute('name')) {
                     [$refNs, $refLocal] = $this->resolveQName($el, $refAttr);
-                    $refKey = $refNs . '#' . $refLocal;
+                    $refKey = $refNs.'#'.$refLocal;
                     if (!isset($this->elements[$refKey])) {
                         $this->warn("unknown element ref '{$refLocal}'");
                         continue;
@@ -568,15 +586,15 @@ final class Generator
 
                 $minOccurs = $el->hasAttribute('minOccurs') ? $el->getAttribute('minOccurs') : '1';
                 $maxOccurs = $el->hasAttribute('maxOccurs') ? $el->getAttribute('maxOccurs') : '1';
-                $isArray = $maxOccurs === 'unbounded' || (is_numeric($maxOccurs) && (int) $maxOccurs > 1);
+                $isArray = 'unbounded' === $maxOccurs || (is_numeric($maxOccurs) && (int) $maxOccurs > 1);
                 // xs:choice elements are mutually exclusive alternatives, not independently
                 // required siblings - nullable regardless of the element's own minOccurs.
-                $nullable = ($minOccurs === '0' || $choiceParticle !== null) && !$isArray;
+                $nullable = ('0' === $minOccurs || $choiceParticle instanceof \DOMElement) && !$isArray;
 
                 $typeInfo = $this->resolveParticleType($typeSource, $ownerClassName, $ownerNamespace);
 
                 $prop = $this->makeProperty($name, false, false, $isArray, $nullable, $typeInfo, $doc);
-                if ($choiceParticle instanceof DOMElement) {
+                if ($choiceParticle instanceof \DOMElement) {
                     // bookkeeping only, stripped before the final return - lets the later
                     // dedup-survivor check below tell "this exact choice element survived
                     // de-dup under its phpName" apart from "a same-named non-choice property
@@ -585,16 +603,14 @@ final class Generator
                 }
                 $properties[] = $prop;
 
-                if ($choiceParticle instanceof DOMElement) {
+                if ($choiceParticle instanceof \DOMElement) {
                     $groupKey = spl_object_id($choiceParticle);
-                    if (!isset($choiceGroups[$groupKey])) {
-                        $choiceGroups[$groupKey] = [
-                            'particle' => $choiceParticle,
-                            'members' => [],
-                            'directChildCount' => $this->xpath($choiceParticle->ownerDocument)
-                                ->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
-                        ];
-                    }
+                    $choiceGroups[$groupKey] ??= [
+                        'particle' => $choiceParticle,
+                        'members' => [],
+                        'directChildCount' => $this->xpath($choiceParticle->ownerDocument)
+                            ->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
+                    ];
                     $choiceGroups[$groupKey]['members'][] = ['phpName' => $prop['phpName'], 'srcEl' => $el];
                 }
             }
@@ -602,9 +618,9 @@ final class Generator
 
         foreach ($this->collectAttributes($contentContainer) as $attr) {
             $name = $attr->getAttribute('name');
-            if ($name === '') {
+            if ('' === $name) {
                 $refAttr = $attr->getAttribute('ref');
-                $this->warn($refAttr !== ''
+                $this->warn('' !== $refAttr
                     ? "xs:attribute ref='{$refAttr}' is not supported, skipping"
                     : 'xs:attribute without name or ref, skipping');
                 continue;
@@ -613,7 +629,7 @@ final class Generator
             $typeInfo = $this->resolveParticleType($attr, $ownerClassName, $ownerNamespace);
             $doc = $this->appendXsdDefaultHint($this->extractDoc($attr), $attr);
 
-            $properties[] = $this->makeProperty($name, true, false, false, $use !== 'required', $typeInfo, $doc);
+            $properties[] = $this->makeProperty($name, true, false, false, 'required' !== $use, $typeInfo, $doc);
         }
 
         // de-dup by phpName, last one wins (own properties override inherited base ones with same name)
@@ -630,7 +646,7 @@ final class Generator
             // repeatable choice (maxOccurs > 1 on the xs:choice itself): picks a branch per
             // occurrence, not once overall - not representable by this generator's flat scalar
             // properties either way, so skip the constraint rather than emit a wrong one.
-            if ($particle->hasAttribute('maxOccurs') && $particle->getAttribute('maxOccurs') !== '1') {
+            if ($particle->hasAttribute('maxOccurs') && '1' !== $particle->getAttribute('maxOccurs')) {
                 continue;
             }
 
@@ -653,7 +669,7 @@ final class Generator
             // de-dup collision above. Warn and skip the constraint instead of emitting a wrong
             // one - elements stay nullable regardless.
             if (count($names) !== $group['directChildCount']) {
-                if ($names !== []) {
+                if ([] !== $names) {
                     $this->warn("xs:choice on '{$ownerClassName}' is not fully representable as an \"exactly one of\" constraint (multi-element branch, unresolved ref, or a name collision), skipping the constraint for this choice");
                 }
                 continue;
@@ -661,7 +677,7 @@ final class Generator
 
             // choice itself optional (minOccurs="0" on the xs:choice): zero branches selected is
             // valid too - "at most one", not "exactly one".
-            $required = !($particle->hasAttribute('minOccurs') && $particle->getAttribute('minOccurs') === '0');
+            $required = !$particle->hasAttribute('minOccurs') || '0' !== $particle->getAttribute('minOccurs');
 
             $exactlyOneOfGroups[] = ['fields' => $names, 'required' => $required];
         }
@@ -693,6 +709,7 @@ final class Generator
         [$baseXsdNs, $baseLocalName] = explode('#', $baseKey, 2);
         if (isset($this->basePropertiesInProgress[$baseKey])) {
             $this->warn("circular complexContent/extension involving '{$baseLocalName}', stopping inheritance chain");
+
             return [];
         }
 
@@ -727,15 +744,16 @@ final class Generator
         ];
     }
 
-    private function extractDoc(DOMElement $node): ?string
+    private function extractDoc(\DOMElement $node): ?string
     {
         $xp = $this->xpath($node->ownerDocument);
         $doc = $xp->query('xs:annotation/xs:documentation', $node)->item(0);
-        if (!$doc instanceof DOMElement) {
+        if (!$doc instanceof \DOMElement) {
             return null;
         }
         $text = trim(preg_replace('/\s+/', ' ', $doc->textContent));
-        return $text === '' ? null : $text;
+
+        return '' === $text ? null : $text;
     }
 
     /**
@@ -745,7 +763,7 @@ final class Generator
      * default on its own side. Only $declNode's own attributes count - not applicable to an
      * xs:element ref="..." site, which XSD forbids from redeclaring default/fixed itself.
      */
-    private function appendXsdDefaultHint(?string $doc, DOMElement $declNode): ?string
+    private function appendXsdDefaultHint(?string $doc, \DOMElement $declNode): ?string
     {
         $hints = [];
         if ($declNode->hasAttribute('default')) {
@@ -754,11 +772,12 @@ final class Generator
         if ($declNode->hasAttribute('fixed')) {
             $hints[] = "XSD-Fixed: {$declNode->getAttribute('fixed')}";
         }
-        if ($hints === []) {
+        if ([] === $hints) {
             return $doc;
         }
-        $hint = '(' . implode(', ', $hints) . ')';
-        return $doc === null ? $hint : "{$doc} {$hint}";
+        $hint = '('.implode(', ', $hints).')';
+
+        return null === $doc ? $hint : "{$doc} {$hint}";
     }
 
     private function fqType(array $p, TypeRenderContext $ctx): string
@@ -766,6 +785,7 @@ final class Generator
         if (!in_array($p['kind'], ['class', 'enum'], true)) {
             return $p['phpType'];
         }
+
         return $ctx->render($p['phpType']);
     }
 
@@ -774,13 +794,15 @@ final class Generator
         if ($p['isArray']) {
             return 'array';
         }
-        return ($p['nullable'] ? '?' : '') . $this->fqType($p, $ctx);
+
+        return ($p['nullable'] ? '?' : '').$this->fqType($p, $ctx);
     }
 
     private function phpDocType(array $p, TypeRenderContext $ctx): string
     {
         $type = $this->fqType($p, $ctx);
-        return $p['isArray'] ? $type . '[]' : $type;
+
+        return $p['isArray'] ? $type.'[]' : $type;
     }
 
     private function hasDefault(array $p): bool
@@ -788,7 +810,7 @@ final class Generator
         return $p['isArray'] || $p['nullable'];
     }
 
-    private function buildComplexClass(DOMElement $ctNode, string $className, string $namespace): string
+    private function buildComplexClass(\DOMElement $ctNode, string $className, string $namespace): string
     {
         ['properties' => $properties, 'choiceGroups' => $choiceGroups] = $this->collectProperties($ctNode, $className, $namespace);
 
@@ -798,7 +820,7 @@ final class Generator
         // Resolve attributesFor() once per property up front so the `use` block (built from
         // every fqcn seen across the whole class) and the constructor body (rendered below,
         // short name unless its basename collides with another fqcn in this class) agree.
-        $propertyAttrs = array_map(fn (array $p): array => $this->config->attributeStrategy->attributesFor($p), $properties);
+        $propertyAttrs = array_map($this->config->attributeStrategy->attributesFor(...), $properties);
 
         // fqcn => shortName, collected from both attribute usages and cross-namespace property
         // types. A property type living in $namespace itself needs neither an import nor a
@@ -822,15 +844,15 @@ final class Generator
             }
             $imports[$fqcn] ??= Naming::basename($fqcn);
         }
-        if ($choiceGroups !== []) {
-            $imports['Xsd2Php\Validator\ExactlyOneOf'] ??= 'ExactlyOneOf';
+        if ([] !== $choiceGroups) {
+            $imports[Validator\ExactlyOneOf::class] ??= 'ExactlyOneOf';
         }
         $shortNameUsedBy = array_count_values($imports);
         $ctx = new TypeRenderContext($sameNamespaceTypes, $imports, $shortNameUsedBy);
 
         $useLines = [];
         foreach ($imports as $fqcn => $shortName) {
-            if ($shortNameUsedBy[$shortName] === 1) {
+            if (1 === $shortNameUsedBy[$shortName]) {
                 $useLines[] = "use {$fqcn};";
             }
         }
@@ -841,12 +863,12 @@ final class Generator
             $type = $this->phpPropertyType($p, $ctx);
             $default = $p['isArray'] ? ' = []' : ($p['nullable'] ? ' = null' : '');
 
-            $doc = $p['doc'] !== null ? str_replace('*/', '* /', $p['doc']) : null;
+            $doc = null !== $p['doc'] ? str_replace('*/', '* /', $p['doc']) : null;
             if ($p['isArray']) {
                 // symfony/property-info's PhpDocExtractor needs an explicit @var tag (PHP has no
                 // generics) to resolve the array item type for denormalization.
-                $ctorLines[] = '        /** @var ' . $this->phpDocType($p, $ctx) . ($doc !== null ? " {$doc}" : '') . ' */';
-            } elseif ($doc !== null) {
+                $ctorLines[] = '        /** @var '.$this->phpDocType($p, $ctx).(null !== $doc ? " {$doc}" : '').' */';
+            } elseif (null !== $doc) {
                 $ctorLines[] = "        /** {$doc} */";
             }
             foreach ($propertyAttrs[$i] as $attr) {
@@ -860,19 +882,19 @@ final class Generator
 
         $classAttrLines = [];
         foreach ($choiceGroups as $group) {
-            $fieldsLiteral = "['" . implode("', '", $group['fields']) . "']";
-            $args = "fields: {$fieldsLiteral}" . ($group['required'] ? '' : ', required: false');
-            $classAttrLines[] = "#[{$ctx->render('Xsd2Php\Validator\ExactlyOneOf')}({$args})]\n";
+            $fieldsLiteral = "['".implode("', '", $group['fields'])."']";
+            $args = "fields: {$fieldsLiteral}".($group['required'] ? '' : ', required: false');
+            $classAttrLines[] = "#[{$ctx->render(Validator\ExactlyOneOf::class)}({$args})]\n";
         }
 
-        $importsBlock = $useLines === [] ? '' : implode("\n", $useLines) . "\n\n";
+        $importsBlock = [] === $useLines ? '' : implode("\n", $useLines)."\n\n";
         $code = "<?php\n\ndeclare(strict_types=1);\n\nnamespace {$namespace};\n\n{$importsBlock}";
         $code .= implode('', $classAttrLines);
         $code .= "final readonly class {$className}\n{\n    public function __construct(\n{$ctorBody}\n    ) {\n    }\n}\n";
 
         $this->writeFile($this->pathFor($namespace, $className), $code);
 
-        return $namespace . '\\' . $className;
+        return $namespace.'\\'.$className;
     }
 
     private function ensureComplexClass(string $key): string
@@ -882,7 +904,7 @@ final class Generator
         }
 
         if (!isset($this->complexTypes[$key])) {
-            throw new RuntimeException("complexType not found: {$key}");
+            throw new \RuntimeException("complexType not found: {$key}");
         }
 
         [$xsdNs, $local] = explode('#', $key, 2);
@@ -897,30 +919,31 @@ final class Generator
     {
         $best = null;
         foreach ($this->config->namespaceMap as $mapping) {
-            if ($namespace === $mapping->phpNamespace || str_starts_with($namespace, $mapping->phpNamespace . '\\')) {
+            if ($namespace === $mapping->phpNamespace || str_starts_with($namespace, $mapping->phpNamespace.'\\')) {
                 // longest phpNamespace prefix wins - one nested inside another (e.g. "App\Foo"
                 // and "App\Foo\Bar") must resolve to the more specific mapping, not whichever
                 // happens to come first in Config::$namespaceMap.
-                if ($best === null || strlen($mapping->phpNamespace) > strlen($best->phpNamespace)) {
+                if (null === $best || strlen($mapping->phpNamespace) > strlen($best->phpNamespace)) {
                     $best = $mapping;
                 }
             }
         }
-        if ($best === null) {
-            throw new RuntimeException("No output directory mapped for PHP namespace '{$namespace}'");
+        if (null === $best) {
+            throw new \RuntimeException("No output directory mapped for PHP namespace '{$namespace}'");
         }
         $relativeNs = substr($namespace, strlen($best->phpNamespace));
-        return $best->outputDir . str_replace('\\', '/', $relativeNs) . '/' . $className . '.php';
+
+        return $best->outputDir.str_replace('\\', '/', $relativeNs).'/'.$className.'.php';
     }
 
     private function writeFile(string $path, string $content): void
     {
         $dir = dirname($path);
         if (!isset($this->createdDirs[$dir])) {
-            @mkdir($dir, 0777, true);
+            @mkdir($dir, 0o777, true);
             $this->createdDirs[$dir] = true;
         }
         file_put_contents($path, $content);
-        $this->written++;
+        ++$this->written;
     }
 }

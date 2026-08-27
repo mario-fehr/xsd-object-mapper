@@ -34,7 +34,8 @@ final class Naming
     public static function splitQName(string $qname): array
     {
         $pos = strpos($qname, ':');
-        return $pos === false ? [null, $qname] : [substr($qname, 0, $pos), substr($qname, $pos + 1)];
+
+        return false === $pos ? [null, $qname] : [substr($qname, 0, $pos), substr($qname, $pos + 1)];
     }
 
     public static function localName(string $qname): string
@@ -44,7 +45,7 @@ final class Naming
 
     public static function basename(string $fqcn): string
     {
-        return substr(strrchr('\\' . $fqcn, '\\'), 1);
+        return substr(strrchr('\\'.$fqcn, '\\'), 1);
     }
 
     public static function xsPrimitiveToPhp(string $local): string
@@ -63,9 +64,10 @@ final class Naming
     public static function sanitizeIdentifier(string $name): string
     {
         $name = preg_replace('/[^A-Za-z0-9_]/', '_', $name);
-        if ($name === '' || ctype_digit($name[0])) {
-            $name = 'V' . $name;
+        if ('' === $name || ctype_digit($name[0])) {
+            return 'V'.$name;
         }
+
         return $name;
     }
 
@@ -80,6 +82,7 @@ final class Naming
         if (isset(self::PHP_RESERVED_WORDS[strtolower($name)])) {
             $name .= 'Type';
         }
+
         return $name;
     }
 }

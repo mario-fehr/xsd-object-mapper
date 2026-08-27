@@ -21,9 +21,9 @@ final class GeneratorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir() . '/xsd2php-test-' . bin2hex(random_bytes(8));
-        mkdir($this->tmpDir . '/xsd', 0777, true);
-        mkdir($this->tmpDir . '/out', 0777, true);
+        $this->tmpDir = sys_get_temp_dir().'/xsd2php-test-'.bin2hex(random_bytes(8));
+        mkdir($this->tmpDir.'/xsd', 0o777, true);
+        mkdir($this->tmpDir.'/out', 0o777, true);
     }
 
     protected function tearDown(): void
@@ -262,9 +262,9 @@ final class GeneratorTest extends TestCase
         // BaseType, not by either subclass - it must be generated exactly once, under BaseType's
         // own namespace, and both subclasses must reference that same class (not get their own
         // private copy under their own namespace).
-        self::assertFileExists($this->tmpDir . '/out/BaseType/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir . '/out/SubAType/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir . '/out/SubBType/Details.php');
+        self::assertFileExists($this->tmpDir.'/out/BaseType/Details.php');
+        self::assertFileDoesNotExist($this->tmpDir.'/out/SubAType/Details.php');
+        self::assertFileDoesNotExist($this->tmpDir.'/out/SubBType/Details.php');
 
         foreach (['SubAType.php', 'SubBType.php'] as $filename) {
             $code = $this->readGenerated($filename);
@@ -373,11 +373,11 @@ final class GeneratorTest extends TestCase
             XSD);
 
         $this->generate(namespaceMap: [
-            'urn:xsd2php-test-a' => new NamespaceMapping('GenA', $this->tmpDir . '/out-a'),
-            'urn:xsd2php-test-b' => new NamespaceMapping('GenB', $this->tmpDir . '/out-b'),
+            'urn:xsd2php-test-a' => new NamespaceMapping('GenA', $this->tmpDir.'/out-a'),
+            'urn:xsd2php-test-b' => new NamespaceMapping('GenB', $this->tmpDir.'/out-b'),
         ]);
 
-        $path = $this->tmpDir . '/out-b/PersonType.php';
+        $path = $this->tmpDir.'/out-b/PersonType.php';
         self::assertFileExists($path);
         $code = file_get_contents($path);
 
@@ -411,13 +411,13 @@ final class GeneratorTest extends TestCase
         // both match as a prefix - the broader one is listed first, but the more specific one
         // must still win.
         $this->generate(namespaceMap: [
-            self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir . '/out'),
-            'urn:xsd2php-test-unused' => new NamespaceMapping('TestGen\\PersonType', $this->tmpDir . '/out-nested'),
+            self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir.'/out'),
+            'urn:xsd2php-test-unused' => new NamespaceMapping('TestGen\\PersonType', $this->tmpDir.'/out-nested'),
         ]);
 
-        self::assertFileExists($this->tmpDir . '/out/PersonType.php');
-        self::assertFileExists($this->tmpDir . '/out-nested/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir . '/out/PersonType/Details.php');
+        self::assertFileExists($this->tmpDir.'/out/PersonType.php');
+        self::assertFileExists($this->tmpDir.'/out-nested/Details.php');
+        self::assertFileDoesNotExist($this->tmpDir.'/out/PersonType/Details.php');
     }
 
     public function testChoiceElementsAreNullableWithExactlyOneOfConstraint(): void
@@ -573,7 +573,7 @@ final class GeneratorTest extends TestCase
         self::assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
         self::assertStringContainsString("#[ExactlyOneOf(fields: ['foo', 'bar'])]", $code);
 
-        require $this->tmpDir . '/out/CartItemType.php';
+        require $this->tmpDir.'/out/CartItemType.php';
         $reflection = new \ReflectionClass('TestGen\CartItemType');
         // ReflectionClass::getAttributes() throws if PHP itself rejects a repeated non-repeatable
         // attribute - constructing it at all is the regression check.
@@ -896,7 +896,7 @@ final class GeneratorTest extends TestCase
         // type, not two independently-generated (potentially divergent) copies; the file itself
         // is always exactly one regardless, since ensureEnumClass() is deterministic - this
         // doesn't prove resolveSimpleTypeRef()'s cache fired, only that consistency holds either way.
-        self::assertCount(1, glob($this->tmpDir . '/out/ColorEnum.php'));
+        self::assertCount(1, glob($this->tmpDir.'/out/ColorEnum.php'));
         self::assertStringContainsString('public ColorEnum $color,', $this->readGenerated('PersonType.php'));
         self::assertStringContainsString('public ColorEnum $color2,', $this->readGenerated('OtherType.php'));
     }
@@ -1225,28 +1225,28 @@ final class GeneratorTest extends TestCase
 
     private function writeXsdFile(string $filename, string $content): void
     {
-        file_put_contents($this->tmpDir . '/xsd/' . $filename, $content);
+        file_put_contents($this->tmpDir.'/xsd/'.$filename, $content);
     }
 
     /** @param array<string, NamespaceMapping>|null $namespaceMap */
     private function generate(?PropertyAttributeStrategy $attributeStrategy = null, ?array $namespaceMap = null): void
     {
         $config = new Config(
-            xsdPaths: glob($this->tmpDir . '/xsd/*.xsd'),
+            xsdPaths: glob($this->tmpDir.'/xsd/*.xsd'),
             namespaceMap: $namespaceMap ?? [
-                self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir . '/out'),
+                self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir.'/out'),
             ],
             attributeStrategy: $attributeStrategy ?? new SymfonySerializerAttributeStrategy(),
         );
 
-        (new Generator($config))->generate();
+        new Generator($config)->generate();
     }
 
     private function readGenerated(string $filename): string
     {
-        $path = $this->tmpDir . '/out/' . $filename;
+        $path = $this->tmpDir.'/out/'.$filename;
         self::assertFileExists($path);
+
         return file_get_contents($path);
     }
-
 }

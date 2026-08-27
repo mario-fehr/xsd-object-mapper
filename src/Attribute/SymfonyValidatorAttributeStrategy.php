@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Xsd2Php\Attribute;
 
-use RuntimeException;
-
 /**
  * Emits symfony/validator constraints derived from the property model:
  *
@@ -42,12 +40,12 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
     {
         $attrs = $this->presenceConstraint($property);
 
-        if ($property['kind'] === 'class') {
-            $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\Valid', 'args' => ''];
+        if ('class' === $property['kind']) {
+            $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\Valid::class, 'args' => ''];
         }
 
         if (!$property['isArray']) {
-            $attrs = [...$attrs, ...$this->facetConstraints($property['facets'])];
+            return [...$attrs, ...$this->facetConstraints($property['facets'])];
         }
 
         return $attrs;
@@ -57,7 +55,7 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
     {
         if ($property['isArray']) {
             return $property['nullable'] ? [] : [[
-                'fqcn' => 'Symfony\Component\Validator\Constraints\Count',
+                'fqcn' => \Symfony\Component\Validator\Constraints\Count::class,
                 'args' => 'min: 1',
             ]];
         }
@@ -66,15 +64,15 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
             return [];
         }
 
-        if ($property['kind'] === 'scalar' && $property['phpType'] === 'string') {
+        if ('scalar' === $property['kind'] && 'string' === $property['phpType']) {
             return [[
-                'fqcn' => 'Symfony\Component\Validator\Constraints\NotBlank',
+                'fqcn' => \Symfony\Component\Validator\Constraints\NotBlank::class,
                 'args' => '',
             ]];
         }
 
         return [[
-            'fqcn' => 'Symfony\Component\Validator\Constraints\NotNull',
+            'fqcn' => \Symfony\Component\Validator\Constraints\NotNull::class,
             'args' => '',
         ]];
     }
@@ -86,32 +84,32 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
 
         if (isset($facets['pattern'])) {
             $attrs[] = [
-                'fqcn' => 'Symfony\Component\Validator\Constraints\Regex',
-                'args' => 'pattern: ' . var_export($this->toPcrePattern($facets['pattern']), true),
+                'fqcn' => \Symfony\Component\Validator\Constraints\Regex::class,
+                'args' => 'pattern: '.var_export($this->toPcrePattern($facets['pattern']), true),
             ];
         }
 
         if (isset($facets['length'])) {
             // xs:length is mutually exclusive with minLength/maxLength on a valid schema, so it
             // alone decides the Length constraint when present.
-            $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\Length', 'args' => "exactly: {$facets['length']}"];
+            $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\Length::class, 'args' => "exactly: {$facets['length']}"];
         } else {
             $lengthArgs = $this->minMaxArgs($facets, 'minLength', 'maxLength');
-            if ($lengthArgs !== '') {
-                $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\Length', 'args' => $lengthArgs];
+            if ('' !== $lengthArgs) {
+                $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\Length::class, 'args' => $lengthArgs];
             }
         }
 
         $rangeArgs = $this->minMaxArgs($facets, 'minInclusive', 'maxInclusive');
-        if ($rangeArgs !== '') {
-            $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\Range', 'args' => $rangeArgs];
+        if ('' !== $rangeArgs) {
+            $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\Range::class, 'args' => $rangeArgs];
         }
 
         if (isset($facets['minExclusive'])) {
-            $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\GreaterThan', 'args' => "value: {$facets['minExclusive']}"];
+            $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\GreaterThan::class, 'args' => "value: {$facets['minExclusive']}"];
         }
         if (isset($facets['maxExclusive'])) {
-            $attrs[] = ['fqcn' => 'Symfony\Component\Validator\Constraints\LessThan', 'args' => "value: {$facets['maxExclusive']}"];
+            $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\LessThan::class, 'args' => "value: {$facets['maxExclusive']}"];
         }
 
         $decimalArgs = [];
@@ -121,8 +119,8 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
         if (isset($facets['totalDigits'])) {
             $decimalArgs[] = "totalDigits: {$facets['totalDigits']}";
         }
-        if ($decimalArgs !== []) {
-            $attrs[] = ['fqcn' => 'Xsd2Php\Validator\Decimal', 'args' => implode(', ', $decimalArgs)];
+        if ([] !== $decimalArgs) {
+            $attrs[] = ['fqcn' => \Xsd2Php\Validator\Decimal::class, 'args' => implode(', ', $decimalArgs)];
         }
 
         return $attrs;
@@ -137,22 +135,18 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
         if (isset($facets[$maxKey])) {
             $args[] = "max: {$facets[$maxKey]}";
         }
+
         return implode(', ', $args);
     }
 
     /** XSD's xs:pattern matches the whole value implicitly; PCRE needs that made explicit. */
     private function toPcrePattern(string $xsdPattern): string
     {
-        $delimiter = null;
-        foreach (['#', '~', '!', '%'] as $candidate) {
-            if (!str_contains($xsdPattern, $candidate)) {
-                $delimiter = $candidate;
-                break;
-            }
+        $delimiter = array_find(['#', '~', '!', '%'], fn ($candidate) => !str_contains($xsdPattern, $candidate));
+        if (null === $delimiter) {
+            throw new \RuntimeException("xs:pattern '{$xsdPattern}' contains all candidate PCRE delimiters, cannot build a safe pattern");
         }
-        if ($delimiter === null) {
-            throw new RuntimeException("xs:pattern '{$xsdPattern}' contains all candidate PCRE delimiters, cannot build a safe pattern");
-        }
-        return $delimiter . '^(?:' . $xsdPattern . ')$' . $delimiter . 'u';
+
+        return $delimiter.'^(?:'.$xsdPattern.')$'.$delimiter.'u';
     }
 }

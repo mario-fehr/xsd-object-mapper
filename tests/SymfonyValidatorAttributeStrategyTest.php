@@ -32,11 +32,11 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir() . '/xsd2php-validator-test-' . bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd2php-validator-test-'.bin2hex(random_bytes(8));
         // unique per test run so `require`-ing the generated class below never redeclares
-        $this->phpNamespace = 'ValidatorTestGen' . bin2hex(random_bytes(4));
-        mkdir($this->tmpDir . '/xsd', 0777, true);
-        mkdir($this->tmpDir . '/out', 0777, true);
+        $this->phpNamespace = 'ValidatorTestGen'.bin2hex(random_bytes(4));
+        mkdir($this->tmpDir.'/xsd', 0o777, true);
+        mkdir($this->tmpDir.'/out', 0o777, true);
     }
 
     protected function tearDown(): void
@@ -51,7 +51,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             new SymfonyValidatorAttributeStrategy(),
         ));
 
-        $code = file_get_contents($this->tmpDir . '/out/ContactType.php');
+        $code = file_get_contents($this->tmpDir.'/out/ContactType.php');
 
         // required string -> NotBlank; required non-string -> NotNull;
         // required array (minOccurs>=1) -> Count(min: 1); optional -> nothing.
@@ -75,8 +75,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
     {
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy());
 
-        require $this->tmpDir . '/out/ContactType.php';
-        $class = $this->phpNamespace . '\\ContactType';
+        require $this->tmpDir.'/out/ContactType.php';
+        $class = $this->phpNamespace.'\\ContactType';
 
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
@@ -152,7 +152,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir . '/out/FacetType.php');
+        $code = file_get_contents($this->tmpDir.'/out/FacetType.php');
 
         self::assertStringContainsString("#[Regex(pattern: '#^(?:[0-9a-fA-F]{8})\$#u')]", $code);
         self::assertStringContainsString('#[Length(min: 2, max: 5)]', $code);
@@ -165,7 +165,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         // Guids (same GuidType, but maxOccurs="unbounded" -> array) skips facets entirely -
         // Regex/Length/Range validate a single scalar value, not each array item.
         self::assertStringContainsString('public array $guids = [],', $code);
-        self::assertSame(1, substr_count($code, "Regex(pattern:"));
+        self::assertSame(1, substr_count($code, 'Regex(pattern:'));
     }
 
     public function testFacetConstraintsAreActuallyEnforcedAtRuntime(): void
@@ -216,8 +216,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        require $this->tmpDir . '/out/FacetType.php';
-        $class = $this->phpNamespace . '\\FacetType';
+        require $this->tmpDir.'/out/FacetType.php';
+        $class = $this->phpNamespace.'\\FacetType';
 
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
@@ -272,14 +272,14 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir . '/out/PersonType.php');
+        $code = file_get_contents($this->tmpDir.'/out/PersonType.php');
         self::assertStringContainsString('use Symfony\Component\Validator\Constraints\Valid;', $code);
         self::assertStringContainsString('#[Valid()]', $code);
 
-        require $this->tmpDir . '/out/AddressType.php';
-        require $this->tmpDir . '/out/PersonType.php';
-        $addressClass = $this->phpNamespace . '\\AddressType';
-        $personClass = $this->phpNamespace . '\\PersonType';
+        require $this->tmpDir.'/out/AddressType.php';
+        require $this->tmpDir.'/out/PersonType.php';
+        $addressClass = $this->phpNamespace.'\\AddressType';
+        $personClass = $this->phpNamespace.'\\PersonType';
 
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
@@ -339,7 +339,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir . '/out/ChainType.php');
+        $code = file_get_contents($this->tmpDir.'/out/ChainType.php');
 
         // NarrowCode adds no pattern of its own - BaseCode's must still apply, merged with
         // NarrowCode's own minLength/maxLength, not lost.
@@ -351,8 +351,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         self::assertStringContainsString("#[Regex(pattern: '#^(?:[0-9]+)\$#u')]", $code);
         self::assertSame(2, substr_count($code, 'Regex(pattern:'));
 
-        require $this->tmpDir . '/out/ChainType.php';
-        $class = $this->phpNamespace . '\\ChainType';
+        require $this->tmpDir.'/out/ChainType.php';
+        $class = $this->phpNamespace.'\\ChainType';
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
         self::assertCount(0, $validator->validate(new $class(narrow: 'ABC', overridden: '123')));
@@ -396,14 +396,14 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir . '/out/MarkerHolderType.php');
+        $code = file_get_contents($this->tmpDir.'/out/MarkerHolderType.php');
 
         // neither '#' nor '~' can be the PCRE delimiter here - both appear in the pattern
         // itself; the generator must fall back to the next candidate ('!').
         self::assertStringContainsString("#[Regex(pattern: '!^(?:[#~])\$!u')]", $code);
 
-        require $this->tmpDir . '/out/MarkerHolderType.php';
-        $class = $this->phpNamespace . '\\MarkerHolderType';
+        require $this->tmpDir.'/out/MarkerHolderType.php';
+        $class = $this->phpNamespace.'\\MarkerHolderType';
         $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
         self::assertCount(0, $validator->validate(new $class(marker: '#')));
@@ -432,16 +432,16 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD;
 
-        file_put_contents($this->tmpDir . '/xsd/schema.xsd', $xsd);
+        file_put_contents($this->tmpDir.'/xsd/schema.xsd', $xsd);
 
         $config = new Config(
-            xsdPaths: [$this->tmpDir . '/xsd/schema.xsd'],
+            xsdPaths: [$this->tmpDir.'/xsd/schema.xsd'],
             namespaceMap: [
-                self::TEST_NS => new NamespaceMapping($this->phpNamespace, $this->tmpDir . '/out'),
+                self::TEST_NS => new NamespaceMapping($this->phpNamespace, $this->tmpDir.'/out'),
             ],
             attributeStrategy: $attributeStrategy,
         );
 
-        (new Generator($config))->generate();
+        new Generator($config)->generate();
     }
 }

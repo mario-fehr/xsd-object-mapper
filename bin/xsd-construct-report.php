@@ -15,7 +15,6 @@ declare(strict_types=1);
  * Output: a table (or, with --json, a machine-readable map) of construct label => occurrence count,
  * scanning recursively into subdirectories.
  */
-
 const XS_NS = 'http://www.w3.org/2001/XMLSchema';
 
 /** @return array<string, string> label => XPath expression (relative to the schema root, "//" absolute) */
@@ -92,11 +91,12 @@ function collectXsdFiles(string $path): array
     $files = [];
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS));
     foreach ($iterator as $file) {
-        if ($file->getExtension() === 'xsd') {
+        if ('xsd' === $file->getExtension()) {
             $files[] = $file->getPathname();
         }
     }
     sort($files);
+
     return $files;
 }
 
@@ -127,33 +127,37 @@ function main(array $argv): int
 {
     $args = array_slice($argv, 1);
     $asJson = in_array('--json', $args, true);
-    $args = array_values(array_filter($args, static fn (string $a): bool => $a !== '--json'));
+    $args = array_values(array_filter($args, static fn (string $a): bool => '--json' !== $a));
 
-    if (count($args) !== 1) {
+    if (1 !== count($args)) {
         fwrite(STDERR, "Usage: php xsd-construct-report.php <xsd-dir-or-file> [--json]\n");
+
         return 1;
     }
 
     $target = $args[0];
     if (!file_exists($target)) {
         fwrite(STDERR, "'{$target}' does not exist.\n");
+
         return 1;
     }
 
     $files = collectXsdFiles($target);
-    if ($files === []) {
+    if ([] === $files) {
         fwrite(STDERR, "No *.xsd files found under '{$target}'.\n");
+
         return 1;
     }
 
     $counts = countConstructs($files);
 
     if ($asJson) {
-        echo json_encode($counts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+        echo json_encode($counts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n";
+
         return 0;
     }
 
-    $labelWidth = max(array_map('strlen', array_keys($counts)));
+    $labelWidth = max(array_map(strlen(...), array_keys($counts)));
     fwrite(STDOUT, sprintf("Scanned %d *.xsd file(s) under '%s':\n\n", count($files), $target));
     foreach ($counts as $label => $count) {
         fwrite(STDOUT, sprintf("  %-{$labelWidth}s  %d\n", $label, $count));

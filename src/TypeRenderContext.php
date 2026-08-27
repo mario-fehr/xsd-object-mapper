@@ -11,9 +11,9 @@ namespace Xsd2Php;
 final readonly class TypeRenderContext
 {
     /**
-     * @param array<string, true> $sameNamespaceTypes fqcn => true, types living in the class being generated's own namespace
-     * @param array<string, string> $imports fqcn => shortName
-     * @param array<string, int> $shortNameUsedBy shortName => count of distinct fqcns using it
+     * @param array<string, true>   $sameNamespaceTypes fqcn => true, types living in the class being generated's own namespace
+     * @param array<string, string> $imports            fqcn => shortName
+     * @param array<string, int>    $shortNameUsedBy    shortName => count of distinct fqcns using it
      */
     public function __construct(
         private array $sameNamespaceTypes,
@@ -28,6 +28,7 @@ final readonly class TypeRenderContext
             return Naming::basename($fqcn);
         }
         $shortName = $this->imports[$fqcn];
-        return $this->shortNameUsedBy[$shortName] === 1 ? $shortName : '\\' . $fqcn;
+
+        return 1 === $this->shortNameUsedBy[$shortName] ? $shortName : '\\'.$fqcn;
     }
 }

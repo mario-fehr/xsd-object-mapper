@@ -21,9 +21,9 @@ final class ConstructReportToolTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir() . '/xsd2php-report-test-' . bin2hex(random_bytes(8));
-        mkdir($this->tmpDir, 0777, true);
-        $this->toolPath = __DIR__ . '/../bin/xsd-construct-report.php';
+        $this->tmpDir = sys_get_temp_dir().'/xsd2php-report-test-'.bin2hex(random_bytes(8));
+        mkdir($this->tmpDir, 0o777, true);
+        $this->toolPath = __DIR__.'/../bin/xsd-construct-report.php';
     }
 
     protected function tearDown(): void
@@ -33,7 +33,7 @@ final class ConstructReportToolTest extends TestCase
 
     public function testCountsConstructsAcrossAllXsdFilesInADirectory(): void
     {
-        file_put_contents($this->tmpDir . '/a.xsd', <<<'XSD'
+        file_put_contents($this->tmpDir.'/a.xsd', <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:test" targetNamespace="urn:test">
               <xs:simpleType name="ColorEnum">
@@ -51,7 +51,7 @@ final class ConstructReportToolTest extends TestCase
             </xs:schema>
             XSD);
         // a second file in the same directory - counts must sum across both, not just the first.
-        file_put_contents($this->tmpDir . '/b.xsd', <<<'XSD'
+        file_put_contents($this->tmpDir.'/b.xsd', <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:test-b" targetNamespace="urn:test-b">
               <xs:complexType name="OtherType">
@@ -74,7 +74,7 @@ final class ConstructReportToolTest extends TestCase
 
     public function testAcceptsASingleFileNotJustADirectory(): void
     {
-        $file = $this->tmpDir . '/single.xsd';
+        $file = $this->tmpDir.'/single.xsd';
         file_put_contents($file, <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:test" targetNamespace="urn:test">
@@ -93,7 +93,7 @@ final class ConstructReportToolTest extends TestCase
 
     public function testExitsNonZeroWhenNoXsdFilesFound(): void
     {
-        exec('php ' . escapeshellarg($this->toolPath) . ' ' . escapeshellarg($this->tmpDir) . ' 2>&1', $output, $exitCode);
+        exec('php '.escapeshellarg($this->toolPath).' '.escapeshellarg($this->tmpDir).' 2>&1', $output, $exitCode);
 
         self::assertSame(1, $exitCode);
     }
@@ -101,7 +101,7 @@ final class ConstructReportToolTest extends TestCase
     /** @return array<string, int> */
     private function runTool(string $target): array
     {
-        $json = shell_exec('php ' . escapeshellarg($this->toolPath) . ' ' . escapeshellarg($target) . ' --json');
+        $json = shell_exec('php '.escapeshellarg($this->toolPath).' '.escapeshellarg($target).' --json');
         self::assertIsString($json);
 
         $decoded = json_decode($json, true);

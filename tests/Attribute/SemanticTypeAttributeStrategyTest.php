@@ -56,13 +56,13 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
      */
     public function testAliasedConstraintsAreActuallyEnforcedAtRuntime(): void
     {
-        $tmpDir = sys_get_temp_dir() . '/xsd2php-semantic-test-' . bin2hex(random_bytes(8));
-        $phpNamespace = 'SemanticTestGen' . bin2hex(random_bytes(4));
-        mkdir($tmpDir . '/xsd', 0777, true);
-        mkdir($tmpDir . '/out', 0777, true);
+        $tmpDir = sys_get_temp_dir().'/xsd2php-semantic-test-'.bin2hex(random_bytes(8));
+        $phpNamespace = 'SemanticTestGen'.bin2hex(random_bytes(4));
+        mkdir($tmpDir.'/xsd', 0o777, true);
+        mkdir($tmpDir.'/out', 0o777, true);
 
         try {
-            file_put_contents($tmpDir . '/xsd/schema.xsd', <<<'XSD'
+            file_put_contents($tmpDir.'/xsd/schema.xsd', <<<'XSD'
                 <?xml version="1.0" encoding="utf-8"?>
                 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
                            xmlns="urn:xsd2php-semantic-test"
@@ -86,16 +86,16 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
                 XSD);
 
             $config = new Config(
-                xsdPaths: [$tmpDir . '/xsd/schema.xsd'],
-                namespaceMap: ['urn:xsd2php-semantic-test' => new NamespaceMapping($phpNamespace, $tmpDir . '/out')],
+                xsdPaths: [$tmpDir.'/xsd/schema.xsd'],
+                namespaceMap: ['urn:xsd2php-semantic-test' => new NamespaceMapping($phpNamespace, $tmpDir.'/out')],
                 attributeStrategy: new SemanticTypeAttributeStrategy(self::ALIAS_MAP + [
                     'CountryCodeType' => ['fqcn' => 'Symfony\Component\Validator\Constraints\Country', 'args' => ''],
                 ]),
             );
-            (new Generator($config))->generate();
+            new Generator($config)->generate();
 
-            require $tmpDir . '/out/ContactType.php';
-            $class = $phpNamespace . '\\ContactType';
+            require $tmpDir.'/out/ContactType.php';
+            $class = $phpNamespace.'\\ContactType';
 
             $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 

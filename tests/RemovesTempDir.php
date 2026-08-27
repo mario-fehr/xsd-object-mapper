@@ -13,10 +13,10 @@ trait RemovesTempDir
             return;
         }
         foreach (scandir($dir) as $entry) {
-            if ($entry === '.' || $entry === '..') {
+            if ('.' === $entry || '..' === $entry) {
                 continue;
             }
-            $path = $dir . '/' . $entry;
+            $path = $dir.'/'.$entry;
             is_dir($path) ? $this->removeDir($path) : unlink($path);
         }
         rmdir($dir);

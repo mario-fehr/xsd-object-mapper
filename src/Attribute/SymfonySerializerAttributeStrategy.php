@@ -15,7 +15,7 @@ final class SymfonySerializerAttributeStrategy implements PropertyAttributeStrat
     {
         $serializedName = $property['isText']
             ? '#'
-            : ($property['isAttribute'] ? '@' . $property['xmlName'] : $property['xmlName']);
+            : ($property['isAttribute'] ? '@'.$property['xmlName'] : $property['xmlName']);
 
         $attrs = [[
             'fqcn' => 'Symfony\Component\Serializer\Attribute\SerializedName',

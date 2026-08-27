@@ -18,7 +18,7 @@ final class DecimalValidator extends ConstraintValidator
         }
 
         // custom constraints should ignore null/empty and let NotNull/NotBlank handle presence
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return;
         }
 
@@ -29,17 +29,17 @@ final class DecimalValidator extends ConstraintValidator
         $normalized = ltrim($this->toPlainDecimalString($value), '+-');
         [$intPart, $fracPart] = array_pad(explode('.', $normalized, 2), 2, '');
 
-        if ($constraint->fractionDigits !== null && strlen($fracPart) > $constraint->fractionDigits) {
+        if (null !== $constraint->fractionDigits && strlen($fracPart) > $constraint->fractionDigits) {
             $this->context->buildViolation($constraint->fractionDigitsMessage)
                 ->setParameter('{{ max }}', (string) $constraint->fractionDigits)
                 ->addViolation();
         }
 
-        if ($constraint->totalDigits !== null) {
+        if (null !== $constraint->totalDigits) {
             $significantIntDigits = ltrim($intPart, '0');
             // no significant integer digits (value is 0.xxx) - leading zeros in the fraction
             // part aren't significant either, e.g. '0.05' has 1 significant digit, not 2.
-            $fracForCounting = $significantIntDigits === '' ? ltrim($fracPart, '0') : $fracPart;
+            $fracForCounting = '' === $significantIntDigits ? ltrim($fracPart, '0') : $fracPart;
             $significantFracDigits = rtrim($fracForCounting, '0');
             $digitCount = max(1, strlen($significantIntDigits) + strlen($significantFracDigits));
 
@@ -61,7 +61,7 @@ final class DecimalValidator extends ConstraintValidator
     {
         $raw = (string) $value;
         if (is_float($value) && (str_contains($raw, 'E') || str_contains($raw, 'e'))) {
-            $raw = rtrim(rtrim(sprintf('%.17F', $value), '0'), '.');
+            return rtrim(rtrim(sprintf('%.17F', $value), '0'), '.');
         }
 
         return $raw;

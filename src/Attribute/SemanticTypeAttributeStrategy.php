@@ -25,7 +25,7 @@ final readonly class SemanticTypeAttributeStrategy implements PropertyAttributeS
         }
 
         $namedType = $property['namedType'] ?? null;
-        if ($namedType === null || !isset($this->aliasMap[$namedType])) {
+        if (null === $namedType || !isset($this->aliasMap[$namedType])) {
             return [];
         }
 

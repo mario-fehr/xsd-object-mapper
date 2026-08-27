@@ -14,15 +14,14 @@ declare(strict_types=1);
  *   php check-fixture-drift.php                 # report drift, exit 1 if any found
  *   php check-fixture-drift.php --update-baseline # after reviewing drift, record new counts
  */
-
-const FIXTURES_DIR = __DIR__ . '/../tests/fixtures';
-const REPORT_TOOL = __DIR__ . '/xsd-construct-report.php';
-const BASELINE_FILE = __DIR__ . '/../tests/fixtures/coverage-baseline.json';
+const FIXTURES_DIR = __DIR__.'/../tests/fixtures';
+const REPORT_TOOL = __DIR__.'/xsd-construct-report.php';
+const BASELINE_FILE = __DIR__.'/../tests/fixtures/coverage-baseline.json';
 
 function currentCounts(): array
 {
-    $json = shell_exec('php ' . escapeshellarg(REPORT_TOOL) . ' ' . escapeshellarg(FIXTURES_DIR) . ' --json');
-    if ($json === null || $json === false) {
+    $json = shell_exec('php '.escapeshellarg(REPORT_TOOL).' '.escapeshellarg(FIXTURES_DIR).' --json');
+    if (null === $json || false === $json) {
         fwrite(STDERR, "Failed to run xsd-construct-report.php.\n");
         exit(1);
     }
@@ -31,6 +30,7 @@ function currentCounts(): array
         fwrite(STDERR, "Unexpected report tool output.\n");
         exit(1);
     }
+
     return $decoded;
 }
 
@@ -40,8 +40,9 @@ function main(array $argv): int
     $current = currentCounts();
 
     if (!file_exists(BASELINE_FILE)) {
-        fwrite(STDOUT, "No baseline yet at " . BASELINE_FILE . " - writing the current counts as the initial baseline.\n");
-        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        fwrite(STDOUT, 'No baseline yet at '.BASELINE_FILE." - writing the current counts as the initial baseline.\n");
+        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
+
         return 0;
     }
 
@@ -60,26 +61,29 @@ function main(array $argv): int
         }
     }
 
-    if ($changed === []) {
+    if ([] === $changed) {
         fwrite(STDOUT, "No drift - tests/fixtures/*.xsd construct usage matches the recorded baseline.\n");
+
         return 0;
     }
 
-    fwrite(STDOUT, "Construct usage drift detected against " . BASELINE_FILE . ":\n\n");
+    fwrite(STDOUT, 'Construct usage drift detected against '.BASELINE_FILE.":\n\n");
     foreach ($changed as $label => $diff) {
         $before = $diff['before'];
         $after = $diff['after'] ?? 'removed from report tool';
-        $flag = $before === 0 && is_int($diff['after']) && $diff['after'] > 0 ? '  <-- newly exercised by a fixture' : '';
+        $flag = 0 === $before && is_int($diff['after']) && $diff['after'] > 0 ? '  <-- newly exercised by a fixture' : '';
         fwrite(STDOUT, sprintf("  %-40s %s -> %s%s\n", $label, $before, $after, $flag));
     }
 
     if ($updateBaseline) {
-        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
         fwrite(STDOUT, "\nBaseline updated.\n");
+
         return 0;
     }
 
     fwrite(STDOUT, "\nRun with --update-baseline once you've reviewed the drift, to record the new counts.\n");
+
     return 1;
 }
 

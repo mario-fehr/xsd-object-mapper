@@ -16,7 +16,7 @@ final class ExactlyOneOfValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, ExactlyOneOf::class);
         }
 
-        if ($value === null) {
+        if (null === $value) {
             return;
         }
 
@@ -25,12 +25,12 @@ final class ExactlyOneOfValidator extends ConstraintValidator
             // array-typed choice fields (xs:element maxOccurs="unbounded" inside xs:choice)
             // default to [], never null - both count as "not set" alongside plain null.
             $fieldValue = $value->{$field};
-            if ($fieldValue !== null && $fieldValue !== []) {
-                $setCount++;
+            if (null !== $fieldValue && [] !== $fieldValue) {
+                ++$setCount;
             }
         }
 
-        if ($constraint->required && $setCount !== 1) {
+        if ($constraint->required && 1 !== $setCount) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ fields }}', implode('", "', $constraint->fields))
                 ->addViolation();

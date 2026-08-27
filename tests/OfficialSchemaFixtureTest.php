@@ -25,8 +25,8 @@ final class OfficialSchemaFixtureTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir() . '/xsd2php-po-test-' . bin2hex(random_bytes(8));
-        mkdir($this->tmpDir, 0777, true);
+        $this->tmpDir = sys_get_temp_dir().'/xsd2php-po-test-'.bin2hex(random_bytes(8));
+        mkdir($this->tmpDir, 0o777, true);
     }
 
     protected function tearDown(): void
@@ -37,16 +37,16 @@ final class OfficialSchemaFixtureTest extends TestCase
     public function testGeneratesFromTheOfficialPurchaseOrderSchema(): void
     {
         $config = new Config(
-            xsdPaths: [__DIR__ . '/fixtures/w3c-purchase-order.xsd'],
+            xsdPaths: [__DIR__.'/fixtures/w3c-purchase-order.xsd'],
             namespaceMap: ['' => new NamespaceMapping('PurchaseOrder', $this->tmpDir)],
             attributeStrategy: new SymfonySerializerAttributeStrategy(),
         );
 
-        $written = (new Generator($config))->generate();
+        $written = new Generator($config)->generate();
 
         self::assertSame(4, $written);
 
-        $orderCode = file_get_contents($this->tmpDir . '/PurchaseOrderType.php');
+        $orderCode = file_get_contents($this->tmpDir.'/PurchaseOrderType.php');
         self::assertStringContainsString('public USAddress $shipTo,', $orderCode);
         self::assertStringContainsString('public Items $items,', $orderCode);
         // ref="comment" with minOccurs="0" -> nullable, type resolved from the global element decl
@@ -54,12 +54,12 @@ final class OfficialSchemaFixtureTest extends TestCase
         // attribute type="xsd:date" -> \DateTimeImmutable, day-only Context
         self::assertStringContainsString('public ?\DateTimeImmutable $orderDate = null,', $orderCode);
 
-        $addressCode = file_get_contents($this->tmpDir . '/USAddress.php');
+        $addressCode = file_get_contents($this->tmpDir.'/USAddress.php');
         // fixed="US" on the attribute surfaces as a doc hint, doesn't change nullability
         self::assertStringContainsString('(XSD-Fixed: US)', $addressCode);
         self::assertStringContainsString('public ?string $country = null,', $addressCode);
 
-        $itemsCode = file_get_contents($this->tmpDir . '/Items.php');
+        $itemsCode = file_get_contents($this->tmpDir.'/Items.php');
         // minOccurs="0" maxOccurs="unbounded" on the anonymous inline item complexType -> array
         self::assertStringContainsString('public array $item = [],', $itemsCode);
     }
