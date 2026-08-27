@@ -45,7 +45,9 @@ final class Naming
 
     public static function basename(string $fqcn): string
     {
-        return substr(strrchr('\\'.$fqcn, '\\'), 1);
+        $pos = strrchr('\\'.$fqcn, '\\');
+
+        return false === $pos ? $fqcn : substr($pos, 1);
     }
 
     public static function xsPrimitiveToPhp(string $local): string
@@ -63,12 +65,15 @@ final class Naming
 
     public static function sanitizeIdentifier(string $name): string
     {
-        $name = preg_replace('/[^A-Za-z0-9_]/', '_', $name);
-        if ('' === $name || ctype_digit($name[0])) {
-            return 'V'.$name;
+        $sanitized = preg_replace('/[^A-Za-z0-9_]/', '_', $name);
+        if (null === $sanitized) {
+            throw new \RuntimeException("preg_replace failed sanitizing identifier '{$name}'");
+        }
+        if ('' === $sanitized || ctype_digit($sanitized[0])) {
+            return 'V'.$sanitized;
         }
 
-        return $name;
+        return $sanitized;
     }
 
     public static function toPropName(string $name): string

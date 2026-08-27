@@ -385,24 +385,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Naming\:\:sanitizeIdentifier\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Naming.php
-
-		-
-			message: '#^Offset 0 might not exist on non\-empty\-string\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Naming.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Naming.php
-
-		-
 			message: '#^Cannot call method getConstraint\(\) on Symfony\\Component\\Validator\\ConstraintViolationInterface\|null\.$#'
 			identifier: method.nonObject
 			count: 2
