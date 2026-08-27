@@ -27,6 +27,9 @@ explains the reasoning for.
   "circular ref" on the second occurrence and its elements are silently dropped. Fix would need
   `$seenGroups` scoped per-path instead of tree-wide (e.g. a copy per sequence/choice branch instead
   of threading the same reference, "seen" only along one ref path).
+
+## Generator/package infrastructure
+
 - **Visitor/event hooks for the generator** — no extension point for custom logic during code
   generation beyond `PropertyAttributeStrategy`.
 - **Multiple target attribute strategies beyond `symfony/serializer`** — e.g. JMS Serializer or
@@ -39,6 +42,46 @@ explains the reasoning for.
 - **Own CLI via `symfony/console`** (`vendor/bin/xsd2php convert ...`, similar to
   goetas-webservices/xsd2php) — only worthwhile if the package is ever consumed standalone, outside
   a project that already wraps it with its own generation script.
+
+## Config options
+
+`Config`'s constructor only takes `xsdPaths`/`namespaceMap`/`attributeStrategy`. Comparing against
+`goetas-webservices/xsd2php`, `WsdlToPhp/PackageGenerator`, and `janephp/janephp`'s generator config
+surfaces (see `reference-repos.md`) surfaces options worth considering:
+
+- **Class prefix/suffix** — a global naming prefix/suffix for generated classes
+  (`WsdlToPhp/PackageGenerator`'s `GeneratorOptions::PREFIX`/`SUFFIX`), to avoid collisions with a
+  consumer's own classes without touching the schema.
+- **Per-type alias mapping** — renaming one specific generated class by its XSD QName
+  (`goetas-webservices/xsd2php`'s DI `aliases` config), finer-grained than `NamespaceMapping`, which
+  only maps at the namespace level.
+- **`clean-generated`-style output-dir purge before regeneration** — `janephp`'s `ConfigLoader`
+  defaults this to `true`. Without it, a generated class for an XSD type later removed/renamed stays
+  behind as an orphan; nothing in this generator currently purges the output directory first.
+- **Configurable date format(s)** — `janephp`'s `date-format`/`full-date-format`/`date-input-format`.
+  Currently hardcoded to `\DateTimeImmutable` with no format context passed to the Symfony Serializer
+  attribute.
+- **`date-prefer-interface`** — `janephp`. Generate `\DateTimeInterface` instead of
+  `\DateTimeImmutable` on date/dateTime properties.
+- **Custom type mapping per named `simpleType`** — `janephp`'s `custom-string-format-mapping`.
+  Substitutes a consumer-supplied value-object class for a specific named XSD simple type instead of
+  the generator's own scalar mapping. A generic version of the `xs:decimal` → Decimal-value-object
+  idea already in the "Type derivation" section above.
+- **`use-fixer`/`fixer-config-file`** — `janephp`. Run PHP-CS-Fixer against a consumer-supplied config
+  right after generation, instead of leaving formatting entirely to a separate pipeline step.
+- **`add_comments`-style configurable docblock header tags** — `WsdlToPhp/PackageGenerator`'s
+  `ADD_COMMENTS`. Author/license/generation-source lines in the generated file header, currently not
+  configurable.
+- **`skip-null-values`/`include-null-value`** — `janephp`. Serializer-context null-handling flag;
+  would need the generator to also emit Symfony Serializer context attributes, which it doesn't yet.
+
+Deliberately not pursued (checked, ruled out): `naming_strategy`/`path_generator`/
+`namespace_dictates_directories` (this generator's PSR-4 output layout is a fixed contract, not
+configurable by design); `known_locations`/`known_namespace_locations` (conflicts with the deliberate
+"no xs:include/xs:import-following" design, see `Config::$xsdPaths` docblock); a `validation` on/off
+toggle (already solved via `PropertyAttributeStrategy` composition — omit the validator strategy);
+`enums-as-objects` (already structurally covered by PHP `enum` typing); `allow-external-refs`/
+`external-ref-allowed-hosts` (only relevant if import/include-following is ever introduced).
 
 ## Type derivation
 

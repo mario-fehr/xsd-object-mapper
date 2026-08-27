@@ -35,10 +35,12 @@ together.
 ### Task 1: Add `Property` value object and `PropertyRole` enum
 
 **Files:**
+
 - Create: `src/PropertyRole.php`
 - Create: `src/Property.php`
 
 **Interfaces:**
+
 - Produces: `Xsd2Php\PropertyRole` (enum, cases `Element`, `Attribute`, `Text`) and
   `Xsd2Php\Property` (final readonly class) - both consumed by every later task in this plan.
 
@@ -117,6 +119,7 @@ Every sub-step below must land together before the suite is runnable again - do 
 run the suite once at the end.
 
 **Files:**
+
 - Modify: `src/Generator.php` (`makeProperty()`, `collectProperties()`, `fqType()`,
   `phpPropertyType()`, `phpDocType()`, `hasDefault()`, `buildComplexClass()`)
 - Modify: `src/Attribute/PropertyAttributeStrategy.php`
@@ -128,6 +131,7 @@ run the suite once at the end.
 - Modify: `tests/Attribute/SemanticTypeAttributeStrategyTest.php` (raw array literals)
 
 **Interfaces:**
+
 - Consumes: `Xsd2Php\Property`, `Xsd2Php\PropertyRole` from Task 1.
 - Produces: `PropertyAttributeStrategy::attributesFor(Property $property): array` - the new
   interface signature every future strategy implementation must match.
@@ -707,9 +711,11 @@ came from) is replaced by comparing Property object identity directly
 ### Task 3: Regenerate the PHPStan baseline and verify
 
 **Files:**
+
 - Modify: `phpstan-baseline.neon`
 
 **Interfaces:**
+
 - Consumes: nothing new - this task only re-runs existing tooling from the phpstan-baseline
   commit set up earlier this session.
 
