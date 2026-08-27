@@ -26,7 +26,11 @@ use Symfony\Component\Filesystem\Filesystem;
 final class Generator
 {
     private const string XS_NS = 'http://www.w3.org/2001/XMLSchema';
-    private const array STRING_FALLBACK = ['kind' => 'scalar', 'phpType' => 'string'];
+
+    private static function stringFallback(): TypeInfo
+    {
+        return new TypeInfo(kind: TypeKind::Scalar, phpType: 'string');
+    }
 
     /** @var array<string, \DOMElement> keyed by "{namespaceURI}#{localName}" */
     private array $complexTypes = [];
@@ -41,7 +45,7 @@ final class Generator
 
     /** @var array<string, string> fqcn cache, keyed by "{namespaceURI}#{localName}" */
     private array $generatedComplex = [];
-    /** @var array<string, array{kind: string, phpType: string, dateOnly?: bool}> */
+    /** @var array<string, TypeInfo> */
     private array $resolvedSimple = [];
     private int $written = 0;
     /** @var array<string, true> dirs mkdir() has already run for, avoids a redundant syscall per file */
@@ -92,7 +96,7 @@ final class Generator
                 $this->buildComplexClass($inlineComplex, Naming::toClassName($local), $namespace);
             } elseif ('' !== $el->getAttribute('type')) {
                 $typeInfo = $this->resolveParticleType($el, Naming::toClassName($local), $namespace);
-                $this->note("root element '{$key}' aliases {$typeInfo['phpType']}");
+                $this->note("root element '{$key}' aliases {$typeInfo->phpType}");
             }
         }
 
@@ -336,13 +340,13 @@ final class Generator
     }
 
     /** Resolves a named simpleType to either a backed enum or a scalar PHP type. */
-    private function resolveSimpleTypeRef(string $key): array
+    private function resolveSimpleTypeRef(string $key): TypeInfo
     {
         if (isset($this->resolvedSimple[$key])) {
             return $this->resolvedSimple[$key];
         }
         // break self-reference cycles defensively
-        $this->resolvedSimple[$key] = self::STRING_FALLBACK;
+        $this->resolvedSimple[$key] = self::stringFallback();
 
         if (!isset($this->simpleTypes[$key])) {
             $this->warn("unknown simpleType '{$key}', falling back to string");
@@ -351,16 +355,16 @@ final class Generator
         }
 
         $node = $this->simpleTypes[$key];
-        $xp = $this->xpath($node->ownerDocument);
+        $xp = $this->xpath($this->ownerDocOf($node));
 
         // xs:list/xs:restriction/xs:union are mutually exclusive per the XSD schema-for-schema -
         // a simpleType has at most one of them, so a combined query is unambiguous.
-        $listOrRestriction = $xp->query('xs:list | xs:restriction', $node)->item(0);
+        $listOrRestriction = $this->query($xp, 'xs:list | xs:restriction', $node)->item(0);
         if ($listOrRestriction instanceof \DOMElement && 'list' === $listOrRestriction->localName) {
             $this->note("simpleType '{$key}' is xs:list, mapped to plain string");
-            $this->resolvedSimple[$key] = self::STRING_FALLBACK;
+            $this->resolvedSimple[$key] = self::stringFallback();
 
-            return self::STRING_FALLBACK;
+            return self::stringFallback();
         }
         if (!$listOrRestriction instanceof \DOMElement) {
             return $this->resolvedSimple[$key] = $this->fallbackScalar("simpleType '{$key}' is xs:union or has an unsupported restriction, mapped to plain string");
@@ -369,10 +373,11 @@ final class Generator
 
         $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
 
-        $enumerations = $xp->query('xs:enumeration', $restriction);
-        if ($enumerations->length > 0 && 'scalar' === $baseInfo['kind']) {
+        /** @var \DOMNodeList<\DOMElement> $enumerations */
+        $enumerations = $this->query($xp, 'xs:enumeration', $restriction);
+        if ($enumerations->length > 0 && TypeKind::Scalar === $baseInfo->kind) {
             [$xsdNs, $local] = explode('#', $key, 2);
-            $result = $this->toEnumResult($local, $enumerations, $baseInfo['phpType'], $this->namespaceFor($xsdNs)->phpNamespace);
+            $result = $this->toEnumResult($local, $enumerations, $baseInfo->phpType, $this->namespaceFor($xsdNs)->phpNamespace);
             $this->resolvedSimple[$key] = $result;
 
             return $result;
@@ -383,12 +388,12 @@ final class Generator
         // this level itself adds. This level's facets win on a key collision (e.g. a tighter
         // maxLength further down the chain).
         $baseInfo = $this->mergeFacets($baseInfo, $restriction);
-        if ('scalar' === $baseInfo['kind']) {
+        if (TypeKind::Scalar === $baseInfo->kind) {
             // the type as directly referenced (not an ancestor further up a restriction chain,
             // if $baseInfo already carried one from resolving its own base) - semantic-type
             // alias matching keys off this name.
             [, $selfLocal] = explode('#', $key, 2);
-            $baseInfo['namedType'] = $selfLocal;
+            $baseInfo = new TypeInfo(kind: $baseInfo->kind, phpType: $baseInfo->phpType, dateOnly: $baseInfo->dateOnly, facets: $baseInfo->facets, namedType: $selfLocal);
         }
 
         $this->resolvedSimple[$key] = $baseInfo;
@@ -397,25 +402,31 @@ final class Generator
     }
 
     /** Logs $reason via note() and returns the plain-string fallback type-info - every silent generator fallback goes through here so none can be added without a diagnostic. */
-    private function fallbackScalar(string $reason): array
+    private function fallbackScalar(string $reason): TypeInfo
     {
         $this->note($reason);
 
-        return self::STRING_FALLBACK;
+        return self::stringFallback();
     }
 
     /** Merges $restriction's own facets onto $typeInfo's (already possibly inherited) ones - own facets win on key collision. No-op if $typeInfo isn't a scalar. */
-    private function mergeFacets(array $typeInfo, \DOMElement $restriction): array
+    private function mergeFacets(TypeInfo $typeInfo, \DOMElement $restriction): TypeInfo
     {
-        if ('scalar' !== $typeInfo['kind']) {
+        if (TypeKind::Scalar !== $typeInfo->kind) {
             return $typeInfo;
         }
-        $facets = [...($typeInfo['facets'] ?? []), ...$this->extractFacets($restriction)];
-        if ([] !== $facets) {
-            $typeInfo['facets'] = $facets;
+        $facets = [...$typeInfo->facets, ...$this->extractFacets($restriction)];
+        if ([] === $facets) {
+            return $typeInfo;
         }
 
-        return $typeInfo;
+        return new TypeInfo(
+            kind: $typeInfo->kind,
+            phpType: $typeInfo->phpType,
+            dateOnly: $typeInfo->dateOnly,
+            facets: $facets,
+            namedType: $typeInfo->namedType,
+        );
     }
 
     /**
@@ -448,11 +459,12 @@ final class Generator
             $facets[$child->localName] = isset($intFacets[$child->localName]) ? (int) $value : $value;
         }
 
+        /** @var array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int} $facets */
         return $facets;
     }
 
     /** Resolves either "xs:string" style primitives or a reference to another named simpleType. */
-    private function resolvePrimitiveOrNamedSimpleType(\DOMElement $contextNode, string $qname): array
+    private function resolvePrimitiveOrNamedSimpleType(\DOMElement $contextNode, string $qname): TypeInfo
     {
         [$ns, $local] = $this->resolveQName($contextNode, $qname);
         $key = $ns.'#'.$local;
@@ -460,15 +472,16 @@ final class Generator
             return $this->resolveSimpleTypeRef($key);
         }
 
-        return ['kind' => 'scalar', 'phpType' => Naming::xsPrimitiveToPhp($local), 'dateOnly' => 'date' === $local];
+        return new TypeInfo(kind: TypeKind::Scalar, phpType: Naming::xsPrimitiveToPhp($local), dateOnly: 'date' === $local);
     }
 
-    /** Wraps ensureEnumClass()'s result as a resolveXxxType()-style type-info array. */
-    private function toEnumResult(string $name, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): array
+    /** Wraps ensureEnumClass()'s result as a resolveXxxType()-style TypeInfo. */
+    private function toEnumResult(string $name, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): TypeInfo
     {
-        return ['kind' => 'enum', 'phpType' => $this->ensureEnumClass($name, $enumerations, $backingPhpType, $namespace), 'dateOnly' => false];
+        return new TypeInfo(kind: TypeKind::Enum, phpType: $this->ensureEnumClass($name, $enumerations, $backingPhpType, $namespace));
     }
 
+    /** @param \DOMNodeList<\DOMElement> $enumerations */
     private function ensureEnumClass(string $simpleTypeName, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): string
     {
         $backing = 'int' === $backingPhpType ? 'int' : 'string';
@@ -477,7 +490,6 @@ final class Generator
         $usedCaseNames = [];
         $cases = [];
         foreach ($enumerations as $enum) {
-            /** @var \DOMElement $enum */
             $value = $enum->getAttribute('value');
             $caseName = Naming::toClassName($value);
             $baseCaseName = $caseName;
@@ -513,52 +525,48 @@ final class Generator
         return $namespace.'\\'.$className;
     }
 
-    /**
-     * Resolves the type of an xs:element or xs:attribute node: named @var ref,
-     * or an inline anonymous xs:complexType/xs:simpleType child.
-     *
-     * @return array{kind: string, phpType: string, dateOnly?: bool}
-     */
-    private function resolveParticleType(\DOMElement $node, string $ownerClassName, string $ownerNamespace): array
+    /** Resolves the type of an xs:element or xs:attribute node: named @var ref, or an inline anonymous xs:complexType/xs:simpleType child. */
+    private function resolveParticleType(\DOMElement $node, string $ownerClassName, string $ownerNamespace): TypeInfo
     {
         $typeAttr = $node->getAttribute('type');
         if ('' !== $typeAttr) {
             [$ns, $local] = $this->resolveQName($node, $typeAttr);
             $key = $ns.'#'.$local;
             if (self::XS_NS !== $ns && isset($this->complexTypes[$key])) {
-                return ['kind' => 'class', 'phpType' => $this->ensureComplexClass($key)];
+                return new TypeInfo(kind: TypeKind::Class_, phpType: $this->ensureComplexClass($key));
             }
 
             return $this->resolvePrimitiveOrNamedSimpleType($node, $typeAttr);
         }
 
-        $xp = $this->xpath($node->ownerDocument);
+        $xp = $this->xpath($this->ownerDocOf($node));
         $nestedNamespace = $ownerNamespace.'\\'.$ownerClassName;
 
         // xs:complexType/xs:simpleType are mutually exclusive per the XSD schema-for-schema - an
         // element/attribute has at most one, so a combined query is unambiguous.
-        $inlineType = $xp->query('xs:complexType | xs:simpleType', $node)->item(0);
+        $inlineType = $this->query($xp, 'xs:complexType | xs:simpleType', $node)->item(0);
         if ($inlineType instanceof \DOMElement && 'complexType' === $inlineType->localName) {
             $anonName = Naming::toClassName($node->getAttribute('name'));
             $className = $this->buildComplexClass($inlineType, $anonName, $nestedNamespace);
 
-            return ['kind' => 'class', 'phpType' => $className];
+            return new TypeInfo(kind: TypeKind::Class_, phpType: $className);
         }
 
         if ($inlineType instanceof \DOMElement) {
-            $restriction = $xp->query('xs:restriction', $inlineType)->item(0);
+            $restriction = $this->query($xp, 'xs:restriction', $inlineType)->item(0);
             if (!$restriction instanceof \DOMElement) {
                 return $this->fallbackScalar("inline simpleType without xs:restriction on '{$node->getAttribute('name')}', mapped to plain string");
             }
 
-            $enumerations = $xp->query('xs:enumeration', $restriction);
+            /** @var \DOMNodeList<\DOMElement> $enumerations */
+            $enumerations = $this->query($xp, 'xs:enumeration', $restriction);
             if ($enumerations->length > 0) {
                 $anonName = Naming::toClassName($node->getAttribute('name')).'Enum';
                 $base = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
 
                 // nested under the owner's namespace, like inline complex types above, so two
                 // unrelated owners with a same-named inline enum member don't collide on output
-                return $this->toEnumResult($anonName, $enumerations, $base['phpType'], $nestedNamespace);
+                return $this->toEnumResult($anonName, $enumerations, $base->phpType, $nestedNamespace);
             }
 
             $base = $this->resolvePrimitiveOrNamedSimpleType($restriction, $restriction->getAttribute('base'));
@@ -771,7 +779,7 @@ final class Generator
     }
 
     /** Builds one property-model entry; shared by the simpleContent-value, element, and attribute sites in collectProperties(). */
-    private function makeProperty(string $name, PropertyRole $role, bool $isArray, bool $nullable, array $typeInfo, ?string $doc): Property
+    private function makeProperty(string $name, PropertyRole $role, bool $isArray, bool $nullable, TypeInfo $typeInfo, ?string $doc): Property
     {
         return new Property(
             phpName: PropertyRole::Text === $role ? $name : Naming::toPropName($name),
@@ -779,11 +787,15 @@ final class Generator
             role: $role,
             isArray: $isArray,
             nullable: $nullable,
-            kind: $typeInfo['kind'],
-            phpType: $typeInfo['phpType'],
-            dateOnly: $typeInfo['dateOnly'] ?? false,
-            facets: $typeInfo['facets'] ?? [],
-            namedType: $typeInfo['namedType'] ?? null,
+            kind: match ($typeInfo->kind) {
+                TypeKind::Scalar => 'scalar',
+                TypeKind::Class_ => 'class',
+                TypeKind::Enum => 'enum',
+            },
+            phpType: $typeInfo->phpType,
+            dateOnly: $typeInfo->dateOnly,
+            facets: $typeInfo->facets,
+            namedType: $typeInfo->namedType,
             doc: $doc,
         );
     }

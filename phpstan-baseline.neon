@@ -45,7 +45,7 @@ parameters:
 		-
 			message: '#^Cannot access property \$length on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
 			identifier: property.nonObject
-			count: 3
+			count: 1
 			path: src/Generator.php
 
 		-
@@ -57,78 +57,12 @@ parameters:
 		-
 			message: '#^Cannot call method item\(\) on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
 			identifier: method.nonObject
-			count: 8
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:ensureEnumClass\(\) has parameter \$enumerations with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:extractFacets\(\) should return array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, \.\.\.\} but returns array\<string, int\|string\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:fallbackScalar\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:makeProperty\(\) has parameter \$typeInfo with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:mergeFacets\(\) has parameter \$typeInfo with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:mergeFacets\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:resolveParticleType\(\) should return array\{kind\: string, phpType\: string, dateOnly\?\: bool\} but returns array\.$#'
-			identifier: return.type
 			count: 5
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:resolvePrimitiveOrNamedSimpleType\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:resolveSimpleTypeRef\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
 			path: src/Generator.php
 
 		-
 			message: '#^Method Xsd2Php\\Generator\:\:toEnumResult\(\) has parameter \$enumerations with generic class DOMNodeList but does not specify its types\: TNode$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:toEnumResult\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Only iterables can be unpacked, mixed given\.$#'
-			identifier: arrayUnpacking.nonIterable
 			count: 1
 			path: src/Generator.php
 
@@ -147,7 +81,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$doc of method Xsd2Php\\Generator\:\:xpath\(\) expects DOMDocument, DOMDocument\|null given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 3
 			path: src/Generator.php
 
 		-
@@ -169,21 +103,9 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#2 \$enumerations of method Xsd2Php\\Generator\:\:toEnumResult\(\) expects DOMNodeList, DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \#2 \$qname of method Xsd2Php\\Generator\:\:resolveQName\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#3 \$backingPhpType of method Xsd2Php\\Generator\:\:toEnumResult\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
 			path: src/Generator.php
 
 		-
@@ -193,51 +115,9 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \$dateOnly of class Xsd2Php\\Property constructor expects bool, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \$facets of class Xsd2Php\\Property constructor expects array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, \.\.\.\}, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \$kind of class Xsd2Php\\Property constructor expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \$namedType of class Xsd2Php\\Property constructor expects string\|null, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \$phpType of class Xsd2Php\\Property constructor expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Possibly invalid array key type string\|null\.$#'
 			identifier: offsetAccess.invalidOffset
 			count: 5
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, array\>\.$#'
-			identifier: assign.propertyType
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, non\-empty\-array\>\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: src/Generator.php
 
 		-
