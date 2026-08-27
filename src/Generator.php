@@ -511,14 +511,7 @@ final class Generator
         return $this->fallbackScalar("no @type/inline type definition on '{$node->getAttribute('name')}' (xs:anyType equivalent), mapped to plain string");
     }
 
-    /**
-     * @return list<array{
-     *   phpName: string, xmlName: ?string, isAttribute: bool, isText: bool,
-     *   isArray: bool, nullable: bool, kind: string, phpType: string, dateOnly: bool,
-     *   facets: array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int},
-     *   namedType: ?string, doc: ?string
-     * }>
-     */
+    /** @return array{properties: list<Property>, choiceGroups: list<array{fields: list<string>, required: bool}>} */
     private function collectProperties(\DOMElement $ctNode, string $ownerClassName, string $ownerNamespace): array
     {
         $xp = $this->xpath($ctNode->ownerDocument);
@@ -552,13 +545,13 @@ final class Generator
             $ext = $xp->query('xs:extension', $content)->item(0);
             /** @var \DOMElement $ext */
             $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($ext, $ext->getAttribute('base'));
-            $properties[] = $this->makeProperty('value', false, true, false, false, $baseInfo, null);
+            $properties[] = $this->makeProperty('value', PropertyRole::Text, false, false, $baseInfo, null);
             $contentContainer = $ext;
         }
 
         $properties = [...$baseProperties, ...$properties];
 
-        /** @var array<int, array{particle: \DOMElement, members: array{phpName: string, srcEl: \DOMElement}[], directChildCount: int}> keyed by spl_object_id() of the enclosing xs:choice particle */
+        /** @var array<int, array{particle: \DOMElement, members: array{phpName: string, prop: Property}[], directChildCount: int}> keyed by spl_object_id() of the enclosing xs:choice particle */
         $choiceGroups = [];
 
         foreach ($xp->query('xs:sequence | xs:choice | xs:all', $contentContainer) as $particle) {
@@ -593,14 +586,7 @@ final class Generator
 
                 $typeInfo = $this->resolveParticleType($typeSource, $ownerClassName, $ownerNamespace);
 
-                $prop = $this->makeProperty($name, false, false, $isArray, $nullable, $typeInfo, $doc);
-                if ($choiceParticle instanceof \DOMElement) {
-                    // bookkeeping only, stripped before the final return - lets the later
-                    // dedup-survivor check below tell "this exact choice element survived
-                    // de-dup under its phpName" apart from "a same-named non-choice property
-                    // (e.g. an xs:attribute) won the de-dup instead".
-                    $prop['__srcEl'] = $el;
-                }
+                $prop = $this->makeProperty($name, PropertyRole::Element, $isArray, $nullable, $typeInfo, $doc);
                 $properties[] = $prop;
 
                 if ($choiceParticle instanceof \DOMElement) {
@@ -611,7 +597,12 @@ final class Generator
                         'directChildCount' => $this->xpath($choiceParticle->ownerDocument)
                             ->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
                     ];
-                    $choiceGroups[$groupKey]['members'][] = ['phpName' => $prop['phpName'], 'srcEl' => $el];
+                    // $prop's own identity (not a separately-tracked DOM node) is what the
+                    // dedup-survivor check below compares against - "did this exact Property
+                    // instance survive dedup under its phpName" tells apart "a same-named
+                    // non-choice property (e.g. an xs:attribute) won the de-dup instead",
+                    // without Property itself needing to carry DOM bookkeeping.
+                    $choiceGroups[$groupKey]['members'][] = ['phpName' => $prop->phpName, 'prop' => $prop];
                 }
             }
         }
@@ -629,13 +620,13 @@ final class Generator
             $typeInfo = $this->resolveParticleType($attr, $ownerClassName, $ownerNamespace);
             $doc = $this->appendXsdDefaultHint($this->extractDoc($attr), $attr);
 
-            $properties[] = $this->makeProperty($name, true, false, false, 'required' !== $use, $typeInfo, $doc);
+            $properties[] = $this->makeProperty($name, PropertyRole::Attribute, false, 'required' !== $use, $typeInfo, $doc);
         }
 
         // de-dup by phpName, last one wins (own properties override inherited base ones with same name)
         $byName = [];
         foreach ($properties as $p) {
-            $byName[$p['phpName']] = $p;
+            $byName[$p->phpName] = $p;
         }
 
         // "exactly one of" only makes sense for a fixed, 1:1 set of alternatives.
@@ -656,7 +647,7 @@ final class Generator
             // phpName otherwise.
             $names = [];
             foreach ($group['members'] as $member) {
-                if (($byName[$member['phpName']]['__srcEl'] ?? null) === $member['srcEl']) {
+                if (($byName[$member['phpName']] ?? null) === $member['prop']) {
                     $names[] = $member['phpName'];
                 }
             }
@@ -682,13 +673,7 @@ final class Generator
             $exactlyOneOfGroups[] = ['fields' => $names, 'required' => $required];
         }
 
-        $properties = array_values($byName);
-        foreach ($properties as &$p) {
-            unset($p['__srcEl']);
-        }
-        unset($p);
-
-        return ['properties' => $properties, 'choiceGroups' => $exactlyOneOfGroups];
+        return ['properties' => array_values($byName), 'choiceGroups' => $exactlyOneOfGroups];
     }
 
     /**
@@ -726,22 +711,21 @@ final class Generator
     }
 
     /** Builds one property-model entry; shared by the simpleContent-value, element, and attribute sites in collectProperties(). */
-    private function makeProperty(string $name, bool $isAttribute, bool $isText, bool $isArray, bool $nullable, array $typeInfo, ?string $doc): array
+    private function makeProperty(string $name, PropertyRole $role, bool $isArray, bool $nullable, array $typeInfo, ?string $doc): Property
     {
-        return [
-            'phpName' => $isText ? $name : Naming::toPropName($name),
-            'xmlName' => $isText ? null : $name,
-            'isAttribute' => $isAttribute,
-            'isText' => $isText,
-            'isArray' => $isArray,
-            'nullable' => $nullable,
-            'kind' => $typeInfo['kind'],
-            'phpType' => $typeInfo['phpType'],
-            'dateOnly' => $typeInfo['dateOnly'] ?? false,
-            'facets' => $typeInfo['facets'] ?? [],
-            'namedType' => $typeInfo['namedType'] ?? null,
-            'doc' => $doc,
-        ];
+        return new Property(
+            phpName: PropertyRole::Text === $role ? $name : Naming::toPropName($name),
+            xmlName: PropertyRole::Text === $role ? null : $name,
+            role: $role,
+            isArray: $isArray,
+            nullable: $nullable,
+            kind: $typeInfo['kind'],
+            phpType: $typeInfo['phpType'],
+            dateOnly: $typeInfo['dateOnly'] ?? false,
+            facets: $typeInfo['facets'] ?? [],
+            namedType: $typeInfo['namedType'] ?? null,
+            doc: $doc,
+        );
     }
 
     private function extractDoc(\DOMElement $node): ?string
@@ -780,34 +764,34 @@ final class Generator
         return null === $doc ? $hint : "{$doc} {$hint}";
     }
 
-    private function fqType(array $p, TypeRenderContext $ctx): string
+    private function fqType(Property $p, TypeRenderContext $ctx): string
     {
-        if (!\in_array($p['kind'], ['class', 'enum'], true)) {
-            return $p['phpType'];
+        if (!\in_array($p->kind, ['class', 'enum'], true)) {
+            return $p->phpType;
         }
 
-        return $ctx->render($p['phpType']);
+        return $ctx->render($p->phpType);
     }
 
-    private function phpPropertyType(array $p, TypeRenderContext $ctx): string
+    private function phpPropertyType(Property $p, TypeRenderContext $ctx): string
     {
-        if ($p['isArray']) {
+        if ($p->isArray) {
             return 'array';
         }
 
-        return ($p['nullable'] ? '?' : '').$this->fqType($p, $ctx);
+        return ($p->nullable ? '?' : '').$this->fqType($p, $ctx);
     }
 
-    private function phpDocType(array $p, TypeRenderContext $ctx): string
+    private function phpDocType(Property $p, TypeRenderContext $ctx): string
     {
         $type = $this->fqType($p, $ctx);
 
-        return $p['isArray'] ? $type.'[]' : $type;
+        return $p->isArray ? $type.'[]' : $type;
     }
 
-    private function hasDefault(array $p): bool
+    private function hasDefault(Property $p): bool
     {
-        return $p['isArray'] || $p['nullable'];
+        return $p->isArray || $p->nullable;
     }
 
     private function buildComplexClass(\DOMElement $ctNode, string $className, string $namespace): string
@@ -815,7 +799,7 @@ final class Generator
         ['properties' => $properties, 'choiceGroups' => $choiceGroups] = $this->collectProperties($ctNode, $className, $namespace);
 
         // required (no default) params must precede optional ones in a PHP constructor
-        usort($properties, fn (array $a, array $b): int => $this->hasDefault($a) <=> $this->hasDefault($b));
+        usort($properties, fn (Property $a, Property $b): int => $this->hasDefault($a) <=> $this->hasDefault($b));
 
         // Resolve attributesFor() once per property up front so the `use` block (built from
         // every fqcn seen across the whole class) and the constructor body (rendered below,
@@ -834,10 +818,10 @@ final class Generator
             }
         }
         foreach ($properties as $p) {
-            if (!\in_array($p['kind'], ['class', 'enum'], true)) {
+            if (!\in_array($p->kind, ['class', 'enum'], true)) {
                 continue;
             }
-            $fqcn = $p['phpType'];
+            $fqcn = $p->phpType;
             if (substr($fqcn, 0, strrpos($fqcn, '\\')) === $namespace) {
                 $sameNamespaceTypes[$fqcn] = true;
                 continue;
@@ -861,10 +845,10 @@ final class Generator
         $ctorLines = [];
         foreach ($properties as $i => $p) {
             $type = $this->phpPropertyType($p, $ctx);
-            $default = $p['isArray'] ? ' = []' : ($p['nullable'] ? ' = null' : '');
+            $default = $p->isArray ? ' = []' : ($p->nullable ? ' = null' : '');
 
-            $doc = null !== $p['doc'] ? str_replace('*/', '* /', $p['doc']) : null;
-            if ($p['isArray']) {
+            $doc = null !== $p->doc ? str_replace('*/', '* /', $p->doc) : null;
+            if ($p->isArray) {
                 // symfony/property-info's PhpDocExtractor needs an explicit @var tag (PHP has no
                 // generics) to resolve the array item type for denormalization.
                 $ctorLines[] = '        /** @var '.$this->phpDocType($p, $ctx).(null !== $doc ? " {$doc}" : '').' */';
@@ -875,7 +859,7 @@ final class Generator
                 $rendered = $ctx->render($attr['fqcn']);
                 $ctorLines[] = "        #[{$rendered}({$attr['args']})]";
             }
-            $ctorLines[] = "        public {$type} \${$p['phpName']}{$default},";
+            $ctorLines[] = "        public {$type} \${$p->phpName}{$default},";
             $ctorLines[] = '';
         }
         $ctorBody = rtrim(implode("\n", $ctorLines));

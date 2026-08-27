@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xsd2Php\Attribute;
 
+use Xsd2Php\Property;
+
 /**
  * Adds a caller-supplied constraint when a property's directly-referenced named simpleType
  * matches an entry in the alias map - a heuristic keyed by XSD type name (e.g. "EmailType" ->
@@ -18,13 +20,13 @@ final readonly class SemanticTypeAttributeStrategy implements PropertyAttributeS
     {
     }
 
-    public function attributesFor(array $property): array
+    public function attributesFor(Property $property): array
     {
-        if ($property['isArray']) {
+        if ($property->isArray) {
             return [];
         }
 
-        $namedType = $property['namedType'] ?? null;
+        $namedType = $property->namedType;
         if (null === $namedType || !isset($this->aliasMap[$namedType])) {
             return [];
         }

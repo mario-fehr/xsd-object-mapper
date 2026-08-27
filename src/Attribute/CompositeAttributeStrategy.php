@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xsd2Php\Attribute;
 
+use Xsd2Php\Property;
+
 /** Merges the attributesFor() results of multiple strategies, in the order given. */
 final readonly class CompositeAttributeStrategy implements PropertyAttributeStrategy
 {
@@ -15,7 +17,7 @@ final readonly class CompositeAttributeStrategy implements PropertyAttributeStra
         $this->strategies = $strategies;
     }
 
-    public function attributesFor(array $property): array
+    public function attributesFor(Property $property): array
     {
         $attrs = [];
         foreach ($this->strategies as $strategy) {

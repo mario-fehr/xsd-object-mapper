@@ -12,6 +12,8 @@ use Xsd2Php\Attribute\SemanticTypeAttributeStrategy;
 use Xsd2Php\Config;
 use Xsd2Php\Generator;
 use Xsd2Php\NamespaceMapping;
+use Xsd2Php\Property;
+use Xsd2Php\PropertyRole;
 use Xsd2Php\Tests\RemovesTempDir;
 
 final class SemanticTypeAttributeStrategyTest extends TestCase
@@ -26,7 +28,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
     {
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
-        $property = ['isArray' => false, 'namedType' => 'EmailType'];
+        $property = new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, namedType: 'EmailType');
 
         $this->assertSame([['fqcn' => Email::class, 'args' => '']], $strategy->attributesFor($property));
     }
@@ -35,15 +37,15 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
     {
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
-        $this->assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => 'SomeOtherType']));
-        $this->assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => null]));
+        $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, namedType: 'SomeOtherType')));
+        $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, namedType: null)));
     }
 
     public function testSkipsArrayPropertiesEvenWhenNamedTypeMatches(): void
     {
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
-        $this->assertSame([], $strategy->attributesFor(['isArray' => true, 'namedType' => 'EmailType']));
+        $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, isArray: true, namedType: 'EmailType')));
     }
 
     /**

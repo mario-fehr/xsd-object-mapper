@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Xsd2Php\Attribute;
 
+use Xsd2Php\Property;
+use Xsd2Php\PropertyRole;
+
 /**
  * Emits symfony/serializer's #[SerializedName]/#[Context] attributes: '@Name' for
  * an xs:attribute, '#' for simpleContent text, bare 'Name' for an xs:element.
@@ -11,18 +14,20 @@ namespace Xsd2Php\Attribute;
  */
 final class SymfonySerializerAttributeStrategy implements PropertyAttributeStrategy
 {
-    public function attributesFor(array $property): array
+    public function attributesFor(Property $property): array
     {
-        $serializedName = $property['isText']
-            ? '#'
-            : ($property['isAttribute'] ? '@'.$property['xmlName'] : $property['xmlName']);
+        $serializedName = match ($property->role) {
+            PropertyRole::Text => '#',
+            PropertyRole::Attribute => '@'.$property->xmlName,
+            PropertyRole::Element => $property->xmlName,
+        };
 
         $attrs = [[
             'fqcn' => 'Symfony\Component\Serializer\Attribute\SerializedName',
             'args' => var_export($serializedName, true),
         ]];
 
-        if (!empty($property['dateOnly'])) {
+        if ($property->dateOnly) {
             $attrs[] = [
                 'fqcn' => 'Symfony\Component\Serializer\Attribute\Context',
                 'args' => "['datetime_format' => 'Y-m-d']",

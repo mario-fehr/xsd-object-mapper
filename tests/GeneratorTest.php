@@ -10,6 +10,7 @@ use Xsd2Php\Attribute\SymfonySerializerAttributeStrategy;
 use Xsd2Php\Config;
 use Xsd2Php\Generator;
 use Xsd2Php\NamespaceMapping;
+use Xsd2Php\Property;
 
 final class GeneratorTest extends TestCase
 {
@@ -293,7 +294,7 @@ final class GeneratorTest extends TestCase
         // generator can't safely alias both to the same short name, so both must fall back
         // to an inline fully-qualified name and neither gets a `use` line.
         $this->generate(new class implements PropertyAttributeStrategy {
-            public function attributesFor(array $property): array
+            public function attributesFor(Property $property): array
             {
                 return [
                     ['fqcn' => 'Vendor\\One\\Marker', 'args' => ''],

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xsd2Php\Attribute;
 
+use Xsd2Php\Property;
+
 /**
  * Emits symfony/validator constraints derived from the property model:
  *
@@ -13,7 +15,7 @@ namespace Xsd2Php\Attribute;
  * - required array (isArray && !nullable, minOccurs >= 1) -> #[Assert\Count(min: 1)]
  * - optional/nullable properties                          -> no presence constraint
  *
- * Facets (from $property['facets'] - merged across a whole chain of nested named-simpleType
+ * Facets (from $property->facets - merged across a whole chain of nested named-simpleType
  * restrictions, closer-to-the-property facets winning on a key collision with an ancestor's;
  * skipped entirely for array properties, since these validate a single scalar value, not each
  * item):
@@ -29,42 +31,42 @@ namespace Xsd2Php\Attribute;
  * - xs:totalDigits / xs:fractionDigits -> #[Xsd2Php\Validator\Decimal] (custom constraint,
  *   symfony/validator has no built-in for either)
  *
- * Cascading (from $property['kind'], regardless of nullable/isArray):
+ * Cascading (from $property->kind, regardless of nullable/isArray):
  * - kind === 'class' (a nested generated DTO, scalar or array-of) -> #[Assert\Valid] - without
  *   this, symfony/validator only checks a property's own constraints and never descends into
  *   its value's constraints, so none of the above would ever fire on nested objects.
  */
 final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrategy
 {
-    public function attributesFor(array $property): array
+    public function attributesFor(Property $property): array
     {
         $attrs = $this->presenceConstraint($property);
 
-        if ('class' === $property['kind']) {
+        if ('class' === $property->kind) {
             $attrs[] = ['fqcn' => \Symfony\Component\Validator\Constraints\Valid::class, 'args' => ''];
         }
 
-        if (!$property['isArray']) {
-            return [...$attrs, ...$this->facetConstraints($property['facets'])];
+        if (!$property->isArray) {
+            return [...$attrs, ...$this->facetConstraints($property->facets)];
         }
 
         return $attrs;
     }
 
-    private function presenceConstraint(array $property): array
+    private function presenceConstraint(Property $property): array
     {
-        if ($property['isArray']) {
-            return $property['nullable'] ? [] : [[
+        if ($property->isArray) {
+            return $property->nullable ? [] : [[
                 'fqcn' => \Symfony\Component\Validator\Constraints\Count::class,
                 'args' => 'min: 1',
             ]];
         }
 
-        if ($property['nullable']) {
+        if ($property->nullable) {
             return [];
         }
 
-        if ('scalar' === $property['kind'] && 'string' === $property['phpType']) {
+        if ('scalar' === $property->kind && 'string' === $property->phpType) {
             return [[
                 'fqcn' => \Symfony\Component\Validator\Constraints\NotBlank::class,
                 'args' => '',
