@@ -92,18 +92,27 @@ deleted; the type now carries itself.
   literal; `fqType()`, `phpPropertyType()`, `phpDocType()` take `Property $p` instead of
   `array $p`; every `$p['key']` access becomes `$p->key`.
 - `src/Attribute/PropertyAttributeStrategy.php` — signature + docblock as above.
+- `src/Attribute/CompositeAttributeStrategy.php` — signature only, delegates unchanged.
 - `src/Attribute/SymfonySerializerAttributeStrategy.php` — the `isText`/`isAttribute` ternary
   chain becomes a `match ($property->role)`.
 - `src/Attribute/SymfonyValidatorAttributeStrategy.php`,
   `src/Attribute/SemanticTypeAttributeStrategy.php` — array accesses become property accesses.
-- `src/TypeRenderContext.php` — re-check for `$property`/`$p` array usage during
-  implementation; none was found during design research, but confirm before/while touching it.
-- Test files currently constructing raw property arrays (found during design research:
-  `tests/Attribute/SemanticTypeAttributeStrategyTest.php`,
-  `tests/SymfonyValidatorAttributeStrategyTest.php`, `tests/GeneratorTest.php`,
-  `tests/OfficialSchemaFixtureTest.php`, `tests/ConstructReportToolTest.php`,
-  `tests/FixtureDriftToolTest.php`, and any others `grep -rlE "\['phpName'|'isAttribute'|'isText'"
-  tests/` turns up at implementation time) — switch to `new Property(...)`.
+- `src/TypeRenderContext.php` — confirmed during design research to have no `$property`/`$p`
+  array usage at all (takes fqcn strings only) — not affected by this migration.
+- `collectProperties()`'s `__srcEl` bookkeeping (an ad-hoc array key added to a choice-branch
+  property, then stripped before the method returns, tracking which DOM element it came from)
+  can't survive as a mutated key on an immutable `Property`. Replaced by comparing `Property`
+  object identity directly — `$byName[$phpName] === $member['prop']` — since a `Property`
+  instance is only ever replaced wholesale in the dedup map, never merged/copied. No new field
+  on `Property`, no separate DOM-keyed side-map needed either.
+- Test files constructing raw property arrays directly (confirmed via
+  `grep -rn "'isAttribute'\|'isText'\|'isArray'\|'phpName'\|'namedType'\|'xmlName'\|'dateOnly'"
+  tests/`, and via every `attributesFor(` call site): only
+  `tests/Attribute/SemanticTypeAttributeStrategyTest.php` (3 raw array literals) and
+  `tests/GeneratorTest.php` (one anonymous `PropertyAttributeStrategy` test double whose
+  parameter type must change, though its body never reads `$property`). Every other test file
+  exercises property generation end-to-end through the real `Generator`, never constructing a
+  property array/object directly — not affected.
 
 ## Testing
 
