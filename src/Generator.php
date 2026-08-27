@@ -47,7 +47,7 @@ final class Generator
     /** @var array<string, true> dirs mkdir() has already run for, avoids a redundant syscall per file */
     private array $createdDirs = [];
 
-    /** @var array<string, list<array>> resolveBaseProperties() result cache, keyed by "{namespaceURI}#{localName}" */
+    /** @var array<string, list<Property>> resolveBaseProperties() result cache, keyed by "{namespaceURI}#{localName}" */
     private array $basePropertiesCache = [];
     /** @var array<string, true> base keys currently being resolved, detects complexContent/extension cycles */
     private array $basePropertiesInProgress = [];
@@ -684,6 +684,8 @@ final class Generator
      * so a given $baseKey always resolves to the same properties (safe to cache) and inline nested
      * types declared on the base get generated once, under the base's own namespace, instead of
      * once per subclass.
+     *
+     * @return list<Property>
      */
     private function resolveBaseProperties(string $baseKey): array
     {

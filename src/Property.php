@@ -20,5 +20,11 @@ final readonly class Property
         public ?string $namedType = null,
         public ?string $doc = null,
     ) {
+        if (PropertyRole::Text === $role && null !== $xmlName) {
+            throw new \InvalidArgumentException('Property with role Text must have a null xmlName.');
+        }
+        if (PropertyRole::Text !== $role && null === $xmlName) {
+            throw new \InvalidArgumentException("Property with role {$role->name} must have a non-null xmlName.");
+        }
     }
 }
