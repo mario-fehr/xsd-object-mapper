@@ -61,12 +61,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:toEnumResult\(\) has parameter \$enumerations with generic class DOMNodeList but does not specify its types\: TNode$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \#1 \$container of method Xsd2Php\\Generator\:\:collectAttributes\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode\|null given\.$#'
 			identifier: argument.type
 			count: 1

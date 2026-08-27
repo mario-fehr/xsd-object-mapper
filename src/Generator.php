@@ -475,7 +475,11 @@ final class Generator
         return new TypeInfo(kind: TypeKind::Scalar, phpType: Naming::xsPrimitiveToPhp($local), dateOnly: 'date' === $local);
     }
 
-    /** Wraps ensureEnumClass()'s result as a resolveXxxType()-style TypeInfo. */
+    /**
+     * Wraps ensureEnumClass()'s result as a resolveXxxType()-style TypeInfo.
+     *
+     * @param \DOMNodeList<\DOMElement> $enumerations
+     */
     private function toEnumResult(string $name, \DOMNodeList $enumerations, string $backingPhpType, string $namespace): TypeInfo
     {
         return new TypeInfo(kind: TypeKind::Enum, phpType: $this->ensureEnumClass($name, $enumerations, $backingPhpType, $namespace));
