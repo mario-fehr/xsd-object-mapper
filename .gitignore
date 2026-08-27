@@ -5,6 +5,9 @@
 # superpowers plugin: subagent-driven-development scratch (briefs, reports, ledger, diffs)
 /.superpowers/
 
+# read-only prior-art clones, see docs/reference-repos.md
+/.references/
+
 # JetBrains (PhpStorm, IntelliJ, ...)
 /.idea/
 
