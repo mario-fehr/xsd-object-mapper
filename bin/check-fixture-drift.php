@@ -22,12 +22,12 @@ function currentCounts(): array
 {
     $json = shell_exec('php '.escapeshellarg(REPORT_TOOL).' '.escapeshellarg(FIXTURES_DIR).' --json');
     if (null === $json || false === $json) {
-        fwrite(STDERR, "Failed to run xsd-construct-report.php.\n");
+        fwrite(\STDERR, "Failed to run xsd-construct-report.php.\n");
         exit(1);
     }
-    $decoded = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+    $decoded = json_decode($json, true, flags: \JSON_THROW_ON_ERROR);
     if (!is_array($decoded)) {
-        fwrite(STDERR, "Unexpected report tool output.\n");
+        fwrite(\STDERR, "Unexpected report tool output.\n");
         exit(1);
     }
 
@@ -40,13 +40,13 @@ function main(array $argv): int
     $current = currentCounts();
 
     if (!file_exists(BASELINE_FILE)) {
-        fwrite(STDOUT, 'No baseline yet at '.BASELINE_FILE." - writing the current counts as the initial baseline.\n");
-        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
+        fwrite(\STDOUT, 'No baseline yet at '.BASELINE_FILE." - writing the current counts as the initial baseline.\n");
+        file_put_contents(BASELINE_FILE, json_encode($current, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES)."\n");
 
         return 0;
     }
 
-    $baseline = json_decode(file_get_contents(BASELINE_FILE), true, flags: JSON_THROW_ON_ERROR);
+    $baseline = json_decode(file_get_contents(BASELINE_FILE), true, flags: \JSON_THROW_ON_ERROR);
 
     $changed = [];
     foreach ($current as $label => $count) {
@@ -62,27 +62,27 @@ function main(array $argv): int
     }
 
     if ([] === $changed) {
-        fwrite(STDOUT, "No drift - tests/fixtures/*.xsd construct usage matches the recorded baseline.\n");
+        fwrite(\STDOUT, "No drift - tests/fixtures/*.xsd construct usage matches the recorded baseline.\n");
 
         return 0;
     }
 
-    fwrite(STDOUT, 'Construct usage drift detected against '.BASELINE_FILE.":\n\n");
+    fwrite(\STDOUT, 'Construct usage drift detected against '.BASELINE_FILE.":\n\n");
     foreach ($changed as $label => $diff) {
         $before = $diff['before'];
         $after = $diff['after'] ?? 'removed from report tool';
         $flag = 0 === $before && is_int($diff['after']) && $diff['after'] > 0 ? '  <-- newly exercised by a fixture' : '';
-        fwrite(STDOUT, sprintf("  %-40s %s -> %s%s\n", $label, $before, $after, $flag));
+        fwrite(\STDOUT, sprintf("  %-40s %s -> %s%s\n", $label, $before, $after, $flag));
     }
 
     if ($updateBaseline) {
-        file_put_contents(BASELINE_FILE, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
-        fwrite(STDOUT, "\nBaseline updated.\n");
+        file_put_contents(BASELINE_FILE, json_encode($current, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES)."\n");
+        fwrite(\STDOUT, "\nBaseline updated.\n");
 
         return 0;
     }
 
-    fwrite(STDOUT, "\nRun with --update-baseline once you've reviewed the drift, to record the new counts.\n");
+    fwrite(\STDOUT, "\nRun with --update-baseline once you've reviewed the drift, to record the new counts.\n");
 
     return 1;
 }

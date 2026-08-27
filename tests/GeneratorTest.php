@@ -55,11 +55,11 @@ final class GeneratorTest extends TestCase
         // ref-target's name ("Name") and type (xs:string) both come from the global
         // element declaration; occurrence (here: array, from maxOccurs="unbounded")
         // comes from the reference site, not the global declaration.
-        self::assertStringContainsString('final readonly class PersonType', $code);
-        self::assertStringContainsString('use Symfony\Component\Serializer\Attribute\SerializedName;', $code);
-        self::assertStringContainsString("#[SerializedName('Name')]", $code);
-        self::assertStringContainsString('public array $name = [],', $code);
-        self::assertStringContainsString('@var string[]', $code);
+        $this->assertStringContainsString('final readonly class PersonType', $code);
+        $this->assertStringContainsString('use Symfony\Component\Serializer\Attribute\SerializedName;', $code);
+        $this->assertStringContainsString("#[SerializedName('Name')]", $code);
+        $this->assertStringContainsString('public array $name = [],', $code);
+        $this->assertStringContainsString('@var string[]', $code);
     }
 
     public function testXsdDefaultAndFixedAppearAsDocHintWithoutChangingNullability(): void
@@ -90,15 +90,15 @@ final class GeneratorTest extends TestCase
 
         // default/fixed are purely informational - nullability/type stay exactly as they'd be
         // without them, driven only by minOccurs/use as before this fix.
-        self::assertStringContainsString('/** Whether to send mail. (XSD-Default: false) */', $code);
-        self::assertStringContainsString('public ?bool $sendMail = null,', $code);
-        self::assertStringContainsString('/** (XSD-Default: Active) */', $code);
-        self::assertStringContainsString('public ?string $status = null,', $code);
-        self::assertStringContainsString('/** (XSD-Fixed: X) */', $code);
+        $this->assertStringContainsString('/** Whether to send mail. (XSD-Default: false) */', $code);
+        $this->assertStringContainsString('public ?bool $sendMail = null,', $code);
+        $this->assertStringContainsString('/** (XSD-Default: Active) */', $code);
+        $this->assertStringContainsString('public ?string $status = null,', $code);
+        $this->assertStringContainsString('/** (XSD-Fixed: X) */', $code);
         // xs:element ref="..." itself can't carry default/fixed (XSD forbids it) - the hint
         // comes from the referenced global element's own declaration.
-        self::assertStringContainsString('/** (XSD-Default: Hello) */', $code);
-        self::assertStringContainsString('public ?string $greeting = null,', $code);
+        $this->assertStringContainsString('/** (XSD-Default: Hello) */', $code);
+        $this->assertStringContainsString('public ?string $greeting = null,', $code);
     }
 
     public function testUnknownElementRefWarnsAndSkipsInsteadOfCrashing(): void
@@ -121,8 +121,8 @@ final class GeneratorTest extends TestCase
 
         $code = $this->readGenerated('PersonType.php');
 
-        self::assertStringContainsString('public function __construct(', $code);
-        self::assertStringNotContainsString('DoesNotExist', $code);
+        $this->assertStringContainsString('public function __construct(', $code);
+        $this->assertStringNotContainsString('DoesNotExist', $code);
     }
 
     public function testUnsupportedAttributeRefIsSkippedInsteadOfCrashing(): void
@@ -148,8 +148,8 @@ final class GeneratorTest extends TestCase
 
         // xs:attribute ref="..." isn't resolved (unlike xs:element ref) - must be skipped with a
         // warning, not silently, same as an unknown element ref above.
-        self::assertStringContainsString('public function __construct(', $code);
-        self::assertStringNotContainsString('SomeAttribute', $code);
+        $this->assertStringContainsString('public function __construct(', $code);
+        $this->assertStringNotContainsString('SomeAttribute', $code);
     }
 
     public function testResolvesGroupRef(): void
@@ -180,9 +180,9 @@ final class GeneratorTest extends TestCase
 
         // xs:group ref flattens the group's own sequence into PersonType's constructor -
         // required Street before optional City, no separate "AddressGroup" artifact.
-        self::assertStringContainsString('public string $street,', $code);
-        self::assertStringContainsString('public ?string $city = null,', $code);
-        self::assertStringNotContainsString('AddressGroup', $code);
+        $this->assertStringContainsString('public string $street,', $code);
+        $this->assertStringContainsString('public ?string $city = null,', $code);
+        $this->assertStringNotContainsString('AddressGroup', $code);
     }
 
     public function testCircularGroupRefStopsInsteadOfInfiniteRecursion(): void
@@ -219,9 +219,9 @@ final class GeneratorTest extends TestCase
 
         // A -> B -> A: the second "A" is where the cycle guard must stop the recursion.
         // X (from A) and Y (from B) still make it in; A isn't duplicated.
-        self::assertStringContainsString('public string $x,', $code);
-        self::assertStringContainsString('public string $y,', $code);
-        self::assertSame(1, substr_count($code, 'public string $x,'));
+        $this->assertStringContainsString('public string $x,', $code);
+        $this->assertStringContainsString('public string $y,', $code);
+        $this->assertSame(1, substr_count($code, 'public string $x,'));
     }
 
     public function testInlineNestedTypeOnExtensionBaseIsOwnedByBaseNotSubclass(): void
@@ -262,14 +262,14 @@ final class GeneratorTest extends TestCase
         // BaseType, not by either subclass - it must be generated exactly once, under BaseType's
         // own namespace, and both subclasses must reference that same class (not get their own
         // private copy under their own namespace).
-        self::assertFileExists($this->tmpDir.'/out/BaseType/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir.'/out/SubAType/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir.'/out/SubBType/Details.php');
+        $this->assertFileExists($this->tmpDir.'/out/BaseType/Details.php');
+        $this->assertFileDoesNotExist($this->tmpDir.'/out/SubAType/Details.php');
+        $this->assertFileDoesNotExist($this->tmpDir.'/out/SubBType/Details.php');
 
         foreach (['SubAType.php', 'SubBType.php'] as $filename) {
             $code = $this->readGenerated($filename);
-            self::assertStringContainsString('use TestGen\BaseType\Details;', $code);
-            self::assertStringContainsString('public ?Details $details = null,', $code);
+            $this->assertStringContainsString('use TestGen\BaseType\Details;', $code);
+            $this->assertStringContainsString('public ?Details $details = null,', $code);
         }
     }
 
@@ -304,9 +304,9 @@ final class GeneratorTest extends TestCase
 
         $code = $this->readGenerated('PersonType.php');
 
-        self::assertStringNotContainsString('use Vendor', $code);
-        self::assertStringContainsString('#[\Vendor\One\Marker()]', $code);
-        self::assertStringContainsString('#[\Vendor\Two\Marker()]', $code);
+        $this->assertStringNotContainsString('use Vendor', $code);
+        $this->assertStringContainsString('#[\Vendor\One\Marker()]', $code);
+        $this->assertStringContainsString('#[\Vendor\Two\Marker()]', $code);
     }
 
     public function testSameNamespacePropertyTypeIsBareWithNoImport(): void
@@ -337,9 +337,9 @@ final class GeneratorTest extends TestCase
         // AddressType lives in the same PHP namespace (TestGen) as PersonType itself - PHP
         // resolves the unqualified name against the file's own namespace automatically, so
         // this needs neither a `use` line nor a leading backslash.
-        self::assertStringNotContainsString('use TestGen\AddressType;', $code);
-        self::assertStringNotContainsString('\AddressType', $code);
-        self::assertStringContainsString('public AddressType $address,', $code);
+        $this->assertStringNotContainsString('use TestGen\AddressType;', $code);
+        $this->assertStringNotContainsString('\AddressType', $code);
+        $this->assertStringContainsString('public AddressType $address,', $code);
     }
 
     public function testCrossNamespacePropertyTypeGetsUseImport(): void
@@ -378,11 +378,11 @@ final class GeneratorTest extends TestCase
         ]);
 
         $path = $this->tmpDir.'/out-b/PersonType.php';
-        self::assertFileExists($path);
+        $this->assertFileExists($path);
         $code = file_get_contents($path);
 
-        self::assertStringContainsString('use GenA\AddressType;', $code);
-        self::assertStringContainsString('public AddressType $address,', $code);
+        $this->assertStringContainsString('use GenA\AddressType;', (string) $code);
+        $this->assertStringContainsString('public AddressType $address,', (string) $code);
     }
 
     public function testPathForPicksLongestNamespacePrefixMatch(): void
@@ -415,9 +415,9 @@ final class GeneratorTest extends TestCase
             'urn:xsd2php-test-unused' => new NamespaceMapping('TestGen\\PersonType', $this->tmpDir.'/out-nested'),
         ]);
 
-        self::assertFileExists($this->tmpDir.'/out/PersonType.php');
-        self::assertFileExists($this->tmpDir.'/out-nested/Details.php');
-        self::assertFileDoesNotExist($this->tmpDir.'/out/PersonType/Details.php');
+        $this->assertFileExists($this->tmpDir.'/out/PersonType.php');
+        $this->assertFileExists($this->tmpDir.'/out-nested/Details.php');
+        $this->assertFileDoesNotExist($this->tmpDir.'/out/PersonType/Details.php');
     }
 
     public function testChoiceElementsAreNullableWithExactlyOneOfConstraint(): void
@@ -443,10 +443,10 @@ final class GeneratorTest extends TestCase
 
         // xs:choice elements are mutually exclusive alternatives, not siblings that are all
         // required at once - both nullable, plus a class-level "exactly one of" constraint.
-        self::assertStringContainsString('use Xsd2Php\Validator\ExactlyOneOf;', $code);
-        self::assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
-        self::assertStringContainsString('public ?string $accommodation = null,', $code);
-        self::assertStringContainsString('public ?string $brochure = null,', $code);
+        $this->assertStringContainsString('use Xsd2Php\Validator\ExactlyOneOf;', $code);
+        $this->assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
+        $this->assertStringContainsString('public ?string $accommodation = null,', $code);
+        $this->assertStringContainsString('public ?string $brochure = null,', $code);
     }
 
     public function testSequenceElementsRemainRequiredWithoutChoiceConstraint(): void
@@ -472,9 +472,9 @@ final class GeneratorTest extends TestCase
 
         // xs:sequence siblings stay independently required - the choice-nullable fix must not
         // leak into plain sequences.
-        self::assertStringNotContainsString('ExactlyOneOf', $code);
-        self::assertStringContainsString('public string $firstName,', $code);
-        self::assertStringContainsString('public string $lastName,', $code);
+        $this->assertStringNotContainsString('ExactlyOneOf', $code);
+        $this->assertStringContainsString('public string $firstName,', $code);
+        $this->assertStringContainsString('public string $lastName,', $code);
     }
 
     public function testGroupRefInsideChoiceIsTreatedAsChoiceMember(): void
@@ -506,9 +506,9 @@ final class GeneratorTest extends TestCase
         // An xs:group ref sitting directly inside an xs:choice inlines its own elements as
         // choice members too (ambient choice membership), not as independently required
         // siblings of the choice.
-        self::assertStringContainsString("#[ExactlyOneOf(fields: ['street', 'brochure'])]", $code);
-        self::assertStringContainsString('public ?string $street = null,', $code);
-        self::assertStringContainsString('public ?string $brochure = null,', $code);
+        $this->assertStringContainsString("#[ExactlyOneOf(fields: ['street', 'brochure'])]", $code);
+        $this->assertStringContainsString('public ?string $street = null,', $code);
+        $this->assertStringContainsString('public ?string $brochure = null,', $code);
     }
 
     public function testRepeatableChoiceSkipsExactlyOneOfConstraint(): void
@@ -535,9 +535,9 @@ final class GeneratorTest extends TestCase
         // A repeatable choice (maxOccurs > 1 on the xs:choice itself) picks a branch per
         // occurrence, not once overall - "exactly one of" globally would be wrong, so the
         // constraint is skipped; elements stay nullable regardless.
-        self::assertStringNotContainsString('ExactlyOneOf', $code);
-        self::assertStringContainsString('public ?string $accommodation = null,', $code);
-        self::assertStringContainsString('public ?string $brochure = null,', $code);
+        $this->assertStringNotContainsString('ExactlyOneOf', $code);
+        $this->assertStringContainsString('public ?string $accommodation = null,', $code);
+        $this->assertStringContainsString('public ?string $brochure = null,', $code);
     }
 
     public function testTwoIndependentChoicesEmitTwoExactlyOneOfAttributesWithoutFatalError(): void
@@ -569,15 +569,15 @@ final class GeneratorTest extends TestCase
 
         $code = $this->readGenerated('CartItemType.php');
 
-        self::assertSame(2, substr_count($code, '#[ExactlyOneOf('));
-        self::assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
-        self::assertStringContainsString("#[ExactlyOneOf(fields: ['foo', 'bar'])]", $code);
+        $this->assertSame(2, substr_count($code, '#[ExactlyOneOf('));
+        $this->assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
+        $this->assertStringContainsString("#[ExactlyOneOf(fields: ['foo', 'bar'])]", $code);
 
         require $this->tmpDir.'/out/CartItemType.php';
         $reflection = new \ReflectionClass('TestGen\CartItemType');
         // ReflectionClass::getAttributes() throws if PHP itself rejects a repeated non-repeatable
         // attribute - constructing it at all is the regression check.
-        self::assertCount(2, $reflection->getAttributes());
+        $this->assertCount(2, $reflection->getAttributes());
     }
 
     public function testChoiceElementNameCollisionWithAttributeSkipsConstraintInsteadOfBindingWrongField(): void
@@ -604,7 +604,7 @@ final class GeneratorTest extends TestCase
 
         // the xs:attribute "type" de-dups onto the same phpName as the choice's "Type" element
         // (last one wins) - the constraint must not silently bind to the unrelated attribute.
-        self::assertStringNotContainsString('ExactlyOneOf', $code);
+        $this->assertStringNotContainsString('ExactlyOneOf', $code);
     }
 
     public function testMultiElementChoiceBranchSkipsConstraintInsteadOfTreatingMembersIndependently(): void
@@ -635,10 +635,10 @@ final class GeneratorTest extends TestCase
         // atomic alternative together, not 2 independent "one of" members; not representable
         // by this generator, so the constraint is skipped rather than emitted wrong. Elements
         // stay nullable regardless.
-        self::assertStringNotContainsString('ExactlyOneOf', $code);
-        self::assertStringContainsString('public ?string $streetA = null,', $code);
-        self::assertStringContainsString('public ?string $streetB = null,', $code);
-        self::assertStringContainsString('public ?string $brochure = null,', $code);
+        $this->assertStringNotContainsString('ExactlyOneOf', $code);
+        $this->assertStringContainsString('public ?string $streetA = null,', $code);
+        $this->assertStringContainsString('public ?string $streetB = null,', $code);
+        $this->assertStringContainsString('public ?string $brochure = null,', $code);
     }
 
     public function testOptionalChoiceEmitsAtMostOneOfConstraint(): void
@@ -664,7 +664,7 @@ final class GeneratorTest extends TestCase
 
         // xs:choice minOccurs="0": zero branches selected is valid too - "at most one", not
         // "exactly one".
-        self::assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'], required: false)]", $code);
+        $this->assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'], required: false)]", $code);
     }
 
     public function testEnumerationGeneratesBackedStringEnum(): void
@@ -692,12 +692,12 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $enumCode = $this->readGenerated('ColorEnum.php');
-        self::assertStringContainsString('enum ColorEnum: string', $enumCode);
-        self::assertStringContainsString("case Red = 'Red';", $enumCode);
-        self::assertStringContainsString("case Green = 'Green';", $enumCode);
+        $this->assertStringContainsString('enum ColorEnum: string', $enumCode);
+        $this->assertStringContainsString("case Red = 'Red';", $enumCode);
+        $this->assertStringContainsString("case Green = 'Green';", $enumCode);
 
         $code = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString('public ColorEnum $color,', $code);
+        $this->assertStringContainsString('public ColorEnum $color,', $code);
     }
 
     public function testEnumerationValueRequiringSanitizationBecomesValidCaseName(): void
@@ -728,8 +728,8 @@ final class GeneratorTest extends TestCase
         // but the case *value* (what actually round-trips through XML) stays the real XSD value.
         // Real schema case: InfraStructureSubTypeEnum has an enumeration value="1".
         $enumCode = $this->readGenerated('SubTypeEnum.php');
-        self::assertStringContainsString("case V1 = '1';", $enumCode);
-        self::assertStringContainsString("case V2 = '2';", $enumCode);
+        $this->assertStringContainsString("case V1 = '1';", $enumCode);
+        $this->assertStringContainsString("case V2 = '2';", $enumCode);
     }
 
     public function testDuplicateSanitizedEnumCaseNamesGetSuffixed(): void
@@ -759,8 +759,8 @@ final class GeneratorTest extends TestCase
         // "A B" and "A_B" both sanitize to the same PHP identifier "A_B" - the second occurrence
         // must not silently overwrite/collide with the first case.
         $enumCode = $this->readGenerated('CollisionEnum.php');
-        self::assertStringContainsString("case A_B = 'A B';", $enumCode);
-        self::assertStringContainsString("case A_B_2 = 'A_B';", $enumCode);
+        $this->assertStringContainsString("case A_B = 'A B';", $enumCode);
+        $this->assertStringContainsString("case A_B_2 = 'A_B';", $enumCode);
     }
 
     public function testEnumValueEqualToPhpReservedWordGetsTypeSuffix(): void
@@ -789,7 +789,7 @@ final class GeneratorTest extends TestCase
         // "class" ucfirst's to "Class", which collides case-insensitively with the PHP reserved
         // word - gets a "Type" suffix, same rule as class name collisions elsewhere in the generator.
         $enumCode = $this->readGenerated('ReservedEnum.php');
-        self::assertStringContainsString("case ClassType = 'class';", $enumCode);
+        $this->assertStringContainsString("case ClassType = 'class';", $enumCode);
     }
 
     public function testIntBackedEnumUsesIntLiteralCases(): void
@@ -819,9 +819,9 @@ final class GeneratorTest extends TestCase
         // xs:int-based enumeration - PHP backing type and case literals must both be int, not the
         // default string.
         $enumCode = $this->readGenerated('PriorityEnum.php');
-        self::assertStringContainsString('enum PriorityEnum: int', $enumCode);
-        self::assertStringContainsString('case V1 = 1;', $enumCode);
-        self::assertStringContainsString('case V2 = 2;', $enumCode);
+        $this->assertStringContainsString('enum PriorityEnum: int', $enumCode);
+        $this->assertStringContainsString('case V1 = 1;', $enumCode);
+        $this->assertStringContainsString('case V2 = 2;', $enumCode);
     }
 
     public function testAnonymousInlineEnumOnElementGeneratesEnumToo(): void
@@ -853,13 +853,13 @@ final class GeneratorTest extends TestCase
         // in resolveParticleType()) - less common in practice than a named simpleType enumeration,
         // but must still work.
         $enumCode = $this->readGenerated('PersonType/StatusEnum.php');
-        self::assertStringContainsString('enum StatusEnum: string', $enumCode);
-        self::assertStringContainsString("case On = 'On';", $enumCode);
-        self::assertStringContainsString("case Off = 'Off';", $enumCode);
+        $this->assertStringContainsString('enum StatusEnum: string', $enumCode);
+        $this->assertStringContainsString("case On = 'On';", $enumCode);
+        $this->assertStringContainsString("case Off = 'Off';", $enumCode);
 
         $code = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString('use TestGen\PersonType\StatusEnum;', $code);
-        self::assertStringContainsString('public ?StatusEnum $status = null,', $code);
+        $this->assertStringContainsString('use TestGen\PersonType\StatusEnum;', $code);
+        $this->assertStringContainsString('public ?StatusEnum $status = null,', $code);
     }
 
     public function testSameNamedEnumSimpleTypeReferencedTwiceResolvesToTheSameEnumClass(): void
@@ -896,9 +896,9 @@ final class GeneratorTest extends TestCase
         // type, not two independently-generated (potentially divergent) copies; the file itself
         // is always exactly one regardless, since ensureEnumClass() is deterministic - this
         // doesn't prove resolveSimpleTypeRef()'s cache fired, only that consistency holds either way.
-        self::assertCount(1, glob($this->tmpDir.'/out/ColorEnum.php'));
-        self::assertStringContainsString('public ColorEnum $color,', $this->readGenerated('PersonType.php'));
-        self::assertStringContainsString('public ColorEnum $color2,', $this->readGenerated('OtherType.php'));
+        $this->assertCount(1, glob($this->tmpDir.'/out/ColorEnum.php'));
+        $this->assertStringContainsString('public ColorEnum $color,', $this->readGenerated('PersonType.php'));
+        $this->assertStringContainsString('public ColorEnum $color2,', $this->readGenerated('OtherType.php'));
     }
 
     public function testAttributeGroupRefResolvesAttributesIntoOwner(): void
@@ -924,8 +924,8 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $code = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString("#[SerializedName('@Id')]", $code);
-        self::assertStringContainsString('public string $id,', $code);
+        $this->assertStringContainsString("#[SerializedName('@Id')]", $code);
+        $this->assertStringContainsString('public string $id,', $code);
     }
 
     public function testMultipleAttributeGroupRefsPlusOwnAttributeAllCombine(): void
@@ -955,14 +955,14 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $code = $this->readGenerated('EventType.php');
-        self::assertStringContainsString('public \DateTimeImmutable $changeDate,', $code);
-        self::assertStringContainsString('public bool $active,', $code);
-        self::assertStringContainsString('public string $id,', $code);
+        $this->assertStringContainsString('public \DateTimeImmutable $changeDate,', $code);
+        $this->assertStringContainsString('public bool $active,', $code);
+        $this->assertStringContainsString('public string $id,', $code);
         // each property declared exactly once - not silently duplicated by combining 2 group refs
         // with an own attribute.
-        self::assertSame(1, substr_count($code, 'public \DateTimeImmutable $changeDate,'));
-        self::assertSame(1, substr_count($code, 'public bool $active,'));
-        self::assertSame(1, substr_count($code, 'public string $id,'));
+        $this->assertSame(1, substr_count($code, 'public \DateTimeImmutable $changeDate,'));
+        $this->assertSame(1, substr_count($code, 'public bool $active,'));
+        $this->assertSame(1, substr_count($code, 'public string $id,'));
     }
 
     public function testNestedAttributeGroupRefIsResolvedRecursively(): void
@@ -989,7 +989,7 @@ final class GeneratorTest extends TestCase
 
         // Wrapper -> Identification -> Id: the group ref's own attributeGroup ref must be
         // followed too, not just the direct xs:attribute children.
-        self::assertStringContainsString('public string $id,', $this->readGenerated('PersonType.php'));
+        $this->assertStringContainsString('public string $id,', $this->readGenerated('PersonType.php'));
     }
 
     public function testCircularAttributeGroupRefStopsInsteadOfInfiniteRecursion(): void
@@ -1022,10 +1022,10 @@ final class GeneratorTest extends TestCase
         // and B's own attributes (collected before the cycle is hit) still make it in, neither is
         // duplicated, and it must warn and stop rather than recurse forever.
         $code = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString('public string $a,', $code);
-        self::assertStringContainsString('public string $b,', $code);
-        self::assertSame(1, substr_count($code, 'public string $a,'));
-        self::assertSame(1, substr_count($code, 'public string $b,'));
+        $this->assertStringContainsString('public string $a,', $code);
+        $this->assertStringContainsString('public string $b,', $code);
+        $this->assertSame(1, substr_count($code, 'public string $a,'));
+        $this->assertSame(1, substr_count($code, 'public string $b,'));
     }
 
     public function testUnknownAttributeGroupRefWarnsAndSkipsInsteadOfCrashing(): void
@@ -1045,8 +1045,8 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $code = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString('public function __construct(', $code);
-        self::assertStringNotContainsString('DoesNotExist', $code);
+        $this->assertStringContainsString('public function __construct(', $code);
+        $this->assertStringNotContainsString('DoesNotExist', $code);
     }
 
     public function testAttributeGroupCacheReturnsSameResolvedAttributesOnReuse(): void
@@ -1086,12 +1086,12 @@ final class GeneratorTest extends TestCase
         // cache keyed/scoped incorrectly (e.g. leaking across distinct attributeGroupCache entries)
         // would produce.
         $personCode = $this->readGenerated('PersonType.php');
-        self::assertStringContainsString('public string $id,', $personCode);
-        self::assertStringNotContainsString('active', $personCode);
+        $this->assertStringContainsString('public string $id,', $personCode);
+        $this->assertStringNotContainsString('active', $personCode);
 
         $otherCode = $this->readGenerated('OtherPersonType.php');
-        self::assertStringContainsString('public bool $active,', $otherCode);
-        self::assertStringNotContainsString('$id', $otherCode);
+        $this->assertStringContainsString('public bool $active,', $otherCode);
+        $this->assertStringNotContainsString('$id', $otherCode);
     }
 
     public function testSimpleContentExtensionGeneratesTextValuePropertyPlusAttributes(): void
@@ -1115,10 +1115,10 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $code = $this->readGenerated('DescriptionType.php');
-        self::assertStringContainsString("#[SerializedName('#')]", $code);
-        self::assertStringContainsString('public string $value,', $code);
-        self::assertStringContainsString("#[SerializedName('@Language')]", $code);
-        self::assertStringContainsString('public string $language,', $code);
+        $this->assertStringContainsString("#[SerializedName('#')]", $code);
+        $this->assertStringContainsString('public string $value,', $code);
+        $this->assertStringContainsString("#[SerializedName('@Language')]", $code);
+        $this->assertStringContainsString('public string $language,', $code);
     }
 
     public function testSimpleContentValuePropertyIsAlwaysRequired(): void
@@ -1145,8 +1145,8 @@ final class GeneratorTest extends TestCase
         // optional the surrounding attributes are - locks in current behavior against an
         // accidental future change.
         $code = $this->readGenerated('DescriptionType.php');
-        self::assertStringContainsString('public string $value,', $code);
-        self::assertStringNotContainsString('?string $value', $code);
+        $this->assertStringContainsString('public string $value,', $code);
+        $this->assertStringNotContainsString('?string $value', $code);
     }
 
     public function testSimpleContentWithAttributeGroupRefCombinesBothAttributeSources(): void
@@ -1176,14 +1176,14 @@ final class GeneratorTest extends TestCase
         $this->generate();
 
         $code = $this->readGenerated('DescriptionWithGroupType.php');
-        self::assertStringContainsString('public string $value,', $code);
-        self::assertStringContainsString('public string $language,', $code);
-        self::assertStringContainsString('public string $id,', $code);
+        $this->assertStringContainsString('public string $value,', $code);
+        $this->assertStringContainsString('public string $language,', $code);
+        $this->assertStringContainsString('public string $id,', $code);
         // each property declared exactly once - not silently duplicated by combining simpleContent,
         // an attributeGroup ref, and an own attribute.
-        self::assertSame(1, substr_count($code, 'public string $value,'));
-        self::assertSame(1, substr_count($code, 'public string $language,'));
-        self::assertSame(1, substr_count($code, 'public string $id,'));
+        $this->assertSame(1, substr_count($code, 'public string $value,'));
+        $this->assertSame(1, substr_count($code, 'public string $language,'));
+        $this->assertSame(1, substr_count($code, 'public string $id,'));
     }
 
     public function testSimpleContentExtensionWithNamedSimpleTypeBaseUsesThatType(): void
@@ -1215,7 +1215,7 @@ final class GeneratorTest extends TestCase
         // extension base is a named simpleType (an enum here), not a bare xs:string - the "value"
         // property must resolve to that type, not fall back to plain string.
         $code = $this->readGenerated('TypedValueType.php');
-        self::assertStringContainsString('public LanguageEnum $value,', $code);
+        $this->assertStringContainsString('public LanguageEnum $value,', $code);
     }
 
     private function writeXsd(string $content): void
@@ -1245,7 +1245,7 @@ final class GeneratorTest extends TestCase
     private function readGenerated(string $filename): string
     {
         $path = $this->tmpDir.'/out/'.$filename;
-        self::assertFileExists($path);
+        $this->assertFileExists($path);
 
         return file_get_contents($path);
     }

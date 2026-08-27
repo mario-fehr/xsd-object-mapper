@@ -19,7 +19,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
     use RemovesTempDir;
 
     private const array ALIAS_MAP = [
-        'EmailType' => ['fqcn' => 'Symfony\Component\Validator\Constraints\Email', 'args' => ''],
+        'EmailType' => ['fqcn' => Email::class, 'args' => ''],
     ];
 
     public function testEmitsTheAliasedConstraintWhenNamedTypeMatches(): void
@@ -28,25 +28,22 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
 
         $property = ['isArray' => false, 'namedType' => 'EmailType'];
 
-        self::assertSame(
-            [['fqcn' => 'Symfony\Component\Validator\Constraints\Email', 'args' => '']],
-            $strategy->attributesFor($property),
-        );
+        $this->assertSame([['fqcn' => Email::class, 'args' => '']], $strategy->attributesFor($property));
     }
 
     public function testEmitsNothingWhenNamedTypeIsUnmapped(): void
     {
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
-        self::assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => 'SomeOtherType']));
-        self::assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => null]));
+        $this->assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => 'SomeOtherType']));
+        $this->assertSame([], $strategy->attributesFor(['isArray' => false, 'namedType' => null]));
     }
 
     public function testSkipsArrayPropertiesEvenWhenNamedTypeMatches(): void
     {
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
-        self::assertSame([], $strategy->attributesFor(['isArray' => true, 'namedType' => 'EmailType']));
+        $this->assertSame([], $strategy->attributesFor(['isArray' => true, 'namedType' => 'EmailType']));
     }
 
     /**
@@ -89,7 +86,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
                 xsdPaths: [$tmpDir.'/xsd/schema.xsd'],
                 namespaceMap: ['urn:xsd2php-semantic-test' => new NamespaceMapping($phpNamespace, $tmpDir.'/out')],
                 attributeStrategy: new SemanticTypeAttributeStrategy(self::ALIAS_MAP + [
-                    'CountryCodeType' => ['fqcn' => 'Symfony\Component\Validator\Constraints\Country', 'args' => ''],
+                    'CountryCodeType' => ['fqcn' => Country::class, 'args' => ''],
                 ]),
             );
             new Generator($config)->generate();
@@ -99,17 +96,17 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
 
             $validator = Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator();
 
-            self::assertCount(0, $validator->validate(new $class(email: 'test@example.com', country: 'AT')));
+            $this->assertCount(0, $validator->validate(new $class(email: 'test@example.com', country: 'AT')));
 
             $violations = $validator->validate(new $class(email: 'not-an-email', country: 'AT'));
-            self::assertGreaterThanOrEqual(1, count($violations));
-            self::assertInstanceOf(Email::class, $violations[0]->getConstraint());
+            $this->assertGreaterThanOrEqual(1, \count($violations));
+            $this->assertInstanceOf(Email::class, $violations[0]->getConstraint());
 
             // "XX" matches the schema's own \w{2} pattern (no Regex here since this type has
             // none) but isn't a real ISO-3166 code - exactly the gap Assert\Country closes.
             $violations = $validator->validate(new $class(email: 'test@example.com', country: 'XX'));
-            self::assertGreaterThanOrEqual(1, count($violations));
-            self::assertInstanceOf(Country::class, $violations[0]->getConstraint());
+            $this->assertGreaterThanOrEqual(1, \count($violations));
+            $this->assertInstanceOf(Country::class, $violations[0]->getConstraint());
         } finally {
             $this->removeDir($tmpDir);
         }

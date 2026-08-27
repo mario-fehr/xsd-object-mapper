@@ -43,10 +43,10 @@ final class FixtureDriftToolTest extends TestCase
 
         [, $exitCode] = $this->runTool();
 
-        self::assertSame(0, $exitCode);
-        self::assertFileExists($this->baselineFile);
+        $this->assertSame(0, $exitCode);
+        $this->assertFileExists($this->baselineFile);
         $baseline = json_decode(file_get_contents($this->baselineFile), true);
-        self::assertSame(1, $baseline['xs:sequence']);
+        $this->assertSame(1, $baseline['xs:sequence']);
     }
 
     public function testReportsNoDriftWhenFixturesMatchTheBaseline(): void
@@ -56,8 +56,8 @@ final class FixtureDriftToolTest extends TestCase
 
         [$output, $exitCode] = $this->runTool();
 
-        self::assertSame(0, $exitCode);
-        self::assertStringContainsString('No drift', $output);
+        $this->assertSame(0, $exitCode);
+        $this->assertStringContainsString('No drift', $output);
     }
 
     public function testDetectsDriftAndUpdatesBaselineOnRequest(): void
@@ -69,18 +69,18 @@ final class FixtureDriftToolTest extends TestCase
         file_put_contents($this->fixturesDir.'/a.xsd', $this->minimalSchema(sequenceCount: 2));
 
         [$output, $exitCode] = $this->runTool();
-        self::assertSame(1, $exitCode);
-        self::assertStringContainsString('xs:sequence', $output);
-        self::assertStringContainsString('1 -> 2', $output);
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString('xs:sequence', $output);
+        $this->assertStringContainsString('1 -> 2', $output);
 
         [, $exitCode] = $this->runTool(['--update-baseline']);
-        self::assertSame(0, $exitCode);
+        $this->assertSame(0, $exitCode);
         $baseline = json_decode(file_get_contents($this->baselineFile), true);
-        self::assertSame(2, $baseline['xs:sequence']);
+        $this->assertSame(2, $baseline['xs:sequence']);
 
         [$output, $exitCode] = $this->runTool();
-        self::assertSame(0, $exitCode);
-        self::assertStringContainsString('No drift', $output);
+        $this->assertSame(0, $exitCode);
+        $this->assertStringContainsString('No drift', $output);
     }
 
     private function minimalSchema(int $sequenceCount): string
@@ -101,7 +101,7 @@ final class FixtureDriftToolTest extends TestCase
     /** @return array{0: string, 1: int} [combined stdout+stderr, exit code] */
     private function runTool(array $extraArgs = []): array
     {
-        $cmd = 'php '.escapeshellarg($this->toolPath).' '.implode(' ', array_map('escapeshellarg', $extraArgs)).' 2>&1';
+        $cmd = 'php '.escapeshellarg($this->toolPath).' '.implode(' ', array_map(escapeshellarg(...), $extraArgs)).' 2>&1';
         exec($cmd, $output, $exitCode);
 
         return [implode("\n", $output), $exitCode];

@@ -65,11 +65,11 @@ final class ConstructReportToolTest extends TestCase
 
         $counts = $this->runTool($this->tmpDir);
 
-        self::assertSame(1, $counts['xs:sequence']);
-        self::assertSame(1, $counts['xs:choice']);
-        self::assertSame(2, $counts['xs:enumeration']);
-        self::assertSame(1, $counts['use="prohibited"']);
-        self::assertSame(0, $counts['xs:any']);
+        $this->assertSame(1, $counts['xs:sequence']);
+        $this->assertSame(1, $counts['xs:choice']);
+        $this->assertSame(2, $counts['xs:enumeration']);
+        $this->assertSame(1, $counts['use="prohibited"']);
+        $this->assertSame(0, $counts['xs:any']);
     }
 
     public function testAcceptsASingleFileNotJustADirectory(): void
@@ -88,24 +88,24 @@ final class ConstructReportToolTest extends TestCase
 
         $counts = $this->runTool($file);
 
-        self::assertSame(1, $counts['xs:all']);
+        $this->assertSame(1, $counts['xs:all']);
     }
 
     public function testExitsNonZeroWhenNoXsdFilesFound(): void
     {
         exec('php '.escapeshellarg($this->toolPath).' '.escapeshellarg($this->tmpDir).' 2>&1', $output, $exitCode);
 
-        self::assertSame(1, $exitCode);
+        $this->assertSame(1, $exitCode);
     }
 
     /** @return array<string, int> */
     private function runTool(string $target): array
     {
         $json = shell_exec('php '.escapeshellarg($this->toolPath).' '.escapeshellarg($target).' --json');
-        self::assertIsString($json);
+        $this->assertIsString($json);
 
         $decoded = json_decode($json, true);
-        self::assertIsArray($decoded);
+        $this->assertIsArray($decoded);
 
         return $decoded;
     }

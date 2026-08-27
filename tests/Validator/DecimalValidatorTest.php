@@ -15,11 +15,11 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(fractionDigits: 2);
 
-        self::assertCount(0, $validator->validate(12.34, $constraint));
-        self::assertCount(0, $validator->validate(12, $constraint));
-        self::assertCount(0, $validator->validate('12.3', $constraint));
-        self::assertCount(1, $validator->validate(12.345, $constraint));
-        self::assertCount(1, $validator->validate('12.345', $constraint));
+        $this->assertCount(0, $validator->validate(12.34, $constraint));
+        $this->assertCount(0, $validator->validate(12, $constraint));
+        $this->assertCount(0, $validator->validate('12.3', $constraint));
+        $this->assertCount(1, $validator->validate(12.345, $constraint));
+        $this->assertCount(1, $validator->validate('12.345', $constraint));
     }
 
     public function testTotalDigits(): void
@@ -27,15 +27,15 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(totalDigits: 3);
 
-        self::assertCount(0, $validator->validate(123, $constraint));
-        self::assertCount(0, $validator->validate(1.23, $constraint));
-        self::assertCount(0, $validator->validate(0.12, $constraint));
+        $this->assertCount(0, $validator->validate(123, $constraint));
+        $this->assertCount(0, $validator->validate(1.23, $constraint));
+        $this->assertCount(0, $validator->validate(0.12, $constraint));
         // leading zeros in the integer part don't count as significant digits
-        self::assertCount(0, $validator->validate('001.23', $constraint));
+        $this->assertCount(0, $validator->validate('001.23', $constraint));
         // 0 itself is 1 significant digit, not 0
-        self::assertCount(0, $validator->validate(0, $constraint));
-        self::assertCount(1, $validator->validate(1234, $constraint));
-        self::assertCount(1, $validator->validate(1.2345, $constraint));
+        $this->assertCount(0, $validator->validate(0, $constraint));
+        $this->assertCount(1, $validator->validate(1234, $constraint));
+        $this->assertCount(1, $validator->validate(1.2345, $constraint));
     }
 
     public function testTotalDigitsIgnoresLeadingZerosInFractionWhenIntegerPartIsZero(): void
@@ -46,11 +46,11 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(totalDigits: 1);
 
-        self::assertCount(0, $validator->validate(0.05, $constraint));
-        self::assertCount(0, $validator->validate('0.05', $constraint));
-        self::assertCount(0, $validator->validate('0.005', $constraint));
+        $this->assertCount(0, $validator->validate(0.05, $constraint));
+        $this->assertCount(0, $validator->validate('0.05', $constraint));
+        $this->assertCount(0, $validator->validate('0.005', $constraint));
         // a non-zero integer part still counts every fraction digit as significant
-        self::assertCount(1, $validator->validate('1.05', new Decimal(totalDigits: 2)));
+        $this->assertCount(1, $validator->validate('1.05', new Decimal(totalDigits: 2)));
     }
 
     public function testBothFacetsCombined(): void
@@ -58,13 +58,13 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(fractionDigits: 2, totalDigits: 4);
 
-        self::assertCount(0, $validator->validate(12.34, $constraint));
+        $this->assertCount(0, $validator->validate(12.34, $constraint));
         // fails only fractionDigits
-        self::assertCount(1, $validator->validate(1.234, $constraint));
+        $this->assertCount(1, $validator->validate(1.234, $constraint));
         // fails only totalDigits (1 fraction digit is fine, but 4+1=5 significant digits > 4)
-        self::assertCount(1, $validator->validate(1234.5, $constraint));
+        $this->assertCount(1, $validator->validate(1234.5, $constraint));
         // fails both
-        self::assertCount(2, $validator->validate(123.456, $constraint));
+        $this->assertCount(2, $validator->validate(123.456, $constraint));
     }
 
     public function testNullAndEmptyStringAreIgnored(): void
@@ -72,8 +72,8 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(fractionDigits: 2);
 
-        self::assertCount(0, $validator->validate(null, $constraint));
-        self::assertCount(0, $validator->validate('', $constraint));
+        $this->assertCount(0, $validator->validate(null, $constraint));
+        $this->assertCount(0, $validator->validate('', $constraint));
     }
 
     public function testScientificNotationFloatIsNormalizedBeforeCounting(): void
@@ -83,8 +83,8 @@ final class DecimalValidatorTest extends TestCase
         // real 6 fraction digits this value actually has.
         $validator = Validation::createValidator();
 
-        self::assertCount(0, $validator->validate(0.000012, new Decimal(fractionDigits: 6)));
-        self::assertCount(1, $validator->validate(0.000012, new Decimal(fractionDigits: 5)));
+        $this->assertCount(0, $validator->validate(0.000012, new Decimal(fractionDigits: 6)));
+        $this->assertCount(1, $validator->validate(0.000012, new Decimal(fractionDigits: 5)));
     }
 
     public function testLargeFloatScientificNotationIsNormalizedForTotalDigits(): void
@@ -94,7 +94,7 @@ final class DecimalValidatorTest extends TestCase
         $validator = Validation::createValidator();
         $constraint = new Decimal(totalDigits: 15);
 
-        self::assertCount(0, $validator->validate(123456789012345.0, $constraint));
-        self::assertCount(1, $validator->validate(1234567890123456.0, $constraint));
+        $this->assertCount(0, $validator->validate(123456789012345.0, $constraint));
+        $this->assertCount(1, $validator->validate(1234567890123456.0, $constraint));
     }
 }

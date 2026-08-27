@@ -22,14 +22,14 @@ final class DecimalValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_int($value) && !is_float($value) && !is_string($value)) {
+        if (!\is_int($value) && !\is_float($value) && !\is_string($value)) {
             throw new UnexpectedValueException($value, 'int|float|string');
         }
 
         $normalized = ltrim($this->toPlainDecimalString($value), '+-');
         [$intPart, $fracPart] = array_pad(explode('.', $normalized, 2), 2, '');
 
-        if (null !== $constraint->fractionDigits && strlen($fracPart) > $constraint->fractionDigits) {
+        if (null !== $constraint->fractionDigits && \strlen($fracPart) > $constraint->fractionDigits) {
             $this->context->buildViolation($constraint->fractionDigitsMessage)
                 ->setParameter('{{ max }}', (string) $constraint->fractionDigits)
                 ->addViolation();
@@ -41,7 +41,7 @@ final class DecimalValidator extends ConstraintValidator
             // part aren't significant either, e.g. '0.05' has 1 significant digit, not 2.
             $fracForCounting = '' === $significantIntDigits ? ltrim($fracPart, '0') : $fracPart;
             $significantFracDigits = rtrim($fracForCounting, '0');
-            $digitCount = max(1, strlen($significantIntDigits) + strlen($significantFracDigits));
+            $digitCount = max(1, \strlen($significantIntDigits) + \strlen($significantFracDigits));
 
             if ($digitCount > $constraint->totalDigits) {
                 $this->context->buildViolation($constraint->totalDigitsMessage)
@@ -60,8 +60,8 @@ final class DecimalValidator extends ConstraintValidator
     private function toPlainDecimalString(int|float|string $value): string
     {
         $raw = (string) $value;
-        if (is_float($value) && (str_contains($raw, 'E') || str_contains($raw, 'e'))) {
-            return rtrim(rtrim(sprintf('%.17F', $value), '0'), '.');
+        if (\is_float($value) && (str_contains($raw, 'E') || str_contains($raw, 'e'))) {
+            return rtrim(rtrim(\sprintf('%.17F', $value), '0'), '.');
         }
 
         return $raw;

@@ -142,7 +142,7 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
     /** XSD's xs:pattern matches the whole value implicitly; PCRE needs that made explicit. */
     private function toPcrePattern(string $xsdPattern): string
     {
-        $delimiter = array_find(['#', '~', '!', '%'], fn ($candidate) => !str_contains($xsdPattern, $candidate));
+        $delimiter = array_find(['#', '~', '!', '%'], static fn ($candidate): bool => !str_contains($xsdPattern, $candidate));
         if (null === $delimiter) {
             throw new \RuntimeException("xs:pattern '{$xsdPattern}' contains all candidate PCRE delimiters, cannot build a safe pattern");
         }

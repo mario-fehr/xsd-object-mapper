@@ -155,12 +155,12 @@ final class Generator
 
     private function warn(string $message): void
     {
-        fwrite(STDERR, "WARN: {$message}\n");
+        fwrite(\STDERR, "WARN: {$message}\n");
     }
 
     private function note(string $message): void
     {
-        fwrite(STDERR, "NOTE: {$message}\n");
+        fwrite(\STDERR, "NOTE: {$message}\n");
     }
 
     /**
@@ -668,7 +668,7 @@ final class Generator
             // only tracks flat membership, not per-branch grouping), an unresolved ref, or the
             // de-dup collision above. Warn and skip the constraint instead of emitting a wrong
             // one - elements stay nullable regardless.
-            if (count($names) !== $group['directChildCount']) {
+            if (\count($names) !== $group['directChildCount']) {
                 if ([] !== $names) {
                     $this->warn("xs:choice on '{$ownerClassName}' is not fully representable as an \"exactly one of\" constraint (multi-element branch, unresolved ref, or a name collision), skipping the constraint for this choice");
                 }
@@ -782,7 +782,7 @@ final class Generator
 
     private function fqType(array $p, TypeRenderContext $ctx): string
     {
-        if (!in_array($p['kind'], ['class', 'enum'], true)) {
+        if (!\in_array($p['kind'], ['class', 'enum'], true)) {
             return $p['phpType'];
         }
 
@@ -834,7 +834,7 @@ final class Generator
             }
         }
         foreach ($properties as $p) {
-            if (!in_array($p['kind'], ['class', 'enum'], true)) {
+            if (!\in_array($p['kind'], ['class', 'enum'], true)) {
                 continue;
             }
             $fqcn = $p['phpType'];
@@ -923,7 +923,7 @@ final class Generator
                 // longest phpNamespace prefix wins - one nested inside another (e.g. "App\Foo"
                 // and "App\Foo\Bar") must resolve to the more specific mapping, not whichever
                 // happens to come first in Config::$namespaceMap.
-                if (null === $best || strlen($mapping->phpNamespace) > strlen($best->phpNamespace)) {
+                if (null === $best || \strlen($mapping->phpNamespace) > \strlen($best->phpNamespace)) {
                     $best = $mapping;
                 }
             }
@@ -931,14 +931,14 @@ final class Generator
         if (null === $best) {
             throw new \RuntimeException("No output directory mapped for PHP namespace '{$namespace}'");
         }
-        $relativeNs = substr($namespace, strlen($best->phpNamespace));
+        $relativeNs = substr($namespace, \strlen($best->phpNamespace));
 
         return $best->outputDir.str_replace('\\', '/', $relativeNs).'/'.$className.'.php';
     }
 
     private function writeFile(string $path, string $content): void
     {
-        $dir = dirname($path);
+        $dir = \dirname($path);
         if (!isset($this->createdDirs[$dir])) {
             @mkdir($dir, 0o777, true);
             $this->createdDirs[$dir] = true;

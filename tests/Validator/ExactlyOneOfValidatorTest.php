@@ -20,7 +20,7 @@ final class ExactlyOneOfValidatorTest extends TestCase
             public ?string $b = null;
         };
 
-        self::assertCount(0, $validator->validate($object, $constraint));
+        $this->assertCount(0, $validator->validate($object, $constraint));
     }
 
     public function testNoneSetFails(): void
@@ -33,7 +33,7 @@ final class ExactlyOneOfValidatorTest extends TestCase
             public ?string $b = null;
         };
 
-        self::assertCount(1, $validator->validate($object, $constraint));
+        $this->assertCount(1, $validator->validate($object, $constraint));
     }
 
     public function testBothSetFails(): void
@@ -46,7 +46,7 @@ final class ExactlyOneOfValidatorTest extends TestCase
             public ?string $b = 'y';
         };
 
-        self::assertCount(1, $validator->validate($object, $constraint));
+        $this->assertCount(1, $validator->validate($object, $constraint));
     }
 
     public function testEmptyArrayCountsAsNotSet(): void
@@ -61,13 +61,13 @@ final class ExactlyOneOfValidatorTest extends TestCase
             public array $items = [];
             public ?string $single = 'x';
         };
-        self::assertCount(0, $validator->validate($untouched, $constraint));
+        $this->assertCount(0, $validator->validate($untouched, $constraint));
 
         $populated = new class {
             public array $items = ['a'];
             public ?string $single = null;
         };
-        self::assertCount(0, $validator->validate($populated, $constraint));
+        $this->assertCount(0, $validator->validate($populated, $constraint));
     }
 
     public function testOptionalGroupAllowsNoneSetButNotBothSet(): void
@@ -79,18 +79,18 @@ final class ExactlyOneOfValidatorTest extends TestCase
             public ?string $a = null;
             public ?string $b = null;
         };
-        self::assertCount(0, $validator->validate($noneSet, $constraint));
+        $this->assertCount(0, $validator->validate($noneSet, $constraint));
 
         $oneSet = new class {
             public ?string $a = 'x';
             public ?string $b = null;
         };
-        self::assertCount(0, $validator->validate($oneSet, $constraint));
+        $this->assertCount(0, $validator->validate($oneSet, $constraint));
 
         $bothSet = new class {
             public ?string $a = 'x';
             public ?string $b = 'y';
         };
-        self::assertCount(1, $validator->validate($bothSet, $constraint));
+        $this->assertCount(1, $validator->validate($bothSet, $constraint));
     }
 }

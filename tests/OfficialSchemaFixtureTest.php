@@ -44,23 +44,23 @@ final class OfficialSchemaFixtureTest extends TestCase
 
         $written = new Generator($config)->generate();
 
-        self::assertSame(4, $written);
+        $this->assertSame(4, $written);
 
         $orderCode = file_get_contents($this->tmpDir.'/PurchaseOrderType.php');
-        self::assertStringContainsString('public USAddress $shipTo,', $orderCode);
-        self::assertStringContainsString('public Items $items,', $orderCode);
+        $this->assertStringContainsString('public USAddress $shipTo,', (string) $orderCode);
+        $this->assertStringContainsString('public Items $items,', (string) $orderCode);
         // ref="comment" with minOccurs="0" -> nullable, type resolved from the global element decl
-        self::assertStringContainsString('public ?string $comment = null,', $orderCode);
+        $this->assertStringContainsString('public ?string $comment = null,', (string) $orderCode);
         // attribute type="xsd:date" -> \DateTimeImmutable, day-only Context
-        self::assertStringContainsString('public ?\DateTimeImmutable $orderDate = null,', $orderCode);
+        $this->assertStringContainsString('public ?\DateTimeImmutable $orderDate = null,', (string) $orderCode);
 
         $addressCode = file_get_contents($this->tmpDir.'/USAddress.php');
         // fixed="US" on the attribute surfaces as a doc hint, doesn't change nullability
-        self::assertStringContainsString('(XSD-Fixed: US)', $addressCode);
-        self::assertStringContainsString('public ?string $country = null,', $addressCode);
+        $this->assertStringContainsString('(XSD-Fixed: US)', (string) $addressCode);
+        $this->assertStringContainsString('public ?string $country = null,', (string) $addressCode);
 
         $itemsCode = file_get_contents($this->tmpDir.'/Items.php');
         // minOccurs="0" maxOccurs="unbounded" on the anonymous inline item complexType -> array
-        self::assertStringContainsString('public array $item = [],', $itemsCode);
+        $this->assertStringContainsString('public array $item = [],', (string) $itemsCode);
     }
 }

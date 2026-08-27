@@ -109,7 +109,7 @@ function countConstructs(array $files): array
     foreach ($files as $file) {
         $dom = new DOMDocument();
         if (!$dom->load($file)) {
-            fwrite(STDERR, "WARN: failed to parse '{$file}', skipping\n");
+            fwrite(\STDERR, "WARN: failed to parse '{$file}', skipping\n");
             continue;
         }
         $xp = new DOMXPath($dom);
@@ -130,21 +130,21 @@ function main(array $argv): int
     $args = array_values(array_filter($args, static fn (string $a): bool => '--json' !== $a));
 
     if (1 !== count($args)) {
-        fwrite(STDERR, "Usage: php xsd-construct-report.php <xsd-dir-or-file> [--json]\n");
+        fwrite(\STDERR, "Usage: php xsd-construct-report.php <xsd-dir-or-file> [--json]\n");
 
         return 1;
     }
 
     $target = $args[0];
     if (!file_exists($target)) {
-        fwrite(STDERR, "'{$target}' does not exist.\n");
+        fwrite(\STDERR, "'{$target}' does not exist.\n");
 
         return 1;
     }
 
     $files = collectXsdFiles($target);
     if ([] === $files) {
-        fwrite(STDERR, "No *.xsd files found under '{$target}'.\n");
+        fwrite(\STDERR, "No *.xsd files found under '{$target}'.\n");
 
         return 1;
     }
@@ -152,15 +152,15 @@ function main(array $argv): int
     $counts = countConstructs($files);
 
     if ($asJson) {
-        echo json_encode($counts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n";
+        echo json_encode($counts, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES)."\n";
 
         return 0;
     }
 
     $labelWidth = max(array_map(strlen(...), array_keys($counts)));
-    fwrite(STDOUT, sprintf("Scanned %d *.xsd file(s) under '%s':\n\n", count($files), $target));
+    fwrite(\STDOUT, sprintf("Scanned %d *.xsd file(s) under '%s':\n\n", count($files), $target));
     foreach ($counts as $label => $count) {
-        fwrite(STDOUT, sprintf("  %-{$labelWidth}s  %d\n", $label, $count));
+        fwrite(\STDOUT, sprintf("  %-{$labelWidth}s  %d\n", $label, $count));
     }
 
     return 0;
