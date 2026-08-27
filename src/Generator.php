@@ -86,8 +86,8 @@ final class Generator
         foreach ($this->elements as $key => $el) {
             [$xsdNs, $local] = explode('#', $key, 2);
             $namespace = $this->namespaceFor($xsdNs)->phpNamespace;
-            $xp = $this->xpath($el->ownerDocument);
-            $inlineComplex = $xp->query('xs:complexType', $el)->item(0);
+            $xp = $this->xpath($this->ownerDocOf($el));
+            $inlineComplex = $this->query($xp, 'xs:complexType', $el)->item(0);
             if ($inlineComplex instanceof \DOMElement) {
                 $this->buildComplexClass($inlineComplex, Naming::toClassName($local), $namespace);
             } elseif ('' !== $el->getAttribute('type')) {
@@ -116,6 +116,23 @@ final class Generator
         return $this->xpathCache[$doc];
     }
 
+    /** Every \DOMElement parsed from a loaded document has a non-null ownerDocument - a truly unreachable defensive check, not a malformed-schema case. */
+    private function ownerDocOf(\DOMElement $node): \DOMDocument
+    {
+        return $node->ownerDocument ?? throw new \RuntimeException('DOMElement without ownerDocument (detached node)');
+    }
+
+    /** Wraps DOMXPath::query(), which is declared |false for a malformed XPath expression - unreachable for this generator's own static, hardcoded expressions. */
+    private function query(\DOMXPath $xp, string $expression, ?\DOMNode $context = null): \DOMNodeList
+    {
+        $result = $xp->query($expression, $context);
+        if (false === $result) {
+            throw new \RuntimeException("Invalid XPath expression '{$expression}'");
+        }
+
+        return $result;
+    }
+
     /** @var array<string, string> xs:* localName => target Generator property, for indexSchemas()'s single combined query */
     private const array SCHEMA_NAME_BUCKETS = [
         'complexType' => 'complexTypes',
@@ -138,7 +155,11 @@ final class Generator
             $xp = $this->xpath($dom);
             $targetNs = $dom->documentElement?->getAttribute('targetNamespace') ?? '';
 
-            foreach ($xp->query($query) as $node) {
+            foreach ($this->query($xp, $query) as $node) {
+                if (!$node instanceof \DOMElement || !isset(self::SCHEMA_NAME_BUCKETS[$node->localName])) {
+                    $this->warn('non-element or unrecognized node from indexSchemas() query, skipping');
+                    continue;
+                }
                 $property = self::SCHEMA_NAME_BUCKETS[$node->localName];
                 $this->{$property}[$targetNs.'#'.$node->getAttribute('name')] = $node;
             }

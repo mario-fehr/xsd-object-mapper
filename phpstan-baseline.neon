@@ -39,7 +39,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 5
+			count: 4
 			path: src/Generator.php
 
 		-
@@ -51,13 +51,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 6
-			path: src/Generator.php
-
-		-
-			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getAttribute\(\)\.$#'
-			identifier: method.notFound
-			count: 1
+			count: 5
 			path: src/Generator.php
 
 		-
@@ -75,7 +69,7 @@ parameters:
 		-
 			message: '#^Cannot call method item\(\) on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
 			identifier: method.nonObject
-			count: 10
+			count: 9
 			path: src/Generator.php
 
 		-
@@ -157,6 +151,12 @@ parameters:
 			path: src/Generator.php
 
 		-
+			message: '#^Method Xsd2Php\\Generator\:\:query\(\) return type with generic class DOMNodeList does not specify its types\: TNode$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Generator.php
+
+		-
 			message: '#^Method Xsd2Php\\Generator\:\:resolveParticleType\(\) should return array\{kind\: string, phpType\: string, dateOnly\?\: bool\} but returns array\.$#'
 			identifier: return.type
 			count: 5
@@ -193,12 +193,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Offset string\|null might not exist on array\{complexType\: ''complexTypes'', simpleType\: ''simpleTypes'', attributeGroup\: ''attributeGroups'', group\: ''groups'', element\: ''elements''\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Only iterables can be unpacked, mixed given\.$#'
 			identifier: arrayUnpacking.nonIterable
 			count: 1
@@ -219,7 +213,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$doc of method Xsd2Php\\Generator\:\:xpath\(\) expects DOMDocument, DOMDocument\|null given\.$#'
 			identifier: argument.type
-			count: 9
+			count: 8
 			path: src/Generator.php
 
 		-
