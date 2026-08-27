@@ -1,0 +1,739 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Cannot access offset \(int\|string\) on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Function currentCounts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Function main\(\) has parameter \$argv with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Parameter \#1 \$key of function array_key_exists expects int\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Parameter \#4 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Variable \$argv might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: bin/check-fixture-drift.php
+
+		-
+			message: '#^Cannot access property \$length on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Cannot call method getExtension\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Cannot call method getPathname\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Function collectXsdFiles\(\) should return array\<string\> but returns list\.$#'
+			identifier: return.type
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Function countConstructs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Function main\(\) has parameter \$argv with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Parameter \#1 \$filename of function file_exists expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Parameter \#1 \$path of function collectXsdFiles expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Parameter \#1 \.\.\.\$arg1 of function max expects non\-empty\-array, list\<int\<0, max\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(string\)\: bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Part \$target \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Variable \$argv might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: bin/xsd-construct-report.php
+
+		-
+			message: '#^Property Xsd2Php\\Attribute\\CompositeAttributeStrategy\:\:\$strategies \(list\<Xsd2Php\\Attribute\\PropertyAttributeStrategy\>\) does not accept array\<int\<0, max\>\|string, Xsd2Php\\Attribute\\PropertyAttributeStrategy\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Attribute/CompositeAttributeStrategy.php
+
+		-
+			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:attributesFor\(\) should return list\<array\{fqcn\: string, args\: string\}\> but returns array\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:facetConstraints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:minMaxArgs\(\) has parameter \$facets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:presenceConstraint\(\) has parameter \$property with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:presenceConstraint\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Part \$facets\[\$maxKey\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Part \$facets\[\$minKey\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
+
+		-
+			message: '#^Argument of an invalid type DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 5
+			path: src/Generator.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Binary operation "\." between mixed and ''\#'' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 5
+			path: src/Generator.php
+
+		-
+			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 6
+			path: src/Generator.php
+
+		-
+			message: '#^Call to an undefined method DOMNameSpaceNode\|DOMNode\:\:getAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''__srcEl'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''doc'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''fields'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''isArray'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''kind'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''nullable'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''phpName'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''phpType'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access offset ''required'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access property \$length on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot call method getAttribute\(\) on DOMNameSpaceNode\|DOMNode\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot call method item\(\) on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
+			identifier: method.nonObject
+			count: 10
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot use array destructuring on DOMElement\.$#'
+			identifier: offsetAccess.nonArray
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectAttributes\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectAttributes\(\) should return array\<DOMElement\> but returns array\<DOMNameSpaceNode\|DOMNode\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) should return array\<DOMElement\> but returns array\<array\<int, DOMElement\|null\>\>\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectParticleElements\(\) has parameter \$seenGroups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectParticleElements\(\) should return array\<array\{DOMElement, DOMElement\|null\}\> but returns array\<array\{mixed, mixed\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:collectProperties\(\) should return list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\> but returns array\{properties\: list, choiceGroups\: list\<array\{fields\: list, required\: bool\}\>\}\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:ensureEnumClass\(\) has parameter \$enumerations with generic class DOMNodeList but does not specify its types\: TNode$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:extractFacets\(\) should return array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, \.\.\.\} but returns array\<string, int\|string\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:fallbackScalar\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:fqType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:fqType\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:hasDefault\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:makeProperty\(\) has parameter \$typeInfo with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:makeProperty\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:mergeFacets\(\) has parameter \$typeInfo with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:mergeFacets\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:phpDocType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:phpPropertyType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolveBaseProperties\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolveBaseProperties\(\) should return array but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolveParticleType\(\) should return array\{kind\: string, phpType\: string, dateOnly\?\: bool\} but returns array\.$#'
+			identifier: return.type
+			count: 5
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolvePrimitiveOrNamedSimpleType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolveQName\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:resolveSimpleTypeRef\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:toEnumResult\(\) has parameter \$enumerations with generic class DOMNodeList but does not specify its types\: TNode$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Generator\:\:toEnumResult\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Offset ''choiceGroups'' does not exist on list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\>\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Offset ''properties'' does not exist on list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\>\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Offset string\|null might not exist on array\{complexType\: ''complexTypes'', simpleType\: ''simpleTypes'', attributeGroup\: ''attributeGroups'', group\: ''groups'', element\: ''elements''\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Only iterables can be unpacked, mixed given\.$#'
+			identifier: arrayUnpacking.nonIterable
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$array of function usort expects TArray of array\<array\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, dateOnly\: bool, facets\: array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, totalDigits\?\: int, fractionDigits\?\: int\}, namedType\: string\|null, doc\: string\|null\}\)\: list\<array\{fqcn\: string, args\: string\}\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$container of method Xsd2Php\\Generator\:\:collectAttributes\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$contextNode of method Xsd2Php\\Generator\:\:resolveQName\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$doc of method Xsd2Php\\Generator\:\:xpath\(\) expects DOMDocument, DOMDocument\|null given\.$#'
+			identifier: argument.type
+			count: 9
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$fqcn of method Xsd2Php\\TypeRenderContext\:\:render\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$fqcn of static method Xsd2Php\\Naming\:\:basename\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$groupRef of method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function strrpos expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$local of static method Xsd2Php\\Naming\:\:xsPrimitiveToPhp\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$p of method Xsd2Php\\Generator\:\:phpDocType\(\) expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$p of method Xsd2Php\\Generator\:\:phpPropertyType\(\) expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$particle of method Xsd2Php\\Generator\:\:collectParticleElements\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$refNode of method Xsd2Php\\Generator\:\:resolveNamedRef\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$sameNamespaceTypes of class Xsd2Php\\TypeRenderContext constructor expects array\<string, true\>, array\<true\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#2 \$contextNode of method DOMXPath\:\:query\(\) expects DOMNode\|null, DOMNameSpaceNode\|DOMNode\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#2 \$enumerations of method Xsd2Php\\Generator\:\:toEnumResult\(\) expects DOMNodeList, DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#2 \$imports of class Xsd2Php\\TypeRenderContext constructor expects array\<string, string\>, array\<string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#2 \$qname of method Xsd2Php\\Generator\:\:resolveQName\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#3 \$backingPhpType of method Xsd2Php\\Generator\:\:toEnumResult\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#3 \$length of function substr expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#3 \$seen of method Xsd2Php\\Generator\:\:resolveNamedRef\(\) expects array\<string, true\>, array given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Part \$doc \(array\<string\>\|string\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Part \$local \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Part \$p\[''phpName''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Part \$refLocal \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 4
+			path: src/Generator.php
+
+		-
+			message: '#^Possibly invalid array key type string\|null\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 5
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$attributeGroups \(array\<string, DOMElement\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$basePropertiesCache \(array\<string, list\<array\>\>\) does not accept non\-empty\-array\<string, mixed\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$complexTypes \(array\<string, DOMElement\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$elements \(array\<string, DOMElement\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$groups \(array\<string, DOMElement\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, array\>\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$resolvedSimple \(array\<string, array\{kind\: string, phpType\: string, dateOnly\?\: bool\}\>\) does not accept array\<string, non\-empty\-array\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Property Xsd2Php\\Generator\:\:\$simpleTypes \(array\<string, DOMElement\>\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Method Xsd2Php\\Naming\:\:sanitizeIdentifier\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Naming.php
+
+		-
+			message: '#^Offset 0 might not exist on non\-empty\-string\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Naming.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Naming.php

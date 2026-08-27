@@ -10,8 +10,12 @@ Standalone XSD-to-PHP generator library. Candidate for eventual Packagist public
 ## Commands
 
 - Install: `composer install`
-- Test: `vendor/bin/phpunit`
 - Requires PHP `^8.4`.
+- `composer test` — PHPUnit.
+- `composer phpstan` — static analysis, level max (`phpstan-baseline.neon` freezes pre-existing findings; new code must stay clean).
+- `composer cs-check` / `composer cs-fix` — PHP-CS-Fixer (`@PHP8x4Migration` + `@Symfony`), dry-run vs. apply.
+- `composer rector` / `composer rector-fix` — Rector (`deadCode` + `codeQuality` sets), dry-run vs. apply.
+- `composer deps-check` — `composer-dependency-analyser`, catches unused/missing/shadow Composer dependencies.
 
 ## Planning
 

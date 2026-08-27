@@ -82,6 +82,11 @@ explains the reasoning for.
   `SymfonyValidatorAttributeStrategy`, `SemanticTypeAttributeStrategy`, or the test fixtures. No
   current bug (all 3 `makeProperty()` call sites always set the booleans correctly today), pure
   hygiene/robustness.
+- **`phpstan-baseline.neon` (180 frozen findings)** — PHPStan runs at `level: max`, mostly flagging
+  the associative-array "property bag" shape (`array{phpName: string, ...}`) `makeProperty()` and
+  its consumers pass around instead of a typed value object. Working the baseline down is the same
+  underlying shape problem as the `isAttribute`/`isText` item above and the AST-based-codegen item;
+  a typed property representation would likely shrink all three at once.
 
 ## Resolved
 
