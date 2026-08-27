@@ -71,25 +71,13 @@ explains the reasoning for.
   `xs:decimal` → a PHP string or a dedicated Decimal value-object instead of `float` — a bigger,
   breaking change to the generator.
 
-## Simplify / code hygiene
-
-- **`makeProperty()` — `isAttribute`/`isText` as 2 booleans instead of 1 enum/string**
-  (`Generator.php`, `SymfonySerializerAttributeStrategy::attributesFor()`) — the 4th (impossible)
-  combination of the two booleans currently isn't representable, but also isn't excluded by the
-  type system (convention, not enforcement). Touches only 3 files, ~10 lines
-  (`Generator.php`'s `makeProperty()` signature + its 3 call sites, `SymfonySerializerAttributeStrategy.php`'s
-  3-way ternary → a `match`, `PropertyAttributeStrategy.php`'s shape docblock) — not
-  `SymfonyValidatorAttributeStrategy`, `SemanticTypeAttributeStrategy`, or the test fixtures. No
-  current bug (all 3 `makeProperty()` call sites always set the booleans correctly today), pure
-  hygiene/robustness.
-- **`phpstan-baseline.neon` (180 frozen findings)** — PHPStan runs at `level: max`, mostly flagging
-  the associative-array "property bag" shape (`array{phpName: string, ...}`) `makeProperty()` and
-  its consumers pass around instead of a typed value object. Working the baseline down is the same
-  underlying shape problem as the `isAttribute`/`isText` item above and the AST-based-codegen item;
-  a typed property representation would likely shrink all three at once.
-
 ## Resolved
 
+- **`makeProperty()`'s untyped array property bag** — replaced with a `Property` value object +
+  `PropertyRole` enum (`Element`/`Attribute`/`Text` instead of 2 independent `isAttribute`/
+  `isText` booleans, so the 4th impossible combination is now structurally unrepresentable).
+  Shrunk `phpstan-baseline.neon` from 219 to 180 findings (see
+  `docs/specs/2026-08-27-property-value-object-design.md`).
 - **`xs:choice` treated like `xs:sequence`** — fixed: `collectParticleElements()` now tracks the
   enclosing `xs:choice` particle per element; choice-branch elements become nullable, plus a
   class-level `#[ExactlyOneOf(fields: [...])]` constraint (`required: false` when the choice itself

@@ -163,12 +163,6 @@ parameters:
 			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
 
 		-
-			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:presenceConstraint\(\) has parameter \$property with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
-
-		-
 			message: '#^Method Xsd2Php\\Attribute\\SymfonyValidatorAttributeStrategy\:\:presenceConstraint\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -193,12 +187,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Binary operation "\." between mixed and ''\#'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 5
@@ -217,63 +205,15 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Cannot access offset ''__srcEl'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''doc'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''fields'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''isArray'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''kind'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''nullable'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''phpName'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''phpType'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Cannot access offset ''required'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Cannot access property \$length on DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false\.$#'
 			identifier: property.nonObject
 			count: 3
+			path: src/Generator.php
+
+		-
+			message: '#^Cannot access property \$phpName on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
 			path: src/Generator.php
 
 		-
@@ -331,7 +271,7 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:collectProperties\(\) should return list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\> but returns array\{properties\: list, choiceGroups\: list\<array\{fields\: list, required\: bool\}\>\}\.$#'
+			message: '#^Method Xsd2Php\\Generator\:\:collectProperties\(\) should return array\{properties\: list\<Xsd2Php\\Property\>, choiceGroups\: list\<array\{fields\: list\<string\>, required\: bool\}\>\} but returns array\{properties\: list, choiceGroups\: list\<array\{fields\: list\<string\>, required\: bool\}\>\}\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Generator.php
@@ -355,31 +295,7 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:fqType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:fqType\(\) should return string but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:hasDefault\(\) has parameter \$p with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Method Xsd2Php\\Generator\:\:makeProperty\(\) has parameter \$typeInfo with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:makeProperty\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Generator.php
@@ -397,26 +313,8 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Method Xsd2Php\\Generator\:\:phpDocType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:phpPropertyType\(\) has parameter \$p with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Method Xsd2Php\\Generator\:\:resolveBaseProperties\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Method Xsd2Php\\Generator\:\:resolveBaseProperties\(\) should return array but returns mixed\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Generator.php
 
@@ -457,18 +355,6 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Offset ''choiceGroups'' does not exist on list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Offset ''properties'' does not exist on list\<array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: src/Generator.php
-
-		-
 			message: '#^Offset string\|null might not exist on array\{complexType\: ''complexTypes'', simpleType\: ''simpleTypes'', attributeGroup\: ''attributeGroups'', group\: ''groups'', element\: ''elements''\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -477,18 +363,6 @@ parameters:
 		-
 			message: '#^Only iterables can be unpacked, mixed given\.$#'
 			identifier: arrayUnpacking.nonIterable
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$array of function usort expects TArray of array\<array\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, Closure\(array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, dateOnly\: bool, facets\: array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, totalDigits\?\: int, fractionDigits\?\: int\}, namedType\: string\|null, doc\: string\|null\}\)\: list\<array\{fqcn\: string, args\: string\}\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Generator.php
 
@@ -511,43 +385,13 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#1 \$fqcn of method Xsd2Php\\TypeRenderContext\:\:render\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$fqcn of static method Xsd2Php\\Naming\:\:basename\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \#1 \$groupRef of method Xsd2Php\\Generator\:\:collectGroupRefElements\(\) expects DOMElement, DOMNameSpaceNode\|DOMNode given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#1 \$haystack of function strrpos expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \#1 \$local of static method Xsd2Php\\Naming\:\:xsPrimitiveToPhp\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$p of method Xsd2Php\\Generator\:\:phpDocType\(\) expects array, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$p of method Xsd2Php\\Generator\:\:phpPropertyType\(\) expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Generator.php
@@ -565,25 +409,7 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#1 \$sameNamespaceTypes of class Xsd2Php\\TypeRenderContext constructor expects array\<string, true\>, array\<true\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#2 \$array of function implode expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Generator.php
@@ -598,12 +424,6 @@ parameters:
 			message: '#^Parameter \#2 \$enumerations of method Xsd2Php\\Generator\:\:toEnumResult\(\) expects DOMNodeList, DOMNodeList\<DOMNameSpaceNode\|DOMNode\>\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Parameter \#2 \$imports of class Xsd2Php\\TypeRenderContext constructor expects array\<string, string\>, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Generator.php
 
 		-
@@ -631,27 +451,39 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
+			message: '#^Parameter \$dateOnly of class Xsd2Php\\Property constructor expects bool, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Generator.php
 
 		-
-			message: '#^Part \$doc \(array\<string\>\|string\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 2
+			message: '#^Parameter \$facets of class Xsd2Php\\Property constructor expects array\{length\?\: int, minLength\?\: int, maxLength\?\: int, pattern\?\: string, minInclusive\?\: string, maxInclusive\?\: string, minExclusive\?\: string, maxExclusive\?\: string, \.\.\.\}, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \$kind of class Xsd2Php\\Property constructor expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \$namedType of class Xsd2Php\\Property constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Generator.php
+
+		-
+			message: '#^Parameter \$phpType of class Xsd2Php\\Property constructor expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
 			path: src/Generator.php
 
 		-
 			message: '#^Part \$local \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 2
-			path: src/Generator.php
-
-		-
-			message: '#^Part \$p\[''phpName''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 1
 			path: src/Generator.php
 
 		-
@@ -663,7 +495,7 @@ parameters:
 		-
 			message: '#^Possibly invalid array key type mixed\.$#'
 			identifier: offsetAccess.invalidOffset
-			count: 4
+			count: 1
 			path: src/Generator.php
 
 		-
@@ -679,7 +511,7 @@ parameters:
 			path: src/Generator.php
 
 		-
-			message: '#^Property Xsd2Php\\Generator\:\:\$basePropertiesCache \(array\<string, list\<array\>\>\) does not accept non\-empty\-array\<string, mixed\>\.$#'
+			message: '#^Property Xsd2Php\\Generator\:\:\$basePropertiesCache \(array\<string, list\<array\>\>\) does not accept non\-empty\-array\<string, list\<array\|Xsd2Php\\Property\>\>\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Generator.php
@@ -742,30 +574,6 @@ parameters:
 			message: '#^Cannot call method getConstraint\(\) on Symfony\\Component\\Validator\\ConstraintViolationInterface\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
-
-		-
-			message: '#^Parameter \#1 \$property of method Xsd2Php\\Attribute\\SemanticTypeAttributeStrategy\:\:attributesFor\(\) expects array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}, array\{isArray\: false, namedType\: ''EmailType''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
-
-		-
-			message: '#^Parameter \#1 \$property of method Xsd2Php\\Attribute\\SemanticTypeAttributeStrategy\:\:attributesFor\(\) expects array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}, array\{isArray\: false, namedType\: ''SomeOtherType''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
-
-		-
-			message: '#^Parameter \#1 \$property of method Xsd2Php\\Attribute\\SemanticTypeAttributeStrategy\:\:attributesFor\(\) expects array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}, array\{isArray\: false, namedType\: null\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
-
-		-
-			message: '#^Parameter \#1 \$property of method Xsd2Php\\Attribute\\SemanticTypeAttributeStrategy\:\:attributesFor\(\) expects array\{phpName\: string, xmlName\: string\|null, isAttribute\: bool, isText\: bool, isArray\: bool, nullable\: bool, kind\: string, phpType\: string, \.\.\.\}, array\{isArray\: true, namedType\: ''EmailType''\} given\.$#'
-			identifier: argument.type
-			count: 1
 			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
 
 		-

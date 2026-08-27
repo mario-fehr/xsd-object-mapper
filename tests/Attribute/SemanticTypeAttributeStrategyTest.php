@@ -38,7 +38,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
         $strategy = new SemanticTypeAttributeStrategy(self::ALIAS_MAP);
 
         $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, namedType: 'SomeOtherType')));
-        $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element, namedType: null)));
+        $this->assertSame([], $strategy->attributesFor(new Property(phpName: 'Email', xmlName: 'Email', role: PropertyRole::Element)));
     }
 
     public function testSkipsArrayPropertiesEvenWhenNamedTypeMatches(): void
