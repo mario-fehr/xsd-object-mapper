@@ -82,7 +82,7 @@ function constructDefinitions(): array
     ];
 }
 
-/** @return string[] absolute paths to every *.xsd file under $path (or [$path] if it's a file) */
+/** @return list<string> absolute paths to every *.xsd file under $path (or [$path] if it's a file) */
 function collectXsdFiles(string $path): array
 {
     if (is_file($path)) {
@@ -91,6 +91,9 @@ function collectXsdFiles(string $path): array
     $files = [];
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS));
     foreach ($iterator as $file) {
+        if (!$file instanceof SplFileInfo) {
+            continue;
+        }
         if ('xsd' === $file->getExtension()) {
             $files[] = $file->getPathname();
         }
@@ -100,7 +103,11 @@ function collectXsdFiles(string $path): array
     return $files;
 }
 
-/** @param string[] $files @return array<string, int> label => total occurrence count across all files */
+/**
+ * @param string[] $files
+ *
+ * @return array<string, int> label => total occurrence count across all files
+ */
 function countConstructs(array $files): array
 {
     $definitions = constructDefinitions();
@@ -116,13 +123,19 @@ function countConstructs(array $files): array
         $xp->registerNamespace('xs', XS_NS);
 
         foreach ($definitions as $label => $expression) {
-            $counts[$label] += $xp->query($expression)->length;
+            $result = $xp->query($expression);
+            if (false === $result) {
+                fwrite(\STDERR, "WARN: invalid XPath expression for '{$label}', skipping\n");
+                continue;
+            }
+            $counts[$label] += $result->length;
         }
     }
 
     return $counts;
 }
 
+/** @param list<string> $argv */
 function main(array $argv): int
 {
     $args = array_slice($argv, 1);
@@ -157,7 +170,7 @@ function main(array $argv): int
         return 0;
     }
 
-    $labelWidth = max(array_map(strlen(...), array_keys($counts)));
+    $labelWidth = max([0, ...array_map(strlen(...), array_keys($counts))]);
     fwrite(\STDOUT, sprintf("Scanned %d *.xsd file(s) under '%s':\n\n", count($files), $target));
     foreach ($counts as $label => $count) {
         fwrite(\STDOUT, sprintf("  %-{$labelWidth}s  %d\n", $label, $count));
@@ -166,4 +179,6 @@ function main(array $argv): int
     return 0;
 }
 
+/** @var list<string> $argv */
+$argv = $_SERVER['argv'] ?? [];
 exit(main($argv));
