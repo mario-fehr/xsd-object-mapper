@@ -50,9 +50,6 @@ explains the reasoning for.
 `makinacorpus/php-xsd-gen`'s generator config surfaces (see `reference-repos.md`) surfaces options
 worth considering:
 
-- **Class prefix/suffix** — a global naming prefix/suffix for generated classes
-  (`WsdlToPhp/PackageGenerator`'s `GeneratorOptions::PREFIX`/`SUFFIX`), to avoid collisions with a
-  consumer's own classes without touching the schema.
 - **Per-type alias mapping** — renaming one specific generated class by its XSD QName
   (`goetas-webservices/xsd2php`'s DI `aliases` config), finer-grained than `NamespaceMapping`, which
   only maps at the namespace level.
@@ -68,9 +65,6 @@ worth considering:
   Substitutes a consumer-supplied value-object class for a specific named XSD simple type instead of
   the generator's own scalar mapping. A generic version of the `xs:decimal` → Decimal-value-object
   idea already in the "Type derivation" section above.
-- **`add_comments`-style configurable docblock header tags** — `WsdlToPhp/PackageGenerator`'s
-  `ADD_COMMENTS`. Author/license/generation-source lines in the generated file header, currently not
-  configurable.
 - **`skip-null-values`/`include-null-value`** — `janephp`. Serializer-context null-handling flag;
   would need the generator to also emit Symfony Serializer context attributes, which it doesn't yet.
 - **Property accessor style as a config axis** — `makinacorpus/php-xsd-gen`'s
@@ -78,8 +72,6 @@ worth considering:
   (individually togglable, `readonly` + `setter` together rejected as invalid). Currently the
   generated property style (readonly public vs. getter/setter vs. promoted constructor param) is
   fixed in the generator, not configurable — the most substantial gap of this batch.
-- **`class_factory_method`** — `makinacorpus/php-xsd-gen`. Generates a static `create()` accepting
-  either a ready instance or an associative array keyed by XSD property name.
 - **Strict-mode toggles for missing/colliding types** — `makinacorpus/php-xsd-gen`'s
   `type_missing_error`/`type_override_error`: hard-fail instead of silently ignoring a missing
   referenced type or silently overwriting on a type-name collision. Related to, but distinct from,
@@ -89,13 +81,12 @@ Priority, if picked up (value vs. effort, not a commitment to build any of it):
 
 1. **Cheap, real gap, do first** — `clean-generated` purge, per-type alias mapping, strict-mode
    missing/colliding-type toggles.
-2. **Mechanical, small scope** — class prefix/suffix, `add_comments` header tags,
-   `date-prefer-interface`.
+2. **Mechanical, small scope** — `date-prefer-interface`.
 3. **Real value, more design work** — custom type mapping per named `simpleType` (also unblocks the
    `xs:decimal` item above), configurable date format(s) and `skip-null-values` (both need Symfony
    Serializer context-attribute generation, which doesn't exist yet — same underlying gap).
 4. **Speculative/large, defer** — property-accessor-style axis (biggest rewrite, no known consumer
-   need yet), `class_factory_method` (pure DX).
+   need yet).
 
 Deliberately not pursued (checked, ruled out): `naming_strategy`/`path_generator`/
 `namespace_dictates_directories` (this generator's PSR-4 output layout is a fixed contract, not
@@ -106,7 +97,20 @@ SOAP-tooling-specific, doesn't apply here); its `property_defaults` (unimplement
 source repo, no mature prior art to compare against); a `validation` on/off
 toggle (already solved via `PropertyAttributeStrategy` composition — omit the validator strategy);
 `enums-as-objects` (already structurally covered by PHP `enum` typing); `allow-external-refs`/
-`external-ref-allowed-hosts` (only relevant if import/include-following is ever introduced).
+`external-ref-allowed-hosts` (only relevant if import/include-following is ever introduced); class
+prefix/suffix (`WsdlToPhp/PackageGenerator`'s `GeneratorOptions::PREFIX`/`SUFFIX`) — its stated
+collision-avoidance goal is already covered by `Config::$namespaceMap`, which lets a consumer route
+each XSD `targetNamespace` to its own PHP namespace/directory; a second, redundant knob isn't
+justified without a concrete case namespace routing doesn't cover (see
+`docs/specs/2026-08-27-config-options-tier2-design.md`); `add_comments`-style docblock header tags
+(`WsdlToPhp/PackageGenerator`'s `ADD_COMMENTS`) — generic vanity (author/license lines) with no XSD- or
+generator-specific rationale, same value on any unrelated codegen tool (see the same spec);
+`makinacorpus/php-xsd-gen`'s `class_factory_method` — its own docblock states "This is part of
+generated SOAP tooling", the identical rationale `class_constructor` above was already excluded for.
+Also directly redundant with this generator's actual hydration path: it already emits
+`#[SerializedName]`/`#[Context]` attributes specifically so `symfony/serializer` can build an instance
+from XML/array data without any hand-written array-to-constructor mapping — a generated `create()`
+would be a second, competing hydration mechanism solving the same problem this package already solves.
 
 ## Type derivation
 
