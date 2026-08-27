@@ -18,6 +18,7 @@ const FIXTURES_DIR = __DIR__.'/../tests/fixtures';
 const REPORT_TOOL = __DIR__.'/xsd-construct-report.php';
 const BASELINE_FILE = __DIR__.'/../tests/fixtures/coverage-baseline.json';
 
+/** @return array<string, int> */
 function currentCounts(): array
 {
     $json = shell_exec('php '.escapeshellarg(REPORT_TOOL).' '.escapeshellarg(FIXTURES_DIR).' --json');
@@ -30,10 +31,12 @@ function currentCounts(): array
         fwrite(\STDERR, "Unexpected report tool output.\n");
         exit(1);
     }
+    /** @var array<string, int> $decoded */
 
     return $decoded;
 }
 
+/** @param list<string> $argv */
 function main(array $argv): int
 {
     $updateBaseline = in_array('--update-baseline', array_slice($argv, 1), true);
@@ -46,7 +49,17 @@ function main(array $argv): int
         return 0;
     }
 
-    $baseline = json_decode(file_get_contents(BASELINE_FILE), true, flags: \JSON_THROW_ON_ERROR);
+    $baselineJson = file_get_contents(BASELINE_FILE);
+    if (false === $baselineJson) {
+        fwrite(\STDERR, 'Failed to read '.BASELINE_FILE.".\n");
+        exit(1);
+    }
+    $baseline = json_decode($baselineJson, true, flags: \JSON_THROW_ON_ERROR);
+    if (!is_array($baseline)) {
+        fwrite(\STDERR, "Unexpected baseline file contents.\n");
+        exit(1);
+    }
+    /** @var array<string, int> $baseline */
 
     $changed = [];
     foreach ($current as $label => $count) {
@@ -87,4 +100,6 @@ function main(array $argv): int
     return 1;
 }
 
+/** @var list<string> $argv */
+$argv = $_SERVER['argv'] ?? [];
 exit(main($argv));
