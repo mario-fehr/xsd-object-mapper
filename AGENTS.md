@@ -12,14 +12,17 @@ Standalone XSD-to-PHP generator library. Candidate for eventual Packagist public
 - Install: `composer install`
 - Requires PHP `^8.4`.
 - `composer test` — PHPUnit.
-- `composer phpstan` — static analysis, level max (`phpstan-baseline.neon` freezes pre-existing findings; new code must stay clean).
-- `composer cs-check` / `composer cs-fix` — PHP-CS-Fixer (`@PHP8x4Migration` + `@Symfony`), dry-run vs. apply.
-- `composer rector` / `composer rector-fix` — Rector (`deadCode` + `codeQuality` sets), dry-run vs. apply.
+- `composer phpstan` — static analysis, level max, `src`+`bin`+`tests` (`phpstan-baseline.neon` freezes pre-existing findings; new code must stay clean).
+- `composer cs-check` / `composer cs-fix` — PHP-CS-Fixer (`@PHP8x4Migration` + `@Symfony` + `@Symfony:risky`), dry-run vs. apply.
+- `composer rector` / `composer rector-fix` — Rector (`deadCode`/`codeQuality`/`typeDeclarations`/`earlyReturn`/`privatization`/`instanceOf`/`phpunitCodeQuality`/`phpunitNarrowAsserts` sets — deliberately not `naming`, which renames by type rather than role, e.g. `$xpathCache` → `$weakMap`), dry-run vs. apply.
 - `composer deps-check` — `composer-dependency-analyser`, catches unused/missing/shadow Composer dependencies.
+- `npm install` (once) — Markdown tooling; the only JS in this repo, kept out of Composer.
+- `npm run format` / `npm run format:check` — Prettier on `**/*.md` (`proseWrap: preserve` — doesn't rewrap this repo's long unwrapped prose lines).
+- `npm run lint:md` / `npm run lint:md:fix` — markdownlint-cli2 (`MD013` line-length off, same reason; `CLAUDE.md` excluded, it's a 1-line `@AGENTS.md` pointer not a doc).
 
 ## Planning
 
-Committed spec/plan/adr workflow (overrides the global local/uncommitted `_plans/` convention — design rationale for this package is worth keeping, unlike ephemeral ticket-driven work). Driven by the `superpowers` plugin, not written by hand:
+Committed spec/plan/adr workflow — design rationale for this package is worth keeping, unlike ephemeral ticket-driven work. Driven by the `superpowers` plugin, not written by hand:
 
 - New feature/change: `brainstorming` skill first, then `writing-plans` — writes `docs/specs/YYYY-MM-DD-slug-design.md` (WHY: problem, goals/non-goals, API, edge cases, testing) and `docs/plans/YYYY-MM-DD-slug.md` (WHAT/HOW: numbered tasks, each a failing-test → implement → passing-test → commit loop).
 - Implementation: `subagent-driven-development` or `executing-plans` to run the plan.
@@ -58,7 +61,7 @@ below).
 Must stay completely independent of any consuming project:
 
 - No mention of any customer/consumer name anywhere in `src/`, `bin/`, `tests/`, `docs/` (or here in `AGENTS.md`/`CLAUDE.md` — these ship with the package too).
-- Never read/depend on a consumer's schema files or planning docs (e.g. no reference to a consumer's `schema/xsd/` or `_plans/` dirs).
+- Never read/depend on a consumer's schema files or planning docs (e.g. no reference to a consumer's `schema/xsd/` dir).
 - Docs describing the generator's own capabilities/limitations (coverage matrix, backlog) go in `docs/` here, written generically — no real-world occurrence counts tied to one consumer's schema.
 - Real-world test corpus needs: use an official/public schema (e.g. `tests/fixtures/w3c-purchase-order.xsd`, from the W3C XML Schema Primer), never a consumer's schema.
 - Schema-agnostic tooling (e.g. `bin/xsd-construct-report.php`) is fine — takes any XSD dir as input, no built-in knowledge of a specific consumer.
@@ -68,4 +71,4 @@ Must stay completely independent of any consuming project:
 
 ## Code comments
 
-Source files must never reference `_plans/...` paths (from this or any consuming repo). If a comment needs the reasoning behind a decision, inline the reasoning itself.
+Source files must never reference planning-doc paths, from this or any consuming project. If a comment needs the reasoning behind a decision, inline the reasoning itself.
