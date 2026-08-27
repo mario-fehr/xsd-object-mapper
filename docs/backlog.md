@@ -68,8 +68,6 @@ worth considering:
   Substitutes a consumer-supplied value-object class for a specific named XSD simple type instead of
   the generator's own scalar mapping. A generic version of the `xs:decimal` → Decimal-value-object
   idea already in the "Type derivation" section above.
-- **`use-fixer`/`fixer-config-file`** — `janephp`. Run PHP-CS-Fixer against a consumer-supplied config
-  right after generation, instead of leaving formatting entirely to a separate pipeline step.
 - **`add_comments`-style configurable docblock header tags** — `WsdlToPhp/PackageGenerator`'s
   `ADD_COMMENTS`. Author/license/generation-source lines in the generated file header, currently not
   configurable.
@@ -86,6 +84,18 @@ worth considering:
   `type_missing_error`/`type_override_error`: hard-fail instead of silently ignoring a missing
   referenced type or silently overwriting on a type-name collision. Related to, but distinct from,
   the `$seenGroups` cycle-detection bug above.
+
+Priority, if picked up (value vs. effort, not a commitment to build any of it):
+
+1. **Cheap, real gap, do first** — `clean-generated` purge, per-type alias mapping, strict-mode
+   missing/colliding-type toggles.
+2. **Mechanical, small scope** — class prefix/suffix, `add_comments` header tags,
+   `date-prefer-interface`.
+3. **Real value, more design work** — custom type mapping per named `simpleType` (also unblocks the
+   `xs:decimal` item above), configurable date format(s) and `skip-null-values` (both need Symfony
+   Serializer context-attribute generation, which doesn't exist yet — same underlying gap).
+4. **Speculative/large, defer** — property-accessor-style axis (biggest rewrite, no known consumer
+   need yet), `class_factory_method` (pure DX).
 
 Deliberately not pursued (checked, ruled out): `naming_strategy`/`path_generator`/
 `namespace_dictates_directories` (this generator's PSR-4 output layout is a fixed contract, not
