@@ -575,7 +575,7 @@ final class GeneratorTest extends TestCase
         $this->assertStringContainsString("#[ExactlyOneOf(fields: ['foo', 'bar'])]", $code);
 
         require $this->tmpDir.'/out/CartItemType.php';
-        $reflection = new \ReflectionClass('TestGen\CartItemType');
+        $reflection = new \ReflectionClass(\TestGen\CartItemType::class);
         // ReflectionClass::getAttributes() throws if PHP itself rejects a repeated non-repeatable
         // attribute - constructing it at all is the regression check.
         $this->assertCount(2, $reflection->getAttributes());
@@ -897,7 +897,9 @@ final class GeneratorTest extends TestCase
         // type, not two independently-generated (potentially divergent) copies; the file itself
         // is always exactly one regardless, since ensureEnumClass() is deterministic - this
         // doesn't prove resolveSimpleTypeRef()'s cache fired, only that consistency holds either way.
-        $this->assertCount(1, glob($this->tmpDir.'/out/ColorEnum.php'));
+        $colorEnumFiles = glob($this->tmpDir.'/out/ColorEnum.php');
+        $this->assertIsArray($colorEnumFiles);
+        $this->assertCount(1, $colorEnumFiles);
         $this->assertStringContainsString('public ColorEnum $color,', $this->readGenerated('PersonType.php'));
         $this->assertStringContainsString('public ColorEnum $color2,', $this->readGenerated('OtherType.php'));
     }
@@ -1232,8 +1234,11 @@ final class GeneratorTest extends TestCase
     /** @param array<string, NamespaceMapping>|null $namespaceMap */
     private function generate(?PropertyAttributeStrategy $attributeStrategy = null, ?array $namespaceMap = null): void
     {
+        $xsdPaths = glob($this->tmpDir.'/xsd/*.xsd');
+        $this->assertIsArray($xsdPaths);
+
         $config = new Config(
-            xsdPaths: glob($this->tmpDir.'/xsd/*.xsd'),
+            xsdPaths: $xsdPaths,
             namespaceMap: $namespaceMap ?? [
                 self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir.'/out'),
             ],
@@ -1247,7 +1252,9 @@ final class GeneratorTest extends TestCase
     {
         $path = $this->tmpDir.'/out/'.$filename;
         $this->assertFileExists($path);
+        $contents = file_get_contents($path);
+        $this->assertIsString($contents);
 
-        return file_get_contents($path);
+        return $contents;
     }
 }

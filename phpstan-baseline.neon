@@ -7,26 +7,8 @@ parameters:
 			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
 
 		-
-			message: '#^Method Xsd2Php\\Tests\\GeneratorTest\:\:readGenerated\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: tests/GeneratorTest.php
-
-		-
-			message: '#^Parameter \#1 \$objectOrClass of class ReflectionClass constructor expects class\-string\<TestGen\\CartItemType\>\|TestGen\\CartItemType, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/GeneratorTest.php
-
-		-
-			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertCount\(\) expects Countable\|iterable, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/GeneratorTest.php
-
-		-
-			message: '#^Parameter \$xsdPaths of class Xsd2Php\\Config constructor expects array\<string\>, list\<string\>\|false given\.$#'
-			identifier: argument.type
+			message: '#^Class TestGen\\CartItemType not found\.$#'
+			identifier: class.notFound
 			count: 1
 			path: tests/GeneratorTest.php
 
