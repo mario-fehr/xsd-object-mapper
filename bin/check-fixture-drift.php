@@ -60,7 +60,6 @@ function main(array $argv): int
         exit(1);
     }
     /** @var array<string, int> $baseline */
-
     $changed = [];
     foreach ($current as $label => $count) {
         $before = $baseline[$label] ?? 0;

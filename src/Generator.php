@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Xsd2Php;
 
 use DOMDocument;
-use DOMElement;
 use DOMXPath;
 use Symfony\Component\Filesystem\Filesystem;
 
