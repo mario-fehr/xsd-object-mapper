@@ -7,11 +7,13 @@
 /.references export-ignore
 /AGENTS.md export-ignore
 /CLAUDE.md export-ignore
+/reference-repos.md export-ignore
 /phpunit.xml.dist export-ignore
 /phpstan.dist.neon export-ignore
 /.php-cs-fixer.dist.php export-ignore
 /rector.php export-ignore
+/.editorconfig export-ignore
 /package.json export-ignore
 /package-lock.json export-ignore
 /.prettierrc.json export-ignore
-/.markdownlint-cli2.jsonc export-ignore
+/.prettierignore export-ignore

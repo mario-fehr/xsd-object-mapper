@@ -14,16 +14,15 @@ If the target path already exists, do not overwrite it blindly. Inspect the exis
 ## Workflow
 
 1. Resolve the target name and clone URL.
-2. Before adding a new entry, check it isn't stale: `curl -s "https://api.github.com/repos/<owner>/<repo>" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['pushed_at'], d['archived'], d['stargazers_count'])"`. Skip anything archived or with no push in ~2 years unless it's uniquely relevant despite being dormant — say so explicitly if so.
-3. Ensure `.references/` exists at the root of the current repository (git-ignored — never commit a clone).
-4. Clone the remote read-only, shallow: `git clone --depth 1 <url> .references/<name>`.
-5. If the cloned repository does not contain an `AGENTS.md`, create one from the local repo's `AGENTS.md` or a minimal repository-specific template.
-6. Report the created path and the remote URL used.
-7. Update the workspace `reference-repos.md` index when the curated set of references changes — one row per repo, with a one-line "why" specific to this workspace's problem, not a generic description.
+2. Ensure `.references/` exists at the root of the current repository.
+3. Clone the remote into `.references/<name>`.
+4. If the cloned repository does not contain an `AGENTS.md`, create one from the local repo's `AGENTS.md` or a minimal repository-specific template.
+5. Report the created path and the remote URL used.
+6. Update the workspace `reference-repos.md` index when the curated set of references changes.
 
 ## Notes
 
 - Use the repository root of the current workspace, not the agent's own home directory.
 - Keep reference repositories isolated under `.references/` so they can be inspected without affecting the main repo.
 - When a reference repo already exists, treat it as a reusable local fixture rather than recreating it.
-- Bring back the **pattern**, not the code — cite what you found ("X resolves `xs:choice` by ...") and implement independently. Never copy code verbatim, even from a permissively-licensed repo; check the repo-specific independence/attribution rules in the workspace's own `AGENTS.md`.
+- Keep a `reference-repos.md` file in the workspace root with the repo URL, local clone path, and a short reason for keeping each reference.

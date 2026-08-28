@@ -38,7 +38,7 @@ explains the reasoning for.
 - **AST-based code generation via `nikic/php-parser`'s `BuilderFactory`** instead of the current
   string concatenation (hand-rolled indentation, `use`-collision logic). Bigger quality win, bigger
   rewrite, not a quick win. Not a Symfony component. Prior art:
-  `open-code-modeling/php-code-ast` in `reference-repos.md`.
+  `open-code-modeling/php-code-ast` in `../reference-repos.md`.
 - **Own CLI via `symfony/console`** (`vendor/bin/xsd2php convert ...`, similar to
   goetas-webservices/xsd2php): only worthwhile if the package is ever consumed standalone, outside
   a project that already wraps it with its own generation script.
@@ -47,7 +47,7 @@ explains the reasoning for.
 
 `Config`'s constructor only takes `xsdPaths`/`namespaceMap`/`attributeStrategy`. Comparing against
 `goetas-webservices/xsd2php`, `WsdlToPhp/PackageGenerator`, `janephp/janephp`, and
-`makinacorpus/php-xsd-gen`'s generator config surfaces (see `reference-repos.md`) surfaces options
+`makinacorpus/php-xsd-gen`'s generator config surfaces (see `../reference-repos.md`) surfaces options
 worth considering:
 
 - **Per-type alias mapping**: renaming one specific generated class by its XSD QName
