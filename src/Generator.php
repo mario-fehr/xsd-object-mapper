@@ -164,7 +164,7 @@ final class Generator
             $targetNs = $dom->documentElement?->getAttribute('targetNamespace') ?? '';
 
             foreach ($this->query($xp, $query) as $node) {
-                if (!$node instanceof \DOMElement || !isset(self::SCHEMA_NAME_BUCKETS[$node->localName])) {
+                if (!$node instanceof \DOMElement || null === $node->localName || !isset(self::SCHEMA_NAME_BUCKETS[$node->localName])) {
                     $this->warn('non-element or unrecognized node from indexSchemas() query, skipping');
                     continue;
                 }
@@ -449,7 +449,7 @@ final class Generator
 
         $facets = [];
         foreach ($restriction->childNodes as $child) {
-            if (!$child instanceof \DOMElement || self::XS_NS !== $child->namespaceURI || !isset($knownFacets[$child->localName])) {
+            if (!$child instanceof \DOMElement || self::XS_NS !== $child->namespaceURI || null === $child->localName || !isset($knownFacets[$child->localName])) {
                 continue;
             }
             if (isset($facets[$child->localName])) {

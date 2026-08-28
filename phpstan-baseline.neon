@@ -37,12 +37,6 @@ parameters:
 			path: src/Attribute/SymfonyValidatorAttributeStrategy.php
 
 		-
-			message: '#^Possibly invalid array key type string\|null\.$#'
-			identifier: offsetAccess.invalidOffset
-			count: 5
-			path: src/Generator.php
-
-		-
 			message: '#^Cannot call method getConstraint\(\) on Symfony\\Component\\Validator\\ConstraintViolationInterface\|null\.$#'
 			identifier: method.nonObject
 			count: 2
