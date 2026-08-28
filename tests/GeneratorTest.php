@@ -153,6 +153,37 @@ final class GeneratorTest extends TestCase
         $this->assertStringNotContainsString('SomeAttribute', $code);
     }
 
+    public function testProhibitedAttributeIsExcludedFromGeneratedClass(): void
+    {
+        $this->writeXsd(<<<'XSD'
+            <?xml version="1.0" encoding="utf-8"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
+                       elementFormDefault="qualified">
+              <xs:complexType name="PersonType">
+                <xs:sequence>
+                  <xs:element name="Name" type="xs:string"/>
+                </xs:sequence>
+                <xs:attribute name="Id" type="xs:string" use="required"/>
+                <xs:attribute name="Nickname" type="xs:string" use="optional"/>
+                <xs:attribute name="Legacy" type="xs:string" use="prohibited"/>
+              </xs:complexType>
+            </xs:schema>
+            XSD);
+
+        $this->generate();
+
+        $code = $this->readGenerated('PersonType.php');
+
+        // use="prohibited" forbids the attribute - it must not be generated at all, unlike
+        // required (non-nullable) or optional (nullable), which stay as before.
+        $this->assertStringContainsString('public string $id,', $code);
+        $this->assertStringContainsString('public ?string $nickname = null,', $code);
+        $this->assertStringNotContainsString('Legacy', $code);
+        $this->assertStringNotContainsString('legacy', $code);
+    }
+
     public function testResolvesGroupRef(): void
     {
         $this->writeXsd(<<<'XSD'

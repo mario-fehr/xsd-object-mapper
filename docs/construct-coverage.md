@@ -55,7 +55,7 @@ schema, not only against this test suite's own hand-written fixtures.
 | `default=` / `fixed=`                               | ✅ (doc-comment hint only, doesn't change nullability or serialization)                                             | ✅                              |
 | `nillable="true"`                                   | — (not a generator concern; handled at the serializer-integration layer by whatever consumes the generated classes) | —                               |
 | `use="required"`/`"optional"`                       | ✅                                                                                                                  | ✅                              |
-| `use="prohibited"`                                  | ❌ mishandled — treated the same as `"optional"` instead of forbidding the attribute                                | ❌                              |
+| `use="prohibited"`                                  | ✅ (excluded from the generated class)                                                                              | ✅                              |
 | `ref=` (element)                                    | ✅                                                                                                                  | ✅                              |
 | `ref=` (attribute)                                  | ⚠️ warns and skips                                                                                                  | ✅                              |
 | Global vs. anonymous (inline) type                  | ✅                                                                                                                  | ✅                              |

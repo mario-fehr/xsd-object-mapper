@@ -697,6 +697,9 @@ final class Generator
                 continue;
             }
             $use = $attr->hasAttribute('use') ? $attr->getAttribute('use') : 'optional';
+            if ('prohibited' === $use) {
+                continue;
+            }
             $typeInfo = $this->resolveParticleType($attr, $ownerClassName, $ownerNamespace);
             $doc = $this->appendXsdDefaultHint($this->extractDoc($attr), $attr);
 
