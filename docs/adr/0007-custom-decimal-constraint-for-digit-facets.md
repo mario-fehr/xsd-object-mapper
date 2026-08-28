@@ -3,12 +3,12 @@
 ## Context
 
 `xs:totalDigits`/`xs:fractionDigits` (XML Schema Part 2 §4.3) have no `symfony/validator` built-in
-equivalent — unlike `pattern`, `minLength`/`maxLength`, or `min/maxInclusive`, which map onto
+equivalent, unlike `pattern`, `minLength`/`maxLength`, or `min/maxInclusive`, which map onto
 `Assert\Regex`/`Assert\Length`/`Assert\Range`.
 
 ## Decision
 
-Add a custom `Xsd2Php\Validator\Decimal` constraint plus `DecimalValidator`, counting significant
+Add a custom `XsdObjectMapper\Validator\Decimal` constraint plus `DecimalValidator`, counting significant
 digits against the value's string representation.
 
 ## Consequences
@@ -23,7 +23,7 @@ plain decimal form before counting, or the digit count is meaningless.
 
 ## Considered and rejected
 
-- **Fixing precision at the root** — mapping `xs:decimal` to a PHP string or a dedicated Decimal value
+- **Fixing precision at the root**: mapping `xs:decimal` to a PHP string or a dedicated Decimal value
   object instead of `float` would be the correct fix for the underlying precision problem, but is a
   breaking change to the generator's type mapping, out of scope for a validator-level constraint. See
   `docs/backlog.md`.

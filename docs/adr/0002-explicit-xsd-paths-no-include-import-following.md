@@ -15,11 +15,11 @@ file. The generator parses exactly those files and does not follow `xs:include`/
 
 Simpler generator: no recursive file resolution, no relative-path handling, no de-duplication of a
 schema document reachable via more than one include path. In exchange, callers with multi-file
-schemas must enumerate every contributing file themselves — documented as a known limitation (see
+schemas must enumerate every contributing file themselves, documented as a known limitation (see
 `docs/construct-coverage.md`, "Namespace handling").
 
 ## Considered and rejected
 
-- **Following `xs:include`/`xs:import` automatically** — deferred rather than rejected outright; no
+- **Following `xs:include`/`xs:import` automatically**: deferred rather than rejected outright; no
   current caller needs it, and it adds file-resolution complexity (relative-path resolution, cycle
   detection across includes) the current explicit-list model doesn't otherwise require.
