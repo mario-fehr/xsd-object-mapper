@@ -32,8 +32,8 @@ non-trivial change gets two committed documents before implementation starts:
   `docs/adr/NNNN-slug.md` instead of a plan.
 
 No ticket IDs (date+slug instead), no story/feature-branch hierarchy or MR checklist — solo lib,
-this two-document workflow replaces that. GitHub Actions CI and a PR template exist for whenever a
-PR does happen, but there's no required-review process (yet).
+this two-document workflow replaces that. `main` is branch-protected: a PR with all CI checks
+green is required before merging (0 approvals required, so this doesn't block solo work).
 
 If you're Claude Code with the `superpowers` plugin installed, its `brainstorming` →
 `writing-plans` → `executing-plans`/`subagent-driven-development` skills produce exactly this
