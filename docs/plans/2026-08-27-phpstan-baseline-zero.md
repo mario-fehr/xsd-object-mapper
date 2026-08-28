@@ -15,7 +15,7 @@
 - No behavior change to `Generator::generate()`'s output for any given XSD input, or to any `../../bin` script's output for any given input.
 - `vendor/bin/phpstan analyse` must report `[OK] No errors` once the baseline is deleted (final task) — every task before that must keep `composer phpstan` passing against a **shrinking** baseline (see Standard Verification Loop below).
 - `TypeInfo`/`TypeKind` mirror `Property`/`PropertyRole`: `final readonly class` with constructor-with-defaults, enum with plain cases (`Class_` — trailing underscore, `class` is reserved).
-- `facets` stays a plain array (not its own object) — it becomes a field *of* `TypeInfo`.
+- `facets` stays a plain array (not its own object) — it becomes a field _of_ `TypeInfo`.
 - `Property::$kind`/`$phpType` stay plain `string` — `TypeKind` is consumed at the `TypeInfo` -> `Property` boundary in `makeProperty()` only, never threaded further (confirmed: `Generator::fqType()` L771, `Generator::buildComplexClass()` L823, and `SymfonyValidatorAttributeStrategy.php` L45/L69 all compare `Property::$kind`, a plain string — untouched by this migration).
 - No new PHPStan rules or level increase.
 - No new test files, unless a Cluster-C `warn()`-and-skip guard branch turns out to be reachable by an existing fixture (verify, don't assume) — none of the guards added by this plan are expected to be reachable by any well-formed XSD, since every guarded site is schema-constrained by its own XPath expression or by the XSD spec's own structural rules.
@@ -65,6 +65,7 @@ diff -r /tmp/xsd2php-diff-before /tmp/xsd2php-diff-after   # expect no output
 ### Task 1: `../../bin/check-fixture-drift.php` type-safety fixes (Cluster A)
 
 **Files:**
+
 - Modify: `../../bin/check-fixture-drift.php`
 
 **Interfaces:** None — standalone CLI script, no other file depends on its internals.
@@ -209,6 +210,7 @@ git commit -m "fix: type-safety pass over bin/check-fixture-drift.php"
 ### Task 2: `../../bin/xsd-construct-report.php` type-safety fixes (Cluster A)
 
 **Files:**
+
 - Modify: `../../bin/xsd-construct-report.php`
 
 **Interfaces:** None — standalone CLI script; `../../bin/check-fixture-drift.php` invokes it only as a subprocess (`shell_exec`), no PHP-level coupling.
@@ -432,6 +434,7 @@ git commit -m "fix: type-safety pass over bin/xsd-construct-report.php"
 ### Task 3: Tool test harness type fixes — `../../tests/ConstructReportToolTest.php` + `../../tests/FixtureDriftToolTest.php` (Cluster D)
 
 **Files:**
+
 - Modify: `../../tests/ConstructReportToolTest.php`
 - Modify: `../../tests/FixtureDriftToolTest.php`
 
@@ -570,6 +573,7 @@ git commit -m "fix: type-safety pass over bin/ tool test harnesses"
 ### Task 4: `../../src/Naming.php` type-safety fixes (Cluster D)
 
 **Files:**
+
 - Modify: `../../src/Naming.php`
 - Test: `tests/NamingTest.php` (if it exists — check first; if not, `Naming` is exercised indirectly through `GeneratorTest.php`, which is this task's regression guard)
 
@@ -656,6 +660,7 @@ git commit -m "fix: type-safety pass over Naming"
 ### Task 5: `../../src/Attribute/CompositeAttributeStrategy.php` fix (Cluster D)
 
 **Files:**
+
 - Modify: `../../src/Attribute/CompositeAttributeStrategy.php`
 
 **Interfaces:** Unchanged — `attributesFor(Property $property): array` (implements `PropertyAttributeStrategy`).
@@ -708,13 +713,15 @@ git commit -m "fix: CompositeAttributeStrategy variadic-to-list narrowing"
 ### Task 6: `TypeKind` enum + `TypeInfo` value object (new files, Cluster B foundation)
 
 **Files:**
+
 - Create: `src/TypeKind.php`
 - Create: `src/TypeInfo.php`
 
 **Interfaces:**
+
 - Produces: `TypeKind` (enum, cases `Scalar`, `Class_`, `Enum`) and `TypeInfo` (`final readonly class`, constructor `TypeKind $kind, string $phpType, bool $dateOnly = false, array $facets = [], ?string $namedType = null`) — consumed by every task from Task 9 onward.
 
-Not yet wired into `Generator.php` — pure additions, no existing behavior touched, no new PHPStan findings possible (both classes are unused until Task 9, and PHPStan's `level: max` does not flag unused *classes*, only unused private members within a class already in use).
+Not yet wired into `Generator.php` — pure additions, no existing behavior touched, no new PHPStan findings possible (both classes are unused until Task 9, and PHPStan's `level: max` does not flag unused _classes_, only unused private members within a class already in use).
 
 - [ ] **Step 1: Create `src/TypeKind.php`**
 
@@ -780,9 +787,11 @@ git commit -m "feat: add TypeKind enum and TypeInfo value object"
 ### Task 7: `Generator::generate()` + `Generator::indexSchemas()` — `query()`/`ownerDocOf()` helpers (Cluster A/C foundation)
 
 **Files:**
+
 - Modify: `../../src/Generator.php`
 
 **Interfaces:**
+
 - Produces: two new `private` helpers other tasks rely on —
   `private function ownerDocOf(\DOMElement $node): \DOMDocument` (throws `\RuntimeException` if `$node->ownerDocument` is null — unreachable for a node parsed from a loaded `\DOMDocument`)
   `private function query(\DOMXPath $xp, string $expression, ?\DOMNode $context = null): \DOMNodeList` (throws `\RuntimeException` if `$xp->query()` returns `false` — unreachable for this generator's own static, hardcoded XPath expressions).
@@ -953,9 +962,11 @@ git commit -m "fix: guard generate()/indexSchemas() DOM access, add query()/owne
 ### Task 8: `resolveQName()` + `collectParticleElements()` + `collectGroupRefElements()` + `collectAttributes()` + `resolveNamedRef()` (Cluster C)
 
 **Files:**
+
 - Modify: `../../src/Generator.php`
 
 **Interfaces:**
+
 - `resolveQName()`'s return type is unchanged (`array{0: string, 1: string}`) — only its docblock format changes (see below), which is what actually fixes the finding.
 - `collectGroupRefElements()`'s **docblock** return type is corrected from `\DOMElement[]` to `array{0: \DOMElement, 1: ?\DOMElement}[]` — this matches its actual runtime behavior (it delegates straight to `collectParticleElements()`, which already returns tuple pairs) and matches the existing, already-correct `$groupElementsCache` property docblock at the top of the class (L55). No caller-visible behavior change — this was a stale docblock, not a logic bug.
 
@@ -1229,9 +1240,11 @@ git commit -m "fix: guard particle/group/attribute collection DOM access, fix re
 This is the largest task — every one of these methods either produces, consumes, or passes through the `$typeInfo`/`$baseInfo` shape, so they must migrate together in one commit (a partial migration wouldn't compile: e.g. `resolveSimpleTypeRef()` assigns `resolvePrimitiveOrNamedSimpleType()`'s result straight into a variable it then reads `->kind`/`->phpType` from).
 
 **Files:**
+
 - Modify: `../../src/Generator.php`
 
 **Interfaces:**
+
 - `fallbackScalar(string $reason): TypeInfo` (was `: array`)
 - `resolvePrimitiveOrNamedSimpleType(\DOMElement $contextNode, string $qname): TypeInfo` (was `: array`)
 - `mergeFacets(TypeInfo $typeInfo, \DOMElement $restriction): TypeInfo` (was `array $typeInfo, ...): array`) — now returns a **new** `TypeInfo` instance (immutable, no in-place mutation)
@@ -1850,6 +1863,7 @@ git commit -m "refactor: migrate \$typeInfo array shape to TypeInfo/TypeKind val
 ### Task 10: `collectProperties()` DOM guards + `extractDoc()` + `buildComplexClass()` cleanup (Cluster C)
 
 **Files:**
+
 - Modify: `../../src/Generator.php`
 
 **Interfaces:** None changed — `collectProperties()`'s signature/return shape, `extractDoc()`'s signature, `buildComplexClass()`'s signature are all unchanged.
@@ -2195,6 +2209,7 @@ git commit -m "fix: guard collectProperties()/extractDoc() DOM access, buildComp
 ### Task 11: `../../src/Attribute/SymfonyValidatorAttributeStrategy.php` iterable type fixes (Cluster D)
 
 **Files:**
+
 - Modify: `../../src/Attribute/SymfonyValidatorAttributeStrategy.php`
 
 **Interfaces:** `attributesFor(Property $property): array` implements `PropertyAttributeStrategy` (interface already declares `list<array{fqcn: string, args: string}>` — this task only makes the implementation's own docblocks match what the interface already promises). No behavior change — pure annotation additions.
@@ -2314,6 +2329,7 @@ git commit -m "fix: type-safety pass over SymfonyValidatorAttributeStrategy"
 ### Task 12: `../../tests/GeneratorTest.php` infra type fixes (Cluster D)
 
 **Files:**
+
 - Modify: `../../tests/GeneratorTest.php`
 
 **Interfaces:** None — all changes are inside private test-helper methods and one inline test assertion.
@@ -2447,6 +2463,7 @@ git commit -m "fix: type-safety pass over GeneratorTest infra helpers"
 ### Task 13: `$violations[0]` -> `$violations->get(0)` + anonymous-class docblocks (Cluster D)
 
 **Files:**
+
 - Modify: `../../tests/SymfonyValidatorAttributeStrategyTest.php`
 - Modify: `../../tests/Attribute/SemanticTypeAttributeStrategyTest.php`
 - Modify: `../../tests/Validator/ExactlyOneOfValidatorTest.php`
@@ -2605,6 +2622,7 @@ git commit -m "fix: type-safety pass over validator constraint assertion tests"
 ### Task 14: Delete the baseline, update `phpstan.dist.neon` and `../backlog.md`, final verification
 
 **Files:**
+
 - Delete: `phpstan-baseline.neon`
 - Modify: `phpstan.dist.neon`
 - Modify: `../backlog.md`
@@ -2630,25 +2648,25 @@ Find (full current file):
 
 ```yaml
 includes:
-    - phpstan-baseline.neon
+  - phpstan-baseline.neon
 
 parameters:
-    level: max
-    paths:
-        - src
-        - bin
-        - tests
+  level: max
+  paths:
+    - src
+    - bin
+    - tests
 ```
 
 Replace with:
 
 ```yaml
 parameters:
-    level: max
-    paths:
-        - src
-        - bin
-        - tests
+  level: max
+  paths:
+    - src
+    - bin
+    - tests
 ```
 
 - [ ] **Step 4: Update `../backlog.md`**
@@ -2678,7 +2696,7 @@ Run: `composer phpstan`
 Expected: `[OK] No errors`
 
 Run: `composer test`
-Expected: full suite green (72+ tests, exact count may have grown slightly if any task added an assertion — none of this plan's tasks add new test *methods*, only guard/type assertions inside existing ones).
+Expected: full suite green (72+ tests, exact count may have grown slightly if any task added an assertion — none of this plan's tasks add new test _methods_, only guard/type assertions inside existing ones).
 
 Run the fixture-diff script from Global Constraints one final time, comparing the CURRENT generator's output against a snapshot taken from the commit just before Task 7 (the first DOM-touching task) — if a local copy of that snapshot wasn't kept, instead just confirm `../../tests/OfficialSchemaFixtureTest.php` still passes (it asserts on this exact fixture's generated output) as the equivalent end-to-end check:
 

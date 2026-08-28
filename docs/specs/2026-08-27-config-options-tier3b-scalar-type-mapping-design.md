@@ -19,7 +19,7 @@ package itself holds no knowledge of any specific type name" — this spec doesn
 Reference-repo check: `janephp`'s `CustomStringFormatGuesser`
 (`.references/janephp/src/Component/JsonSchema/Guesser/JsonSchema/CustomStringFormatGuesser.php`)
 takes `array<string, string>` (JSON Schema `format` keyword => classname) and, on a match, returns a
-`CustomObjectType` that *replaces* the property's type resolution entirely — it runs first in the
+`CustomObjectType` that _replaces_ the property's type resolution entirely — it runs first in the
 guesser chain (`GuesserFactory.php:39`, before `DateGuesser`/`EnumGuesser`/etc.), so a mapped
 `format` short-circuits every other type-guessing concern for that property, not just the base scalar
 type.
@@ -54,7 +54,7 @@ type.
   in practice, since `complexType`/`simpleType` are separate registries per
   `Generator::SCHEMA_NAME_BUCKETS`).
 - Does not touch `Property::$namedType`/`SemanticTypeAttributeStrategy` (ADR 0006) — that mechanism
-  stays bare-local-name-keyed and *adds* a constraint attribute to an otherwise-normal scalar property;
+  stays bare-local-name-keyed and _adds_ a constraint attribute to an otherwise-normal scalar property;
   this spec's mapping fully replaces the property's type, a structurally different operation. A type
   that's `scalarTypeMapping`-mapped simply never reaches the `namedType`-assignment line
   (`Generator.php:333`) since resolution short-circuits earlier — `Property::$namedType` stays `null`
@@ -65,7 +65,7 @@ type.
 - A mapped type used as an `xs:enumeration`-carrying `simpleType` intentionally loses its enum
   generation too (the mapping wins over enum-ness, not just over facets) — see Edge cases.
 - No constructor-argument shape assumed for the mapped class — the mapped FQCN is used purely as a PHP
-  type hint; how the consumer's class gets *instantiated* during deserialization is entirely the
+  type hint; how the consumer's class gets _instantiated_ during deserialization is entirely the
   consumer's `symfony/serializer` denormalizer configuration, outside this generator's concern.
 
 ## API
@@ -139,8 +139,8 @@ needed), or `fqType()`/`phpPropertyType()`/`phpDocType()` (already FQCN-render a
 - A fixture with `scalarTypeMapping: []` (default) is unaffected — byte-identical regression check
   against `tests/fixtures/w3c-purchase-order.xsd`, same bar every prior tier spec used.
 - `resolveSimpleTypeRef()`'s cycle-guard (`$this->resolvedSimple[$key] = self::STRING_FALLBACK;` set
-  *before* recursing) is unreachable for a mapped key (the mapped branch returns before that line) —
-  confirm this doesn't change cycle-detection behavior for any *other*, unmapped named `simpleType`
+  _before_ recursing) is unreachable for a mapped key (the mapped branch returns before that line) —
+  confirm this doesn't change cycle-detection behavior for any _other_, unmapped named `simpleType`
   that happens to reference the mapped one as its own restriction base (it can't: a mapped type's
   resolution never recurses into `resolvePrimitiveOrNamedSimpleType()` at all, so nothing downstream
   of it can be part of a self-reference cycle through this method).
@@ -157,7 +157,7 @@ needed), or `fqType()`/`phpPropertyType()`/`phpDocType()` (already FQCN-render a
   `typeAliases`.
 - **`Property::$namedType` staying `null` for a mapped property** (Non-goals) means a consumer cannot
   combine this spec's type-substitution with `SemanticTypeAttributeStrategy`'s constraint-aliasing for
-  the *same* named `simpleType` — not a real limitation in practice, since a consumer substituting
+  the _same_ named `simpleType` — not a real limitation in practice, since a consumer substituting
   their own class for a type is already free to put any `symfony/validator` constraints they want
   directly on that class.
 - **Array-of-mapped-type properties** need no special handling: `isArray` facet-skipping already exists

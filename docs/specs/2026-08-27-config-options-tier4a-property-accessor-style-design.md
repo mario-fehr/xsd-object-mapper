@@ -14,7 +14,7 @@ styles, matching the reference repo's own flexibility rather than a narrower sub
 `makinacorpus/php-xsd-gen` is AST-based (`nikic/php-parser`'s `BuilderFactory`) — its own "many
 combinable flags" design is easy to keep correct because each flag toggles one AST-builder call. This
 generator's `buildComplexClass()` is hand-rolled string concatenation. That difference doesn't change
-*what* this spec generates, but it does change *how big* the implementation is — see Implementation
+_what_ this spec generates, but it does change _how big_ the implementation is — see Implementation
 scope's closing note.
 
 ## Goals
@@ -22,6 +22,7 @@ scope's closing note.
 - `Config` gains 5 new fields, defaulting to today's exact fixed behavior (promoted, public, readonly,
   no getter, no setter) — a `Config` that doesn't set any of them generates byte-identical output to
   today:
+
   ```php
   public bool $propertyPromotion = true,
   public bool $propertyPublic = true,
@@ -29,6 +30,7 @@ scope's closing note.
   public bool $propertyGetter = false,
   public bool $propertySetter = false,
   ```
+
 - `propertyPromotion`: `true` — constructor-promoted properties (today's only mode). `false` —
   separate property declarations + non-promoted constructor parameters + manual `$this->prop = $prop;`
   assignment statements in the constructor body.
@@ -41,16 +43,16 @@ scope's closing note.
   all, on the class or on any property/param).
 - `propertyGetter`/`propertySetter`: independent of promotion/public/readonly — `true` adds a
   `get{Name}(): Type { return $this->{name}; }` / `set{Name}(Type $value): void { $this->{name} =
-  $value; }` public method for every property, regardless of the property's own visibility.
+$value; }` public method for every property, regardless of the property's own visibility.
 - Invalid combination rejected at `Config` construction: `propertyReadonly: true` with
   `propertySetter: true` throws `\InvalidArgumentException` immediately — a setter on a `readonly`-
-  class property compiles but throws `Error: Cannot modify readonly property` at *every* call, a
+  class property compiles but throws `Error: Cannot modify readonly property` at _every_ call, a
   broken-output combination, not just an ergonomics footgun. (`makinacorpus/php-xsd-gen` silently
   force-disables the setter with an `E_USER_WARNING` for the same combination — this spec throws
   instead, matching this package's own precedent of failing loud on a caller-configuration error rather
   than silently degrading; see [Tier 1](2026-08-27-config-options-tier1-design.md)'s
   `typeMissingError`/`typeOverrideError` reasoning for the same posture, and contrast with
-  `Generator`'s `warn()`/`note()` convention, which is reserved for *schema-content* issues, not
+  `Generator`'s `warn()`/`note()` convention, which is reserved for _schema-content_ issues, not
   caller-config mistakes.)
 
 ## Non-goals
@@ -122,19 +124,19 @@ plan, not here, but the shape is:
     corresponding property for `symfony/serializer`'s/`symfony/validator`'s reflection-based readers,
     same as today).
   - **Non-promoted** (new): a separate property-declaration statement (`{public|private} Type
-    $name;`, no `readonly` keyword — class-level `readonly` already covers it when `propertyReadonly`)
+$name;`, no `readonly` keyword — class-level `readonly` already covers it when `propertyReadonly`)
     carrying the doc comment and `#[...]` attributes (moved here from the constructor param — a plain,
     non-promoted constructor parameter has no property-reflection mirroring, so this move is required
     for `symfony/serializer`/`symfony/validator` to still find them, not optional/cosmetic); a plain
     (un-attributed, undocumented) constructor parameter of the same name/type; a `$this->name =
-    $name;` assignment statement in the constructor body.
+$name;` assignment statement in the constructor body.
 - **Constructor body**: today always empty (`{\n    }\n`, promoted params self-assign). When
   `!propertyPromotion`, gains one `$this->{name} = ${name};` line per property, in the same
   required-before-optional order the params themselves already use (`usort()`'s existing ordering,
   `Generator.php:804`, is unchanged and still governs both the param list and, now, the assignment
   order — no new ordering logic needed).
 - **Accessors**: when `propertyGetter`/`propertySetter`, append `get{Ucfirst(name)}(): Type { return
-  $this->{name}; }` / `set{Ucfirst(name)}(Type $value): void { $this->{name} = $value; }` public
+$this->{name}; }` / `set{Ucfirst(name)}(Type $value): void { $this->{name} = $value; }` public
   methods after the constructor, one pair of loops over `$properties` (independent of the
   promoted/non-promoted branch above — both read/write `$this->{name}` identically either way).
   `Naming::toClassName($p->phpName)`-style ucfirst (reuse `Naming`'s existing sanitize-free `ucfirst`,
@@ -148,7 +150,7 @@ The five flags are independent per the confirmed full-matrix scope, so the imple
 budget for testing a representative combination set (every flag toggled independently against the
 default, plus the two or three combinations most likely to interact unexpectedly — e.g.
 `propertyPromotion: false` + `propertyGetter: true` + `propertyPublic: false`, the "classic private-
-with-accessors" combo `makinacorpus/php-xsd-gen`'s own *default* actually is), not literally all 32
+with-accessors" combo `makinacorpus/php-xsd-gen`'s own _default_ actually is), not literally all 32
 combinations minus the one rejected pair.
 
 ## Testing
@@ -174,16 +176,16 @@ combinations minus the one rejected pair.
 - A `propertyPromotion: false` class still needs every property assigned before `symfony/serializer`'s
   denormalizer (or any other constructor caller) can rely on it — the manual `$this->name = $name;`
   assignment order matters only in that every property must be assigned exactly once; order among
-  properties themselves has no behavioral consequence (unlike the *parameter* order, which PHP's
+  properties themselves has no behavioral consequence (unlike the _parameter_ order, which PHP's
   required-before-optional rule does constrain).
 - `propertyReadonly: false` also removes readonly-ness from any `readonly` value objects this generator
   emits elsewhere (there are none outside `buildComplexClass()`'s own output — `Property`/`Config`/
-  `NamespaceMapping`/`TypeInfo` are this *package's own* internal value objects, not generated code;
+  `NamespaceMapping`/`TypeInfo` are this _package's own_ internal value objects, not generated code;
   unaffected by a `Config` flag that only governs generated-class shape).
 - Non-promoted mode's property statement and the plain constructor parameter share the same
   `Naming::toPropName()`-derived name by construction (both come from the same `Property::$phpName`) —
   no separate collision surface introduced.
 - `propertyGetter`/`propertySetter` methods don't get their own `#[...]` attributes (no `symfony/
-  serializer`/`symfony/validator` concern applies to a plain accessor method) — only the property/
+serializer`/`symfony/validator` concern applies to a plain accessor method) — only the property/
   promoted-param carries them, confirmed already implicit in Goals but stated explicitly here since
   it's the kind of detail easy to accidentally duplicate onto the getter during implementation.

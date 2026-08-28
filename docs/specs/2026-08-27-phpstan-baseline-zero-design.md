@@ -24,7 +24,7 @@ Categorized by root cause (see `docs/backlog.md`'s "Static analysis" section for
   shape, not yet applied to this one.
 - **C. Raw DOM `NodeList` iteration (25 entries, all `Generator.php` + 1 in
   `xsd-construct-report.php`)** — `$xp->query(...)` returns `\DOMNodeList<\DOMNameSpaceNode|
-  \DOMNode>|false` per PHPStan's `ext-dom` stubs; a `foreach` over it yields
+\DOMNode>|false` per PHPStan's `ext-dom` stubs; a `foreach` over it yields
   `\DOMNameSpaceNode|\DOMNode`, not `\DOMElement`. The codebase already uses an
   `instanceof \DOMElement` guard at some call sites (e.g. `$ext instanceof \DOMElement` in
   `collectProperties()`) — these 25 are the remaining sites where that same, already-established
@@ -56,7 +56,7 @@ Categorized by root cause (see `docs/backlog.md`'s "Static analysis" section for
 - No behavior change or new XSD-construct support — this is purely a type-safety pass over
   existing logic paths.
 - `facets`' own shape (`array{length?: int, minLength?: int, ...}`) stays a plain array, same as
-  the `Property` refactor's decision — it becomes a field *of* `TypeInfo`, not its own object.
+  the `Property` refactor's decision — it becomes a field _of_ `TypeInfo`, not its own object.
 - Cluster D's test-file findings get the minimal fix each needs (an explicit cast, an
   `assert()`, an `array_values()`) — no broader test-file refactor.
 
@@ -172,12 +172,12 @@ malformed-input test, not by assumption).
   than throw — consistent with this generator's overall philosophy of degrading gracefully on
   unexpected schema shapes instead of crashing.
 - `self::STRING_FALLBACK` (currently `['kind' => 'scalar', 'phpType' => 'string', 'dateOnly' =>
-  false]`) becoming a `TypeInfo` constant needs PHP 8.4's ability to use an object as a class
+false]`) becoming a `TypeInfo` constant needs PHP 8.4's ability to use an object as a class
   constant's default value where the object is composed entirely of other constants/literals
   (readonly class instantiation in a constant context) — confirm this compiles as expected during
   Cluster B's implementation; if it doesn't, a `private static function stringFallback(): TypeInfo`
   factory method is the fallback design, not a blocker for the approach.
-- `mergeFacets(TypeInfo $typeInfo, \DOMElement $restriction): TypeInfo` needs to return a *new*
+- `mergeFacets(TypeInfo $typeInfo, \DOMElement $restriction): TypeInfo` needs to return a _new_
   `TypeInfo` with merged facets (immutable value object, no in-place mutation) rather than the
   current array-merge-and-return pattern — straightforward but worth calling out since it's a
   `with`-style reconstruction, not a simple field access change like most of Cluster B.

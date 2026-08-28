@@ -22,7 +22,7 @@ Two corrections to the backlog wording found while scoping this spec:
    per-strategy configuration belongs on the strategy itself, not the shared `Config` object — "the
    composition decision... lives entirely with the caller building the `Config`". So the date-format
    options land as `SymfonySerializerAttributeStrategy` constructor parameters, not new `Config`
-   fields. `skip-null-values` is different: it's a *class*-level attribute (applies uniformly across
+   fields. `skip-null-values` is different: it's a _class_-level attribute (applies uniformly across
    all of a generated class's nullable properties), and this codebase's only existing class-level
    attribute (`#[ExactlyOneOf]`, from the choice-group feature) is generated directly by
    `Generator::buildComplexClass()`, config-driven, with no strategy indirection at all — `Config`
@@ -32,7 +32,7 @@ Two corrections to the backlog wording found while scoping this spec:
 `janephp`'s option names/defaults referenced for scoping (not adopted 1:1 — see API section for why):
 `full-date-format` (default `'Y-m-d'`, this generator's current hardcoded date-only format),
 `date-format` (default RFC3339, the full-datetime format), `date-input-format` (default `null`, a
-separate *input*-parsing format) —
+separate _input_-parsing format) —
 `.references/janephp/src/Component/JsonSchema/Console/Loader/ConfigLoader.php:67-70`.
 
 ## Goals
@@ -58,7 +58,7 @@ separate *input*-parsing format) —
 - `skipNullValues` is one global flag for the whole generation run, not configurable per-namespace or
   per-type — matches every other `Config` flag added in Tier 1/Tier 2.
 - No merging logic between a property's own `dateOnly`-driven `#[Context]` and the new class-level
-  `skipNullValues`-driven `#[Context]` — they're different attribute *targets* (property vs. class),
+  `skipNullValues`-driven `#[Context]` — they're different attribute _targets_ (property vs. class),
   `symfony/serializer` attributes support both independently on the same class without conflict, no
   special-casing needed.
 
@@ -118,14 +118,18 @@ check is correct whichever type is actually in use).
 `$choiceGroups`-driven `#[ExactlyOneOf]` class attribute:
 
 - Import registration, alongside the existing `if ([] !== $choiceGroups) { $imports[Validator\ExactlyOneOf::class] ??= 'ExactlyOneOf'; }` block:
+
   ```php
   if (null !== $this->config->skipNullValues) {
       $imports['Symfony\Component\Serializer\Attribute\Context'] ??= 'Context';
   }
   ```
+
   (Idempotent either way if a property-level `dateOnly`/`dateTimeFormat` `Context` attribute already
   registered the same fqcn earlier in the same method — `??=` is a no-op on the second registration.)
+
 - Class attribute line, alongside the existing `foreach ($choiceGroups as $group) { $classAttrLines[] = ...; }` loop:
+
   ```php
   if (null !== $this->config->skipNullValues) {
       $classAttrLines[] = "#[{$ctx->render('Symfony\Component\Serializer\Attribute\Context')}(['skip_null_values' => ".var_export($this->config->skipNullValues, true)."])]\n";

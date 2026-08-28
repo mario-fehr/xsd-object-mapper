@@ -19,7 +19,7 @@ Reference-repo check: `makinacorpus/php-xsd-gen`'s `AbstractGenerator`
 (`.references/makinacorpus-php-xsd-gen/src/Helper/AbstractGenerator.php`) is a mutable fluent builder
 over the same option set its `GeneratorConfig` ultimately holds — `->file()` appends one XSD path at a
 time, `->namespace()` appends one namespace-map entry at a time, every boolean option gets a
-`toggle(bool $toggle = true): static` method. Adopting the *shape* of that pattern (fluent, mutable
+`toggle(bool $toggle = true): static` method. Adopting the _shape_ of that pattern (fluent, mutable
 builder wrapping an otherwise-immutable config), not its `logger()` method — this generator has no
 `LoggerInterface` abstraction anywhere today (`Generator::warn()`/`note()` write directly to `STDERR`);
 adding one would be an unrelated observability feature, not a `Config`-construction-ergonomics one, out
@@ -32,11 +32,11 @@ caller who prefers one constructor call over incremental building.
 
 ## Goals
 
-- New `src/ConfigBuilder.php`, `final class` (deliberately *not* `readonly` — a fluent builder is
+- New `src/ConfigBuilder.php`, `final class` (deliberately _not_ `readonly` — a fluent builder is
   inherently mutable internal state, unlike every other value object this package exposes).
 - One fluent method per `Config` field, `return $this` (technically `static` for subclass-safety, no
   subclassing use case exists today but costs nothing to declare correctly).
-- Collection fields get an *appending* method (`file()`, `namespace()`, `typeAlias()`,
+- Collection fields get an _appending_ method (`file()`, `namespace()`, `typeAlias()`,
   `scalarTypeMapping()` — singular, one entry per call) rather than a method that replaces the whole
   array, since the incremental-building ergonomics are the entire point (a caller who already has a
   complete array can still pass it via `Config`'s constructor directly — the builder isn't the only
@@ -55,7 +55,7 @@ caller who prefers one constructor call over incremental building.
 - No validation duplicated from `Config`'s own constructor (e.g. Tier 4a's `propertyReadonly` +
   `propertySetter` conflict) — `build()` calls `new Config(...)`, which already throws; the builder
   doesn't pre-check anything `Config` itself already guards.
-- No fluent method that *replaces* a whole collection field (e.g. no `xsdPaths(array $paths): static`
+- No fluent method that _replaces_ a whole collection field (e.g. no `xsdPaths(array $paths): static`
   alongside `file(string $path): static`) — one appending method per collection field keeps the API
   surface from doubling for no ergonomic gain a direct `Config` constructor call doesn't already cover.
 - `Config`'s constructor stays the canonical/primary construction path, documented as such — this
@@ -148,7 +148,7 @@ final class ConfigBuilder
 ```
 
 `skipNullValues`'s builder-side default is `null` (matching Tier 3a's `Config::$skipNullValues: ?bool
-= null` three-state field exactly — `bool $toggle = true` for the *method* signature still works,
+= null` three-state field exactly — `bool $toggle = true` for the _method_ signature still works,
 since calling `->skipNullValues()` or `->skipNullValues(true)`/`->skipNullValues(false)` all produce a
 concrete `bool`; the field only stays `null` when the method is never called at all).
 
@@ -160,7 +160,7 @@ incrementally, not as one batch:
 - **This spec's own plan** implements the `ConfigBuilder` class itself plus the three methods for
   `Config`'s existing fields (`file()`, `namespace()`, `attributeStrategy()`, `build()`) — these three
   fields already exist in `Config` today, nothing to wait on.
-- **Every other method** (one per Tier 1/2/3a/3b/4a field) is added as a task on *that field's own*
+- **Every other method** (one per Tier 1/2/3a/3b/4a field) is added as a task on _that field's own_
   tier's implementation plan, once `writing-plans` turns that tier's spec into a plan — not batched
   into a separate "catch up `ConfigBuilder`" plan after the fact. Matches the already-agreed convention
   of updating `Config`'s own docblock per-tier rather than in one final pass (same session, same

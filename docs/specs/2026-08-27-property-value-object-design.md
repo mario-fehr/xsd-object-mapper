@@ -107,7 +107,7 @@ deleted; the type now carries itself.
   on `Property`, no separate DOM-keyed side-map needed either.
 - Test files constructing raw property arrays directly (confirmed via
   `grep -rn "'isAttribute'\|'isText'\|'isArray'\|'phpName'\|'namedType'\|'xmlName'\|'dateOnly'"
-  tests/`, and via every `attributesFor(` call site): only
+tests/`, and via every `attributesFor(` call site): only
   `tests/Attribute/SemanticTypeAttributeStrategyTest.php` (3 raw array literals) and
   `tests/GeneratorTest.php` (one anonymous `PropertyAttributeStrategy` test double whose
   parameter type must change, though its body never reads `$property`). Every other test file

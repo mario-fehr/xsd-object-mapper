@@ -14,7 +14,7 @@ Correction to the backlog wording found while scoping this spec: `clean-generate
 says "nothing in this generator currently purges the output directory first" — false as of the code
 today. `Generator::generate()` already unconditionally wipes every `NamespaceMapping::$outputDir`
 before regenerating (`$this->filesystem->remove($mapping->outputDir)`, present since the initial
-commit). The real gap is that this is *unconditional* — no way to opt out for an output dir that also
+commit). The real gap is that this is _unconditional_ — no way to opt out for an output dir that also
 holds hand-written companion files. Scope here is making it toggleable, not adding the behavior.
 
 ## Goals
@@ -22,7 +22,7 @@ holds hand-written companion files. Scope here is making it toggleable, not addi
 - `cleanGenerated: bool = true` — output-dir purge in `generate()` becomes conditional on this flag.
   Default preserves current (always-purge) behavior; `false` opts out.
 - `typeAliases: array<string, string> = []` — keyed by XSD QName (`"{namespaceURI}#{localName}"`,
-  same key shape `Generator` already uses internally), overrides the generated PHP class *name* (not
+  same key shape `Generator` already uses internally), overrides the generated PHP class _name_ (not
   namespace — that stays `NamespaceMapping`'s job) for a specific named `complexType` or named
   `simpleType`-enum. Value is used verbatim as the class's short name, not run through
   `Naming::toClassName()` — consistent with [ADR 0006](../adr/0006-semantic-type-aliasing-is-caller-supplied.md)'s
@@ -47,12 +47,12 @@ holds hand-written companion files. Scope here is making it toggleable, not addi
   different XSD types aliased to the same name within the same namespace (would silently overwrite
   the generated file, same as any other class-name collision today) — caller's responsibility, not a
   new check.
-- `typeMissingError`/`typeOverrideError` don't touch the *unrelated* `$seenGroups` cycle-detection gap
+- `typeMissingError`/`typeOverrideError` don't touch the _unrelated_ `$seenGroups` cycle-detection gap
   (`resolveNamedRef()`'s tree-wide-not-per-path scoping, see backlog) or the existing `xs:attribute
-  ref="..."`/element-ref warn-and-skip paths — those already warn today and are out of scope here.
+ref="..."`/element-ref warn-and-skip paths — those already warn today and are out of scope here.
 - No change to any XS-builtin-primitive fallback (e.g. an XSD 1.1-only or otherwise unrecognized
   `xs:*` primitive name still silently maps to `string` via `Naming::xsPrimitiveToPhp()`'s `default`
-  arm) — `typeMissingError` is scoped to *named*-type reference misses only, not unrecognized
+  arm) — `typeMissingError` is scoped to _named_-type reference misses only, not unrecognized
   XS-namespace primitives.
 
 ## API
@@ -86,6 +86,7 @@ public function __construct(
     is `ensureEnumClass()` taking the already-resolved class name directly rather than a "simpleType
     name to be sanitized" — confirm exact call shape against the code at implementation time.
 - **`typeMissingError`** — new private helper, e.g.:
+
   ```php
   private function reportMissingType(string $kindLabel, string $local): void
   {
@@ -96,25 +97,30 @@ public function __construct(
       $this->warn($message);
   }
   ```
+
   Called from:
   - `resolvePrimitiveOrNamedSimpleType()`'s fallback branch, only when `$ns !== self::XS_NS` (a named-
     type reference that resolved to neither a known `complexType` — checked by
     `resolveParticleType()`'s caller — nor a known `simpleType`). An XS-namespace primitive that
     `Naming::xsPrimitiveToPhp()` doesn't recognize stays silent (non-goal above).
   - `collectProperties()`'s `complexContent`/`extension` base lookup (currently: `isset($baseKey,
-    ...)` false means `$baseProperties` just stays `[]`, no diagnostic at all today) — add an `else`
+...)` false means `$baseProperties` just stays `[]`, no diagnostic at all today) — add an `else`
     branch calling `reportMissingType('complexType base', $baseLocal)` when `$baseLocal` is non-empty
     and not `anyType`. This closes a pre-existing silent gap independent of this feature (no warning
     exists today even outside strict mode) — folded in here since `typeMissingError` needs to cover
     this site to be complete, not deferred as a separate backlog item.
+
 - **`typeOverrideError`** — `indexSchemas()`'s combined-query loop, currently:
+
   ```php
   foreach ($xp->query($query) as $node) {
       $property = self::SCHEMA_NAME_BUCKETS[$node->localName];
       $this->{$property}[$targetNs.'#'.$node->getAttribute('name')] = $node;
   }
   ```
+
   becomes a collision check before the assignment:
+
   ```php
   foreach ($xp->query($query) as $node) {
       $property = self::SCHEMA_NAME_BUCKETS[$node->localName];
@@ -129,6 +135,7 @@ public function __construct(
       $this->{$property}[$key] = $node;
   }
   ```
+
   Applies uniformly to all 5 buckets (`complexType`/`simpleType`/`attributeGroup`/`group`/`element`) —
   one shared code path, no reason to special-case by construct kind.
 
@@ -136,6 +143,7 @@ public function __construct(
 
 Each of the 4 flags gets its own unit test(s) against `GeneratorTest.php`'s existing fixture-based
 style:
+
 - `cleanGenerated: false` — a stray file in a configured `outputDir` before `generate()` survives
   after.
 - `typeAliases` — a fixture `complexType` and a fixture named-`simpleType` enum each with an alias
