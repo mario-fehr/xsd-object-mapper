@@ -20,26 +20,6 @@ Candidate for eventual Packagist publication.
 - `npm install` (once) — Prettier; the only JS in this repo, kept out of Composer.
 - `npm run format` / `npm run format:check` — Prettier on `**/*.{md,yml,yaml,json}` (`proseWrap: preserve` doesn't rewrap this repo's long unwrapped prose lines; `CLAUDE.md` excluded via `.prettierignore`, it's a 1-line `@AGENTS.md` pointer not a doc).
 
-## Planning
-
-Design rationale for this package is worth keeping (unlike ephemeral ticket-driven work), so any
-non-trivial change gets two committed documents before implementation starts:
-
-- `docs/specs/YYYY-MM-DD-slug-design.md` — WHY: problem, goals/non-goals, API, edge cases, testing.
-- `docs/plans/YYYY-MM-DD-slug.md` — WHAT/HOW: numbered tasks, each a failing-test → implement →
-  passing-test → commit loop.
-- A durable architectural decision that isn't tied to one feature gets its own
-  `docs/adr/NNNN-slug.md` instead of a plan.
-
-No ticket IDs (date+slug instead), no story/feature-branch hierarchy or MR checklist — solo lib,
-this two-document workflow replaces that. `main` is branch-protected: a PR with all CI checks
-green is required before merging (0 approvals required, so this doesn't block solo work).
-
-If you're Claude Code with the `superpowers` plugin installed, its `brainstorming` →
-`writing-plans` → `executing-plans`/`subagent-driven-development` skills produce exactly this
-shape — use them (`.superpowers/` is that plugin's own ephemeral scratch, gitignored, never
-committed). Without it, write the two files by hand following the structure above.
-
 ## Architecture
 
 - `src/Generator.php` — entry point, XSD → PHP class generation.
@@ -49,17 +29,17 @@ committed). Without it, write the two files by hand following the structure abov
 - `src/Validator/` — custom constraints generated code depends on (`Decimal`, `ExactlyOneOf`).
 - `bin/xsd-construct-report.php`, `bin/check-fixture-drift.php` — schema-agnostic CLI tools, take any XSD dir/file as input.
 - `docs/construct-coverage.md` — per-construct support/test matrix. `docs/backlog.md` — reasoning behind every gap in that matrix.
-- `docs/reference-repos.md` — prior-art XSD→PHP (and adjacent) generators.
+- `reference-repos.md` — prior-art XSD→PHP (and adjacent) generators.
 
 ## Reference: prior-art generators
 
-`docs/reference-repos.md` lists open-source XSD→PHP (and adjacent schema→PHP)
+`reference-repos.md` lists open-source XSD→PHP (and adjacent schema→PHP)
 generators worth consulting before inventing a solution from scratch. Consult it
 when: a construct isn't in `docs/construct-coverage.md` yet and you're about to
 design how to generate PHP for it; writing/updating a `docs/backlog.md` entry
 (check whether prior art solved the gap, punted on it, or hit the same wall);
 or facing a generator-architecture question (config shape, naming/collision
-strategy, runtime-vs-generated-code split) while writing a spec or plan.
+strategy, runtime-vs-generated-code split).
 
 Clone one into the git-ignored `.references/` dir — the `add-reference-repository` skill
 automates this if you have the `superpowers` plugin, otherwise `git clone --depth 1 <url>
