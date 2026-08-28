@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
 
@@ -18,7 +18,7 @@ final class FixtureDriftToolTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/xsd2php-drift-test-'.bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd-object-mapper-drift-test-'.bin2hex(random_bytes(8));
         mkdir($this->tmpDir.'/bin', 0o777, true);
         mkdir($this->tmpDir.'/tests/fixtures', 0o777, true);
 

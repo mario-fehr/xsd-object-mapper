@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Attribute;
+namespace XsdObjectMapper\Attribute;
 
-use Xsd2Php\Property;
+use XsdObjectMapper\Property;
 
 /** Merges the attributesFor() results of multiple strategies, in the order given. */
 final readonly class CompositeAttributeStrategy implements PropertyAttributeStrategy

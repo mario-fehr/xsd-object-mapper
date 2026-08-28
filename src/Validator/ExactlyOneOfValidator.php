@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Validator;
+namespace XsdObjectMapper\Validator;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;

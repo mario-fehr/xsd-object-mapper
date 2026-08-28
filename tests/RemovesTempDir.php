@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 /** Recursively deletes a test's temp directory - shared by every test that generates into one. */
 trait RemovesTempDir

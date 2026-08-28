@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Xsd2Php\Attribute\SymfonySerializerAttributeStrategy;
-use Xsd2Php\Config;
-use Xsd2Php\Generator;
-use Xsd2Php\NamespaceMapping;
+use XsdObjectMapper\Attribute\SymfonySerializerAttributeStrategy;
+use XsdObjectMapper\Config;
+use XsdObjectMapper\Generator;
+use XsdObjectMapper\NamespaceMapping;
 
 /**
  * Runs the generator against the W3C XML Schema Primer's purchase-order example
@@ -25,7 +25,7 @@ final class OfficialSchemaFixtureTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/xsd2php-po-test-'.bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd-object-mapper-po-test-'.bin2hex(random_bytes(8));
         mkdir($this->tmpDir, 0o777, true);
     }
 

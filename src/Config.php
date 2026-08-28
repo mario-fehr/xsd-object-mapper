@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php;
+namespace XsdObjectMapper;
 
-use Xsd2Php\Attribute\PropertyAttributeStrategy;
+use XsdObjectMapper\Attribute\PropertyAttributeStrategy;
 
 final readonly class Config
 {

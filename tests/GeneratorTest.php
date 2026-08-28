@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Xsd2Php\Attribute\PropertyAttributeStrategy;
-use Xsd2Php\Attribute\SymfonySerializerAttributeStrategy;
-use Xsd2Php\Config;
-use Xsd2Php\Generator;
-use Xsd2Php\NamespaceMapping;
-use Xsd2Php\Property;
+use XsdObjectMapper\Attribute\PropertyAttributeStrategy;
+use XsdObjectMapper\Attribute\SymfonySerializerAttributeStrategy;
+use XsdObjectMapper\Config;
+use XsdObjectMapper\Generator;
+use XsdObjectMapper\NamespaceMapping;
+use XsdObjectMapper\Property;
 
 final class GeneratorTest extends TestCase
 {
     use RemovesTempDir;
 
-    private const string TEST_NS = 'urn:xsd2php-test';
+    private const string TEST_NS = 'urn:xsd-object-mapper-test';
 
     private string $tmpDir;
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/xsd2php-test-'.bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd-object-mapper-test-'.bin2hex(random_bytes(8));
         mkdir($this->tmpDir.'/xsd', 0o777, true);
         mkdir($this->tmpDir.'/out', 0o777, true);
     }
@@ -37,8 +37,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:element name="Name" type="xs:string"/>
               <xs:complexType name="PersonType">
@@ -68,8 +68,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:element name="Greeting" type="xs:string" default="Hello"/>
               <xs:complexType name="PersonType">
@@ -107,8 +107,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -131,8 +131,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -158,8 +158,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:group name="AddressGroup">
                 <xs:sequence>
@@ -191,8 +191,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:group name="A">
                 <xs:sequence>
@@ -230,8 +230,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="BaseType">
                 <xs:sequence>
@@ -279,8 +279,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -315,8 +315,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="AddressType">
                 <xs:sequence>
@@ -348,8 +348,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsdFile('a.xsd', <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test-a"
-                       targetNamespace="urn:xsd2php-test-a"
+                       xmlns="urn:xsd-object-mapper-test-a"
+                       targetNamespace="urn:xsd-object-mapper-test-a"
                        elementFormDefault="qualified">
               <xs:complexType name="AddressType">
                 <xs:sequence>
@@ -361,9 +361,9 @@ final class GeneratorTest extends TestCase
         $this->writeXsdFile('b.xsd', <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test-b"
-                       xmlns:a="urn:xsd2php-test-a"
-                       targetNamespace="urn:xsd2php-test-b"
+                       xmlns="urn:xsd-object-mapper-test-b"
+                       xmlns:a="urn:xsd-object-mapper-test-a"
+                       targetNamespace="urn:xsd-object-mapper-test-b"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -374,8 +374,8 @@ final class GeneratorTest extends TestCase
             XSD);
 
         $this->generate(namespaceMap: [
-            'urn:xsd2php-test-a' => new NamespaceMapping('GenA', $this->tmpDir.'/out-a'),
-            'urn:xsd2php-test-b' => new NamespaceMapping('GenB', $this->tmpDir.'/out-b'),
+            'urn:xsd-object-mapper-test-a' => new NamespaceMapping('GenA', $this->tmpDir.'/out-a'),
+            'urn:xsd-object-mapper-test-b' => new NamespaceMapping('GenB', $this->tmpDir.'/out-b'),
         ]);
 
         $path = $this->tmpDir.'/out-b/PersonType.php';
@@ -391,8 +391,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -413,7 +413,7 @@ final class GeneratorTest extends TestCase
         // must still win.
         $this->generate(namespaceMap: [
             self::TEST_NS => new NamespaceMapping('TestGen', $this->tmpDir.'/out'),
-            'urn:xsd2php-test-unused' => new NamespaceMapping('TestGen\\PersonType', $this->tmpDir.'/out-nested'),
+            'urn:xsd-object-mapper-test-unused' => new NamespaceMapping('TestGen\\PersonType', $this->tmpDir.'/out-nested'),
         ]);
 
         $this->assertFileExists($this->tmpDir.'/out/PersonType.php');
@@ -426,8 +426,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:choice>
@@ -444,7 +444,7 @@ final class GeneratorTest extends TestCase
 
         // xs:choice elements are mutually exclusive alternatives, not siblings that are all
         // required at once - both nullable, plus a class-level "exactly one of" constraint.
-        $this->assertStringContainsString('use Xsd2Php\Validator\ExactlyOneOf;', $code);
+        $this->assertStringContainsString('use XsdObjectMapper\Validator\ExactlyOneOf;', $code);
         $this->assertStringContainsString("#[ExactlyOneOf(fields: ['accommodation', 'brochure'])]", $code);
         $this->assertStringContainsString('public ?string $accommodation = null,', $code);
         $this->assertStringContainsString('public ?string $brochure = null,', $code);
@@ -455,8 +455,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -483,8 +483,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:group name="AddressGroup">
                 <xs:sequence>
@@ -517,8 +517,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:choice maxOccurs="unbounded">
@@ -548,8 +548,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:sequence>
@@ -588,8 +588,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:choice>
@@ -615,8 +615,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:choice>
@@ -649,8 +649,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="CartItemType">
                 <xs:choice minOccurs="0">
@@ -675,8 +675,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="ColorEnum">
                 <xs:restriction base="xs:string">
@@ -708,8 +708,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="SubTypeEnum">
                 <xs:restriction base="xs:string">
@@ -740,8 +740,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="CollisionEnum">
                 <xs:restriction base="xs:string">
@@ -771,8 +771,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="ReservedEnum">
                 <xs:restriction base="xs:string">
@@ -800,8 +800,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="PriorityEnum">
                 <xs:restriction base="xs:int">
@@ -832,8 +832,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:sequence>
@@ -870,8 +870,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="ColorEnum">
                 <xs:restriction base="xs:string">
@@ -911,8 +911,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="Identification">
                 <xs:attribute name="Id" type="xs:string" use="required"/>
@@ -940,8 +940,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="Identification">
                 <xs:attribute name="Id" type="xs:string" use="required"/>
@@ -975,8 +975,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="Identification">
                 <xs:attribute name="Id" type="xs:string" use="required"/>
@@ -1002,8 +1002,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="CircularA">
                 <xs:attribute name="A" type="xs:string" use="required"/>
@@ -1038,8 +1038,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="PersonType">
                 <xs:attributeGroup ref="DoesNotExist"/>
@@ -1059,8 +1059,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="Identification">
                 <xs:attribute name="Id" type="xs:string" use="required"/>
@@ -1104,8 +1104,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="DescriptionType">
                 <xs:simpleContent>
@@ -1131,8 +1131,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:complexType name="DescriptionType">
                 <xs:simpleContent>
@@ -1161,8 +1161,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:attributeGroup name="Identification">
                 <xs:attribute name="Id" type="xs:string" use="required"/>
@@ -1196,8 +1196,8 @@ final class GeneratorTest extends TestCase
         $this->writeXsd(<<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-test"
-                       targetNamespace="urn:xsd2php-test"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="LanguageEnum">
                 <xs:restriction base="xs:string">

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php;
+namespace XsdObjectMapper;
 
 /** PHP identifier/type-name helpers shared across the generator. */
 final class Naming

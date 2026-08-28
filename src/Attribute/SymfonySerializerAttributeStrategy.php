@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Attribute;
+namespace XsdObjectMapper\Attribute;
 
-use Xsd2Php\Property;
-use Xsd2Php\PropertyRole;
+use XsdObjectMapper\Property;
+use XsdObjectMapper\PropertyRole;
 
 /**
  * Emits symfony/serializer's #[SerializedName]/#[Context] attributes: '@Name' for

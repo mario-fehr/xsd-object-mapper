@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests\Validator;
+namespace XsdObjectMapper\Tests\Validator;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
-use Xsd2Php\Validator\ExactlyOneOf;
+use XsdObjectMapper\Validator\ExactlyOneOf;
 
 final class ExactlyOneOfValidatorTest extends TestCase
 {

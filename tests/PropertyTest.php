@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Xsd2Php\Property;
-use Xsd2Php\PropertyRole;
+use XsdObjectMapper\Property;
+use XsdObjectMapper\PropertyRole;
 
 final class PropertyTest extends TestCase
 {

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests\Attribute;
+namespace XsdObjectMapper\Tests\Attribute;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraints\Country;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Validation;
-use Xsd2Php\Attribute\SemanticTypeAttributeStrategy;
-use Xsd2Php\Config;
-use Xsd2Php\Generator;
-use Xsd2Php\NamespaceMapping;
-use Xsd2Php\Property;
-use Xsd2Php\PropertyRole;
-use Xsd2Php\Tests\RemovesTempDir;
+use XsdObjectMapper\Attribute\SemanticTypeAttributeStrategy;
+use XsdObjectMapper\Config;
+use XsdObjectMapper\Generator;
+use XsdObjectMapper\NamespaceMapping;
+use XsdObjectMapper\Property;
+use XsdObjectMapper\PropertyRole;
+use XsdObjectMapper\Tests\RemovesTempDir;
 
 final class SemanticTypeAttributeStrategyTest extends TestCase
 {
@@ -55,7 +55,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
      */
     public function testAliasedConstraintsAreActuallyEnforcedAtRuntime(): void
     {
-        $tmpDir = sys_get_temp_dir().'/xsd2php-semantic-test-'.bin2hex(random_bytes(8));
+        $tmpDir = sys_get_temp_dir().'/xsd-object-mapper-semantic-test-'.bin2hex(random_bytes(8));
         $phpNamespace = 'SemanticTestGen'.bin2hex(random_bytes(4));
         mkdir($tmpDir.'/xsd', 0o777, true);
         mkdir($tmpDir.'/out', 0o777, true);
@@ -64,8 +64,8 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
             file_put_contents($tmpDir.'/xsd/schema.xsd', <<<'XSD'
                 <?xml version="1.0" encoding="utf-8"?>
                 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                           xmlns="urn:xsd2php-semantic-test"
-                           targetNamespace="urn:xsd2php-semantic-test"
+                           xmlns="urn:xsd-object-mapper-semantic-test"
+                           targetNamespace="urn:xsd-object-mapper-semantic-test"
                            elementFormDefault="qualified">
                   <xs:simpleType name="EmailType">
                     <xs:restriction base="xs:string"/>
@@ -86,7 +86,7 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
 
             $config = new Config(
                 xsdPaths: [$tmpDir.'/xsd/schema.xsd'],
-                namespaceMap: ['urn:xsd2php-semantic-test' => new NamespaceMapping($phpNamespace, $tmpDir.'/out')],
+                namespaceMap: ['urn:xsd-object-mapper-semantic-test' => new NamespaceMapping($phpNamespace, $tmpDir.'/out')],
                 attributeStrategy: new SemanticTypeAttributeStrategy(self::ALIAS_MAP + [
                     'CountryCodeType' => ['fqcn' => Country::class, 'args' => ''],
                 ]),

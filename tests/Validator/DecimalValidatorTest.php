@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests\Validator;
+namespace XsdObjectMapper\Tests\Validator;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
-use Xsd2Php\Validator\Decimal;
+use XsdObjectMapper\Validator\Decimal;
 
 final class DecimalValidatorTest extends TestCase
 {

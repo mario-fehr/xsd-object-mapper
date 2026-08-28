@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php;
+namespace XsdObjectMapper;
 
 /**
  * Resolves how a class/enum property type is rendered inside one generated class file:

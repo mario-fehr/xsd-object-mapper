@@ -10,7 +10,7 @@
          cacheDirectory=".phpunit.cache"
 >
     <testsuites>
-        <testsuite name="xsd2php Test Suite">
+        <testsuite name="xsd-object-mapper Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

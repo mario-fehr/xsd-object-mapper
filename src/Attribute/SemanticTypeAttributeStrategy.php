@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Attribute;
+namespace XsdObjectMapper\Attribute;
 
-use Xsd2Php\Property;
+use XsdObjectMapper\Property;
 
 /**
  * Adds a caller-supplied constraint when a property's directly-referenced named simpleType

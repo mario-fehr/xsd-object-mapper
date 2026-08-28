@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Constraints\Count;
@@ -13,26 +13,26 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Validation;
-use Xsd2Php\Attribute\CompositeAttributeStrategy;
-use Xsd2Php\Attribute\SymfonySerializerAttributeStrategy;
-use Xsd2Php\Attribute\SymfonyValidatorAttributeStrategy;
-use Xsd2Php\Config;
-use Xsd2Php\Generator;
-use Xsd2Php\NamespaceMapping;
-use Xsd2Php\Validator\Decimal;
+use XsdObjectMapper\Attribute\CompositeAttributeStrategy;
+use XsdObjectMapper\Attribute\SymfonySerializerAttributeStrategy;
+use XsdObjectMapper\Attribute\SymfonyValidatorAttributeStrategy;
+use XsdObjectMapper\Config;
+use XsdObjectMapper\Generator;
+use XsdObjectMapper\NamespaceMapping;
+use XsdObjectMapper\Validator\Decimal;
 
 final class SymfonyValidatorAttributeStrategyTest extends TestCase
 {
     use RemovesTempDir;
 
-    private const string TEST_NS = 'urn:xsd2php-validator-test';
+    private const string TEST_NS = 'urn:xsd-object-mapper-validator-test';
 
     private string $tmpDir;
     private string $phpNamespace;
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/xsd2php-validator-test-'.bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd-object-mapper-validator-test-'.bin2hex(random_bytes(8));
         // unique per test run so `require`-ing the generated class below never redeclares
         $this->phpNamespace = 'ValidatorTestGen'.bin2hex(random_bytes(4));
         mkdir($this->tmpDir.'/xsd', 0o777, true);
@@ -102,8 +102,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy(), <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="GuidType">
                 <xs:restriction base="xs:string">
@@ -161,7 +161,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->assertStringContainsString('#[GreaterThan(value: 0)]', $code);
         $this->assertStringContainsString('#[LessThan(value: 10)]', $code);
         $this->assertStringContainsString('#[Decimal(fractionDigits: 2)]', $code);
-        $this->assertStringContainsString('use Xsd2Php\Validator\Decimal;', $code);
+        $this->assertStringContainsString('use XsdObjectMapper\Validator\Decimal;', $code);
         // Guids (same GuidType, but maxOccurs="unbounded" -> array) skips facets entirely -
         // Regex/Length/Range validate a single scalar value, not each array item.
         $this->assertStringContainsString('public array $guids = [],', $code);
@@ -173,8 +173,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy(), <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="ShortCode">
                 <xs:restriction base="xs:string">
@@ -255,8 +255,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy(), <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:complexType name="AddressType">
                 <xs:sequence>
@@ -311,8 +311,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy(), <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="BaseCode">
                 <xs:restriction base="xs:string">
@@ -380,8 +380,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->writeXsdAndGenerate(new SymfonyValidatorAttributeStrategy(), <<<'XSD'
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:simpleType name="MarkerType">
                 <xs:restriction base="xs:string">
@@ -413,13 +413,13 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->assertInstanceOf(Regex::class, $violations->get(0)->getConstraint());
     }
 
-    private function writeXsdAndGenerate(\Xsd2Php\Attribute\PropertyAttributeStrategy $attributeStrategy, ?string $xsd = null): void
+    private function writeXsdAndGenerate(\XsdObjectMapper\Attribute\PropertyAttributeStrategy $attributeStrategy, ?string $xsd = null): void
     {
         $xsd ??= <<<XSD
             <?xml version="1.0" encoding="utf-8"?>
             <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                       xmlns="urn:xsd2php-validator-test"
-                       targetNamespace="urn:xsd2php-validator-test"
+                       xmlns="urn:xsd-object-mapper-validator-test"
+                       targetNamespace="urn:xsd-object-mapper-validator-test"
                        elementFormDefault="qualified">
               <xs:complexType name="ContactType">
                 <xs:sequence>

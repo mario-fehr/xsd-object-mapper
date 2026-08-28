@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Attribute;
+namespace XsdObjectMapper\Attribute;
 
-use Xsd2Php\Property;
+use XsdObjectMapper\Property;
 
 /**
  * Emits symfony/validator constraints derived from the property model:
@@ -28,7 +28,7 @@ use Xsd2Php\Property;
  * - xs:minInclusive / xs:maxInclusive -> #[Assert\Range]
  * - xs:minExclusive                   -> #[Assert\GreaterThan]
  * - xs:maxExclusive                   -> #[Assert\LessThan]
- * - xs:totalDigits / xs:fractionDigits -> #[Xsd2Php\Validator\Decimal] (custom constraint,
+ * - xs:totalDigits / xs:fractionDigits -> #[XsdObjectMapper\Validator\Decimal] (custom constraint,
  *   symfony/validator has no built-in for either)
  *
  * Cascading (from $property->kind, regardless of nullable/isArray):
@@ -128,7 +128,7 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
             $decimalArgs[] = "totalDigits: {$facets['totalDigits']}";
         }
         if ([] !== $decimalArgs) {
-            $attrs[] = ['fqcn' => \Xsd2Php\Validator\Decimal::class, 'args' => implode(', ', $decimalArgs)];
+            $attrs[] = ['fqcn' => \XsdObjectMapper\Validator\Decimal::class, 'args' => implode(', ', $decimalArgs)];
         }
 
         return $attrs;

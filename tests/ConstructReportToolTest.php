@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Tests;
+namespace XsdObjectMapper\Tests;
 
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +21,7 @@ final class ConstructReportToolTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/xsd2php-report-test-'.bin2hex(random_bytes(8));
+        $this->tmpDir = sys_get_temp_dir().'/xsd-object-mapper-report-test-'.bin2hex(random_bytes(8));
         mkdir($this->tmpDir, 0o777, true);
         $this->toolPath = __DIR__.'/../bin/xsd-construct-report.php';
     }

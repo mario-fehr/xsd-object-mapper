@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Xsd2Php\Attribute;
+namespace XsdObjectMapper\Attribute;
 
-use Xsd2Php\Property;
+use XsdObjectMapper\Property;
 
 /**
  * Extension point: decides which PHP attributes get emitted above a generated

@@ -1,7 +1,7 @@
 {
-  "name": "xsd2php",
+  "name": "xsd-object-mapper",
   "private": true,
-  "description": "Markdown formatting/linting tooling for xsd2php's docs (no other JS in this repo)",
+  "description": "Markdown formatting/linting tooling for xsd-object-mapper's docs (no other JS in this repo)",
   "scripts": {
     "format": "prettier --write \"**/*.md\"",
     "format:check": "prettier --check \"**/*.md\"",

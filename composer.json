@@ -1,18 +1,36 @@
 {
-    "name": "mario-fehr/xsd2php",
+    "name": "mario-fehr/xsd-object-mapper",
     "description": "Generates PHP value-object classes from XSD schemas.",
     "type": "library",
-    "license": "proprietary",
+    "license": "MIT",
+    "homepage": "https://github.com/mario-fehr/xsd-object-mapper",
+    "support": {
+        "issues": "https://github.com/mario-fehr/xsd-object-mapper/issues",
+        "source": "https://github.com/mario-fehr/xsd-object-mapper"
+    },
+    "keywords": [
+        "xsd",
+        "xml-schema",
+        "code-generation",
+        "value-object",
+        "symfony"
+    ],
+    "authors": [
+        {
+            "name": "Mario Fehr",
+            "email": "mario.fehr@gmx.at"
+        }
+    ],
     "require": {
-        "php": "^8.4",
+        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-dom": "*",
-        "symfony/filesystem": "^7.0 || ^8.0",
-        "symfony/validator": "^7.0 || ^8.0"
+        "symfony/filesystem": "^7.4|^8.0",
+        "symfony/validator": "^7.4|^8.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^13.3",
-        "symfony/intl": "^7.0 || ^8.0",
+        "symfony/intl": "^7.4|^8.0",
         "phpstan/phpstan": "^2.2",
         "friendsofphp/php-cs-fixer": "^3.95",
         "rector/rector": "^2.6",
@@ -20,12 +38,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Xsd2Php\\": "src/"
+            "XsdObjectMapper\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Xsd2Php\\Tests\\": "tests/"
+            "XsdObjectMapper\\Tests\\": "tests/"
         }
     },
     "scripts": {
