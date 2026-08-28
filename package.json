@@ -1,15 +1,12 @@
 {
-  "name": "xsd-object-mapper",
-  "private": true,
-  "description": "Markdown formatting/linting tooling for xsd-object-mapper's docs (no other JS in this repo)",
-  "scripts": {
-    "format": "prettier --write \"**/*.md\"",
-    "format:check": "prettier --check \"**/*.md\"",
-    "lint:md": "markdownlint-cli2 \"**/*.md\"",
-    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\""
-  },
-  "devDependencies": {
-    "markdownlint-cli2": "^0.23.2",
-    "prettier": "^3.9.6"
-  }
+    "name": "xsd-object-mapper",
+    "private": true,
+    "description": "Prettier formatting for xsd-object-mapper's Markdown/YAML/JSON files (no other JS in this repo)",
+    "scripts": {
+        "format": "prettier --write \"**/*.{md,yml,yaml,json}\"",
+        "format:check": "prettier --check \"**/*.{md,yml,yaml,json}\""
+    },
+    "devDependencies": {
+        "prettier": "^3.9.6"
+    }
 }

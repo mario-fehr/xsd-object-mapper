@@ -1,0 +1,8 @@
+/vendor/
+/node_modules/
+/.references/
+/.idea/
+/.vscode/
+package-lock.json
+composer.lock
+CLAUDE.md

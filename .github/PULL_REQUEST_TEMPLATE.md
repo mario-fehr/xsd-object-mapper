@@ -13,6 +13,6 @@ Replace this notice with a description of your change.
 
 Checklist before requesting review (see CONTRIBUTING.md):
 - composer test / phpstan / cs-check / rector / deps-check all pass
-- npm run format:check / lint:md pass (if you touched docs)
+- npm run format:check passes (if you touched md/yml/json files)
 - New architectural decisions get an ADR under docs/adr/
 -->

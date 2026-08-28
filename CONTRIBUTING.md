@@ -4,10 +4,10 @@
 
 ```bash
 composer install
-npm install   # only needed for Markdown linting, see AGENTS.md
+npm install   # only needed for Prettier (Markdown/YAML/JSON formatting), see AGENTS.md
 ```
 
-Requires PHP `^8.4`.
+Requires PHP `>=8.4`.
 
 ## Before opening a PR
 
@@ -20,15 +20,13 @@ composer cs-check
 composer rector
 composer deps-check
 npm run format:check
-npm run lint:md
 ```
 
 `cs-fix` / `rector-fix` apply the corresponding fixes automatically.
 
 ## Code style / design
 
-- See [`AGENTS.md`](AGENTS.md) for architecture, planning workflow, and the independence
-  constraints this package must keep (no coupling to any consumer's schema or planning docs).
+- See [`AGENTS.md`](AGENTS.md) for architecture, conventions, and the planning workflow.
 - Durable design decisions are recorded as ADRs in [`docs/adr/`](docs/adr) — check there before
   proposing a change to existing behavior, and add one for any new architectural decision.
 - [`docs/backlog.md`](docs/backlog.md) explains known gaps; check it before assuming a missing

@@ -17,9 +17,8 @@ Candidate for eventual Packagist publication.
 - `composer cs-check` / `composer cs-fix` — PHP-CS-Fixer (`@PHP8x4Migration` + `@Symfony` + `@Symfony:risky`), dry-run vs. apply.
 - `composer rector` / `composer rector-fix` — Rector (`deadCode`/`codeQuality`/`typeDeclarations`/`earlyReturn`/`privatization`/`instanceOf`/`phpunitCodeQuality`/`phpunitNarrowAsserts` sets — deliberately not `naming`, which renames by type rather than role, e.g. `$xpathCache` → `$weakMap`), dry-run vs. apply.
 - `composer deps-check` — `composer-dependency-analyser`, catches unused/missing/shadow Composer dependencies.
-- `npm install` (once) — Markdown tooling; the only JS in this repo, kept out of Composer.
-- `npm run format` / `npm run format:check` — Prettier on `**/*.md` (`proseWrap: preserve` — doesn't rewrap this repo's long unwrapped prose lines).
-- `npm run lint:md` / `npm run lint:md:fix` — markdownlint-cli2 (`MD013` line-length off, same reason; `CLAUDE.md` excluded, it's a 1-line `@AGENTS.md` pointer not a doc).
+- `npm install` (once) — Prettier; the only JS in this repo, kept out of Composer.
+- `npm run format` / `npm run format:check` — Prettier on `**/*.{md,yml,yaml,json}` (`proseWrap: preserve` doesn't rewrap this repo's long unwrapped prose lines; `CLAUDE.md` excluded via `.prettierignore`, it's a 1-line `@AGENTS.md` pointer not a doc).
 
 ## Planning
 

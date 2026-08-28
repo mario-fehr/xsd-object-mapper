@@ -85,8 +85,8 @@ jobs:
       - name: Analyse Composer dependencies
         run: vendor/bin/composer-dependency-analyser
 
-  markdown:
-    name: Markdown lint
+  format:
+    name: Prettier format check
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -101,4 +101,3 @@ jobs:
 
       - run: npm ci
       - run: npm run format:check
-      - run: npm run lint:md
