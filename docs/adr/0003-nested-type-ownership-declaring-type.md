@@ -1,5 +1,9 @@
 # 3. Nested-type ownership follows the declaring type, not an extending subclass
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 `Generator::collectProperties()` recurses into a base `complexType` on `complexContent`/`xs:extension`.

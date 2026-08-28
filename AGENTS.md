@@ -29,6 +29,7 @@ Candidate for eventual Packagist publication.
 - `src/Validator/` — custom constraints generated code depends on (`Decimal`, `ExactlyOneOf`).
 - `bin/xsd-construct-report.php`, `bin/check-fixture-drift.php` — schema-agnostic CLI tools, take any XSD dir/file as input.
 - `docs/construct-coverage.md` — per-construct support/test matrix. `docs/backlog.md` — reasoning behind every gap in that matrix.
+- `docs/adr/` — architecturally significant decisions (build-vs-buy, input contract, extension model), one per file; see `docs/adr/README.md` for the index and conventions.
 - `reference-repos.md` — prior-art XSD→PHP (and adjacent) generators.
 
 ## Reference: prior-art generators

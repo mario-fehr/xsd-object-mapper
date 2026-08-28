@@ -1,5 +1,9 @@
 # 6. Semantic type aliasing is caller-supplied, not built into the package
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 Some named simpleTypes carry a semantic meaning beyond their structural facets (e.g. an email-shaped

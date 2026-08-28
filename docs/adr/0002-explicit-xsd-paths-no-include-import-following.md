@@ -1,5 +1,9 @@
 # 2. Explicit `Config::$xsdPaths`, no `xs:include`/`xs:import` following
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 Multi-file XSD schemas commonly pull related files together via `xs:include` (same namespace) or

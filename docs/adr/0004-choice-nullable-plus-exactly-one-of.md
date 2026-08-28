@@ -1,5 +1,9 @@
 # 4. `xs:choice` elements become nullable plus a class-level `ExactlyOneOf` constraint
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 `Generator::collectParticleElements()` historically flattened `xs:sequence`, `xs:choice`, and

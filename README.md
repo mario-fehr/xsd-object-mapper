@@ -59,7 +59,7 @@ in that matrix.
 
 ## Design decisions
 
-Durable architectural decisions are recorded as ADRs in [`docs/adr/`](docs/adr).
+Durable architectural decisions are recorded as ADRs in [`docs/adr/`](docs/adr); see [`docs/adr/README.md`](docs/adr/README.md) for the index and conventions.
 
 ## Contributing
 

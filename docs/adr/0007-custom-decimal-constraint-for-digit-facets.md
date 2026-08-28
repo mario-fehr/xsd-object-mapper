@@ -1,5 +1,9 @@
 # 7. Custom `Decimal` constraint for `totalDigits`/`fractionDigits`
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 `xs:totalDigits`/`xs:fractionDigits` (XML Schema Part 2 §4.3) have no `symfony/validator` built-in
