@@ -584,39 +584,45 @@ final class Generator
     /** @return array{properties: list<Property>, choiceGroups: list<array{fields: list<string>, required: bool}>} */
     private function collectProperties(\DOMElement $ctNode, string $ownerClassName, string $ownerNamespace): array
     {
-        $xp = $this->xpath($ctNode->ownerDocument);
+        $xp = $this->xpath($this->ownerDocOf($ctNode));
 
         $properties = [];
 
         // xs:complexContent/xs:simpleContent are mutually exclusive per the XSD schema-for-schema -
         // a complexType has at most one, so a combined query is unambiguous.
-        $content = $xp->query('xs:complexContent | xs:simpleContent', $ctNode)->item(0);
+        $content = $this->query($xp, 'xs:complexContent | xs:simpleContent', $ctNode)->item(0);
 
         $contentContainer = $ctNode;
         $baseProperties = [];
 
         if ($content instanceof \DOMElement && 'complexContent' === $content->localName) {
-            $ext = $xp->query('xs:extension', $content)->item(0);
+            $ext = $this->query($xp, 'xs:extension', $content)->item(0);
             if (!$ext instanceof \DOMElement) {
                 // xs:restriction narrows/redefines the base content model rather than adding to
                 // it; treated like extension (union of base + local content) rather than
                 // implemented properly. Warn loud instead of silently generating a wrong shape.
-                $ext = $xp->query('xs:restriction', $content)->item(0);
+                $ext = $this->query($xp, 'xs:restriction', $content)->item(0);
                 $this->warn("'{$ownerClassName}' uses complexContent/xs:restriction, treated as extension");
             }
-            /* @var DOMElement $ext */
-            [$baseNs, $baseLocal] = $this->resolveQName($ext, $ext->getAttribute('base'));
-            $baseKey = $baseNs.'#'.$baseLocal;
-            if ('' !== $baseLocal && 'anyType' !== $baseLocal && isset($this->complexTypes[$baseKey])) {
-                $baseProperties = $this->resolveBaseProperties($baseKey);
+            if ($ext instanceof \DOMElement) {
+                [$baseNs, $baseLocal] = $this->resolveQName($ext, $ext->getAttribute('base'));
+                $baseKey = $baseNs.'#'.$baseLocal;
+                if ('' !== $baseLocal && 'anyType' !== $baseLocal && isset($this->complexTypes[$baseKey])) {
+                    $baseProperties = $this->resolveBaseProperties($baseKey);
+                }
+                $contentContainer = $ext;
+            } else {
+                $this->warn("'{$ownerClassName}' has complexContent without xs:extension or xs:restriction, skipping base resolution");
             }
-            $contentContainer = $ext;
         } elseif ($content instanceof \DOMElement) {
-            $ext = $xp->query('xs:extension', $content)->item(0);
-            /** @var \DOMElement $ext */
-            $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($ext, $ext->getAttribute('base'));
-            $properties[] = $this->makeProperty('value', PropertyRole::Text, false, false, $baseInfo, null);
-            $contentContainer = $ext;
+            $ext = $this->query($xp, 'xs:extension', $content)->item(0);
+            if ($ext instanceof \DOMElement) {
+                $baseInfo = $this->resolvePrimitiveOrNamedSimpleType($ext, $ext->getAttribute('base'));
+                $properties[] = $this->makeProperty('value', PropertyRole::Text, false, false, $baseInfo, null);
+                $contentContainer = $ext;
+            } else {
+                $this->warn("'{$ownerClassName}' has simpleContent without xs:extension, skipping value property");
+            }
         }
 
         $properties = [...$baseProperties, ...$properties];
@@ -624,9 +630,12 @@ final class Generator
         /** @var array<int, array{particle: \DOMElement, members: array{phpName: string, prop: Property}[], directChildCount: int}> keyed by spl_object_id() of the enclosing xs:choice particle */
         $choiceGroups = [];
 
-        foreach ($xp->query('xs:sequence | xs:choice | xs:all', $contentContainer) as $particle) {
+        foreach ($this->query($xp, 'xs:sequence | xs:choice | xs:all', $contentContainer) as $particle) {
+            if (!$particle instanceof \DOMElement) {
+                $this->warn("'{$ownerClassName}' has a non-element sequence/choice/all node, skipping");
+                continue;
+            }
             foreach ($this->collectParticleElements($particle) as [$el, $choiceParticle]) {
-                /** @var \DOMElement $el */
                 $refAttr = $el->getAttribute('ref');
                 if ('' !== $refAttr && !$el->hasAttribute('name')) {
                     [$refNs, $refLocal] = $this->resolveQName($el, $refAttr);
@@ -664,8 +673,7 @@ final class Generator
                     $choiceGroups[$groupKey] ??= [
                         'particle' => $choiceParticle,
                         'members' => [],
-                        'directChildCount' => $this->xpath($choiceParticle->ownerDocument)
-                            ->query('xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
+                        'directChildCount' => $this->query($xp, 'xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
                     ];
                     // $prop's own identity (not a separately-tracked DOM node) is what the
                     // dedup-survivor check below compares against - "did this exact Property
@@ -806,12 +814,16 @@ final class Generator
 
     private function extractDoc(\DOMElement $node): ?string
     {
-        $xp = $this->xpath($node->ownerDocument);
-        $doc = $xp->query('xs:annotation/xs:documentation', $node)->item(0);
+        $xp = $this->xpath($this->ownerDocOf($node));
+        $doc = $this->query($xp, 'xs:annotation/xs:documentation', $node)->item(0);
         if (!$doc instanceof \DOMElement) {
             return null;
         }
-        $text = trim(preg_replace('/\s+/', ' ', $doc->textContent));
+        $normalized = preg_replace('/\s+/', ' ', $doc->textContent);
+        if (null === $normalized) {
+            return null;
+        }
+        $text = trim($normalized);
 
         return '' === $text ? null : $text;
     }
@@ -898,7 +910,8 @@ final class Generator
                 continue;
             }
             $fqcn = $p->phpType;
-            if (substr($fqcn, 0, strrpos($fqcn, '\\')) === $namespace) {
+            $lastBackslash = strrpos($fqcn, '\\');
+            if (false !== $lastBackslash && substr($fqcn, 0, $lastBackslash) === $namespace) {
                 $sameNamespaceTypes[$fqcn] = true;
                 continue;
             }
