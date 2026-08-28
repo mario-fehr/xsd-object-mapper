@@ -143,29 +143,14 @@ would be a second, competing hydration mechanism solving the same problem this p
   `xs:decimal` → a PHP string or a dedicated Decimal value-object instead of `float` — a bigger,
   breaking change to the generator.
 
-## Static analysis
-
-- **`phpstan-baseline.neon` still carries ~175 findings** (down from 219, see the `Property` value
-  object entry below) — the two remaining dominant sources:
-  - **`$typeInfo`'s untyped array shape** — `resolveParticleType()` and
-    `resolvePrimitiveOrNamedSimpleType()` both return a `kind`/`phpType`/`dateOnly`/`facets`/
-    `namedType` array bag, threaded through `makeProperty(array $typeInfo, ...)` and every call
-    site. Same shape of problem the `Property` value object already solved for the property side;
-    this is the type-resolution side, still untyped. A real fix needs its own value object (or a
-    PHPStan-level `array{...}` shape declaration, which only silences the noise instead of making
-    the impossible states unrepresentable) — deliberately deferred rather than folded into the
-    `Property` migration, since `$typeInfo` is a distinct concern (type resolution vs. property
-    identity) and widening that change would have made the `Property` migration itself harder to
-    review.
-  - **`ext-dom`'s own typing** — PHPStan sees `\DOMNodeList<\DOMNameSpaceNode|\DOMNode>|false` from
-    `getElementsByTagNameNS()`, untyped `getAttribute()`/`hasAttribute()` on `\DOMNode`, etc. This
-    is inherent to the standard library's stubs, not something this codebase can fix short of
-    wrapping every DOM call in a typed adapter — not planned, the wrapping overhead isn't justified
-    for a code-generation tool that touches the DOM API in exactly the ways its stubs are weakest
-    at (attribute/text access, node-list iteration).
-
 ## Resolved
 
+- **`phpstan-baseline.neon` eliminated entirely** — the two remaining root causes from the old
+  "Static analysis" section above are both fixed: `$typeInfo`'s untyped array shape replaced with
+  a `TypeInfo` value object + `TypeKind` enum (mirroring the `Property`/`PropertyRole` pattern),
+  and every remaining raw `\DOMNodeList` iteration site in `Generator.php` got the codebase's
+  existing `instanceof \DOMElement` guard idiom. `vendor/bin/phpstan analyse` runs clean with no
+  baseline at all (see `docs/specs/2026-08-27-phpstan-baseline-zero-design.md`).
 - **`makeProperty()`'s untyped array property bag** — replaced with a `Property` value object +
   `PropertyRole` enum (`Element`/`Attribute`/`Text` instead of 2 independent `isAttribute`/
   `isText` booleans, so the 4th impossible combination is now structurally unrepresentable).
