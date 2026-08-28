@@ -62,13 +62,13 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         // array properties always get a `= []` default (PHP can't express "required" via
         // absence of default for arrays) - Count(min: 1) is the only actual enforcement.
         $this->assertMatchesRegularExpression('/#\[SerializedName\(\'Tag\'\)\]\s+#\[Count\(min: 1\)\]\s+public array \$tag = \[\],/', $code);
-        $this->assertStringContainsString("#[SerializedName('Nickname')]\n        public ?string \$nickname = null,", (string) $code);
+        $this->assertStringContainsString("#[SerializedName('Nickname')]\n        public ?string \$nickname = null,", $code);
 
         // serializer and validator attributes coexist without a `use` collision (different basenames).
-        $this->assertStringContainsString('use Symfony\Component\Serializer\Attribute\SerializedName;', (string) $code);
-        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\Count;', (string) $code);
-        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\NotBlank;', (string) $code);
-        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\NotNull;', (string) $code);
+        $this->assertStringContainsString('use Symfony\Component\Serializer\Attribute\SerializedName;', $code);
+        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\Count;', $code);
+        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\NotBlank;', $code);
+        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\NotNull;', $code);
     }
 
     public function testConstraintsAreActuallyEnforcedAtRuntime(): void
@@ -154,17 +154,17 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
 
         $code = $this->readGenerated('FacetType.php');
 
-        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[0-9a-fA-F]{8})\$#u')]", (string) $code);
-        $this->assertStringContainsString('#[Length(min: 2, max: 5)]', (string) $code);
-        $this->assertStringContainsString('#[Range(min: 0, max: 100)]', (string) $code);
-        $this->assertStringContainsString('#[Length(exactly: 3)]', (string) $code);
-        $this->assertStringContainsString('#[GreaterThan(value: 0)]', (string) $code);
-        $this->assertStringContainsString('#[LessThan(value: 10)]', (string) $code);
-        $this->assertStringContainsString('#[Decimal(fractionDigits: 2)]', (string) $code);
-        $this->assertStringContainsString('use Xsd2Php\Validator\Decimal;', (string) $code);
+        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[0-9a-fA-F]{8})\$#u')]", $code);
+        $this->assertStringContainsString('#[Length(min: 2, max: 5)]', $code);
+        $this->assertStringContainsString('#[Range(min: 0, max: 100)]', $code);
+        $this->assertStringContainsString('#[Length(exactly: 3)]', $code);
+        $this->assertStringContainsString('#[GreaterThan(value: 0)]', $code);
+        $this->assertStringContainsString('#[LessThan(value: 10)]', $code);
+        $this->assertStringContainsString('#[Decimal(fractionDigits: 2)]', $code);
+        $this->assertStringContainsString('use Xsd2Php\Validator\Decimal;', $code);
         // Guids (same GuidType, but maxOccurs="unbounded" -> array) skips facets entirely -
         // Regex/Length/Range validate a single scalar value, not each array item.
-        $this->assertStringContainsString('public array $guids = [],', (string) $code);
+        $this->assertStringContainsString('public array $guids = [],', $code);
         $this->assertSame(1, substr_count($code, 'Regex(pattern:'));
     }
 
@@ -273,8 +273,8 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             XSD);
 
         $code = $this->readGenerated('PersonType.php');
-        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\Valid;', (string) $code);
-        $this->assertStringContainsString('#[Valid()]', (string) $code);
+        $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\Valid;', $code);
+        $this->assertStringContainsString('#[Valid()]', $code);
 
         require $this->tmpDir.'/out/AddressType.php';
         require $this->tmpDir.'/out/PersonType.php';
@@ -343,12 +343,12 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
 
         // NarrowCode adds no pattern of its own - BaseCode's must still apply, merged with
         // NarrowCode's own minLength/maxLength, not lost.
-        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[A-Z]+)\$#u')]", (string) $code);
-        $this->assertStringContainsString('#[Length(min: 3, max: 3)]', (string) $code);
+        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[A-Z]+)\$#u')]", $code);
+        $this->assertStringContainsString('#[Length(min: 3, max: 3)]', $code);
 
         // OverriddenCode redefines pattern - its own value must win over BaseCode's ancestor
         // value on the same key (a single merged 'pattern' key, not two competing attributes).
-        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[0-9]+)\$#u')]", (string) $code);
+        $this->assertStringContainsString("#[Regex(pattern: '#^(?:[0-9]+)\$#u')]", $code);
         $this->assertSame(2, substr_count($code, 'Regex(pattern:'));
 
         require $this->tmpDir.'/out/ChainType.php';
@@ -400,7 +400,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
 
         // neither '#' nor '~' can be the PCRE delimiter here - both appear in the pattern
         // itself; the generator must fall back to the next candidate ('!').
-        $this->assertStringContainsString("#[Regex(pattern: '!^(?:[#~])\$!u')]", (string) $code);
+        $this->assertStringContainsString("#[Regex(pattern: '!^(?:[#~])\$!u')]", $code);
 
         require $this->tmpDir.'/out/MarkerHolderType.php';
         $class = $this->phpNamespace.'\\MarkerHolderType';

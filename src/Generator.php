@@ -26,7 +26,7 @@ final class Generator
 {
     private const string XS_NS = 'http://www.w3.org/2001/XMLSchema';
 
-    private static function stringFallback(): TypeInfo
+    private function stringFallback(): TypeInfo
     {
         return new TypeInfo(kind: TypeKind::Scalar, phpType: 'string');
     }
@@ -345,7 +345,7 @@ final class Generator
             return $this->resolvedSimple[$key];
         }
         // break self-reference cycles defensively
-        $this->resolvedSimple[$key] = self::stringFallback();
+        $this->resolvedSimple[$key] = $this->stringFallback();
 
         if (!isset($this->simpleTypes[$key])) {
             $this->warn("unknown simpleType '{$key}', falling back to string");
@@ -361,9 +361,9 @@ final class Generator
         $listOrRestriction = $this->query($xp, 'xs:list | xs:restriction', $node)->item(0);
         if ($listOrRestriction instanceof \DOMElement && 'list' === $listOrRestriction->localName) {
             $this->note("simpleType '{$key}' is xs:list, mapped to plain string");
-            $this->resolvedSimple[$key] = self::stringFallback();
+            $this->resolvedSimple[$key] = $this->stringFallback();
 
-            return self::stringFallback();
+            return $this->stringFallback();
         }
         if (!$listOrRestriction instanceof \DOMElement) {
             return $this->resolvedSimple[$key] = $this->fallbackScalar("simpleType '{$key}' is xs:union or has an unsupported restriction, mapped to plain string");
@@ -405,7 +405,7 @@ final class Generator
     {
         $this->note($reason);
 
-        return self::stringFallback();
+        return $this->stringFallback();
     }
 
     /** Merges $restriction's own facets onto $typeInfo's (already possibly inherited) ones - own facets win on key collision. No-op if $typeInfo isn't a scalar. */
