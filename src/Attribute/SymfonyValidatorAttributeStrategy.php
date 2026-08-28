@@ -38,6 +38,7 @@ use Xsd2Php\Property;
  */
 final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrategy
 {
+    /** @return list<array{fqcn: string, args: string}> */
     public function attributesFor(Property $property): array
     {
         $attrs = $this->presenceConstraint($property);
@@ -53,6 +54,7 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
         return $attrs;
     }
 
+    /** @return list<array{fqcn: string, args: string}> */
     private function presenceConstraint(Property $property): array
     {
         if ($property->isArray) {
@@ -79,7 +81,11 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
         ]];
     }
 
-    /** @param array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int} $facets */
+    /**
+     * @param array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int} $facets
+     *
+     * @return list<array{fqcn: string, args: string}>
+     */
     private function facetConstraints(array $facets): array
     {
         $attrs = [];
@@ -128,6 +134,7 @@ final class SymfonyValidatorAttributeStrategy implements PropertyAttributeStrate
         return $attrs;
     }
 
+    /** @param array{length?: int, minLength?: int, maxLength?: int, pattern?: string, minInclusive?: string, maxInclusive?: string, minExclusive?: string, maxExclusive?: string, totalDigits?: int, fractionDigits?: int} $facets */
     private function minMaxArgs(array $facets, string $minKey, string $maxKey): string
     {
         $args = [];
