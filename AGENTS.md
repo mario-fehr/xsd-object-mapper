@@ -5,12 +5,13 @@ in this repository. `CLAUDE.md` is a pointer to this file — edit here, not the
 
 ## What this is
 
-Standalone XSD-to-PHP generator library. Candidate for eventual Packagist publication.
+Standalone XSD-to-PHP generator library, published as `mario-fehr/xsd-object-mapper`.
+Candidate for eventual Packagist publication.
 
 ## Commands
 
 - Install: `composer install`
-- Requires PHP `^8.4`.
+- Requires PHP `>=8.4`.
 - `composer test` — PHPUnit.
 - `composer phpstan` — static analysis, level max, `src`+`bin`+`tests`, runs clean with no baseline (`[OK] No errors`).
 - `composer cs-check` / `composer cs-fix` — PHP-CS-Fixer (`@PHP8x4Migration` + `@Symfony` + `@Symfony:risky`), dry-run vs. apply.
@@ -22,14 +23,23 @@ Standalone XSD-to-PHP generator library. Candidate for eventual Packagist public
 
 ## Planning
 
-Committed spec/plan/adr workflow — design rationale for this package is worth keeping, unlike ephemeral ticket-driven work. Driven by the `superpowers` plugin, not written by hand:
+Design rationale for this package is worth keeping (unlike ephemeral ticket-driven work), so any
+non-trivial change gets two committed documents before implementation starts:
 
-- New feature/change: `brainstorming` skill first, then `writing-plans` — writes `docs/specs/YYYY-MM-DD-slug-design.md` (WHY: problem, goals/non-goals, API, edge cases, testing) and `docs/plans/YYYY-MM-DD-slug.md` (WHAT/HOW: numbered tasks, each a failing-test → implement → passing-test → commit loop).
-- Implementation: `subagent-driven-development` or `executing-plans` to run the plan.
-- Durable design decision worth keeping forever (not a feature-specific plan): `docs/adr/NNNN-slug.md`, one per decision.
-- `.superpowers/` is the plugin's own ephemeral scratch (briefs/reports/ledger/diffs) — gitignored, never committed.
+- `docs/specs/YYYY-MM-DD-slug-design.md` — WHY: problem, goals/non-goals, API, edge cases, testing.
+- `docs/plans/YYYY-MM-DD-slug.md` — WHAT/HOW: numbered tasks, each a failing-test → implement →
+  passing-test → commit loop.
+- A durable architectural decision that isn't tied to one feature gets its own
+  `docs/adr/NNNN-slug.md` instead of a plan.
 
-No ticket IDs (date+slug instead), no branch/MR sections — solo lib, no GitLab remote workflow (yet).
+No ticket IDs (date+slug instead), no story/feature-branch hierarchy or MR checklist — solo lib,
+this two-document workflow replaces that. GitHub Actions CI and a PR template exist for whenever a
+PR does happen, but there's no required-review process (yet).
+
+If you're Claude Code with the `superpowers` plugin installed, its `brainstorming` →
+`writing-plans` → `executing-plans`/`subagent-driven-development` skills produce exactly this
+shape — use them (`.superpowers/` is that plugin's own ephemeral scratch, gitignored, never
+committed). Without it, write the two files by hand following the structure above.
 
 ## Architecture
 
@@ -50,25 +60,29 @@ when: a construct isn't in `docs/construct-coverage.md` yet and you're about to
 design how to generate PHP for it; writing/updating a `docs/backlog.md` entry
 (check whether prior art solved the gap, punted on it, or hit the same wall);
 or facing a generator-architecture question (config shape, naming/collision
-strategy, runtime-vs-generated-code split) during `brainstorming`/`writing-plans`.
+strategy, runtime-vs-generated-code split) while writing a spec or plan.
 
-Use the `add-reference-repository` skill to clone one into the git-ignored
-`.references/` dir — bring back the pattern, not the code (see Independence,
-below).
+Clone one into the git-ignored `.references/` dir — the `add-reference-repository` skill
+automates this if you have the `superpowers` plugin, otherwise `git clone --depth 1 <url>
+.references/<name>` works just as well — bring back the pattern, not the code.
 
-## Independence
+## Conventions
 
-Must stay completely independent of any consuming project:
-
-- No mention of any customer/consumer name anywhere in `src/`, `bin/`, `tests/`, `docs/` (or here in `AGENTS.md`/`CLAUDE.md` — these ship with the package too).
-- Never read/depend on a consumer's schema files or planning docs (e.g. no reference to a consumer's `schema/xsd/` dir).
-- Docs describing the generator's own capabilities/limitations (coverage matrix, backlog) go in `docs/` here, written generically — no real-world occurrence counts tied to one consumer's schema.
-- Real-world test corpus needs: use an official/public schema (e.g. `tests/fixtures/w3c-purchase-order.xsd`, from the W3C XML Schema Primer), never a consumer's schema.
-- Schema-agnostic tooling (e.g. `bin/xsd-construct-report.php`) is fine — takes any XSD dir as input, no built-in knowledge of a specific consumer.
-- Prior-art research via `docs/reference-repos.md`/`.references/` studies design patterns only — never copy code verbatim, even from MIT-licensed repos (see that file).
-
-**Why:** coupling to one consumer's schema or planning docs makes the package unshippable/unreusable.
-
-## Code comments
-
-Source files must never reference planning-doc paths, from this or any consuming project. If a comment needs the reasoning behind a decision, inline the reasoning itself.
+- PHP `>=8.4`: readonly, constructor-promoted classes; native types; backed enums for
+  `xs:enumeration`. No comments unless the WHY is non-obvious — never explain WHAT
+  already-obvious code does.
+- New public `Config`/`NamespaceMapping` constructor parameters get a PHPDoc `@param` explaining
+  the contract (see `Config.php` for the existing style).
+- Attribute strategies (`src/Attribute/`) stay trivial and composable via
+  `CompositeAttributeStrategy` — don't grow one strategy to do everything a new use case needs.
+- A newly supported XSD construct gets both a `docs/construct-coverage.md` entry and an isolated
+  synthetic test — corpus coverage from `OfficialSchemaFixtureTest` is not a substitute for one.
+- A new `PropertyAttributeStrategy` implementation gets a line in README's "Attribute strategies"
+  list when it lands.
+- Documentation prose (README, CONTRIBUTING, CHANGELOG entries): match the existing sections'
+  voice; draft/polish with the `natural-writing-editor` agent if you have it configured.
+- Commit messages: [Conventional Commits](https://www.conventionalcommits.org/) —
+  `type: short description`, lowercase, imperative mood, no trailing period (`feat`, `fix`,
+  `refactor`, `chore`, `docs` used so far). Not Symfony's `[Scope] Description` bracket style.
+- Releases: manual for now — a `CHANGELOG.md` entry under `[Unreleased]` per user-facing change
+  (see `CONTRIBUTING.md`), no automated release workflow yet.
