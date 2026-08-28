@@ -14,11 +14,9 @@ explains the reasoning for.
 - **`mixed="true"` (text + element mixed content)**: not recognized/handled; would likely silently
   process only the child elements and drop the interleaved text (not verified against a real case).
 - **`xs:redefine` / `xs:override`**: schema redefinition/override mechanism, not handled.
-- **`use="prohibited"` on `xs:attribute`** (mishandled): tracked as [#3](https://github.com/mario-fehr/xsd-object-mapper/issues/3).
 - **`xs:all` has no dedicated test**: `collectParticleElements()` queries
   `xs:sequence | xs:choice | xs:all` together everywhere, so the code path is shared with
   sequence/choice, but that assumption itself has never been falsified by an isolated test.
-- **`resolveNamedRef()`'s `$seenGroups` cycle detection is too coarse**: tracked as [#4](https://github.com/mario-fehr/xsd-object-mapper/issues/4).
 
 ## Generator/package infrastructure
 
@@ -66,8 +64,8 @@ worth considering:
   fixed in the generator, not configurable (the most substantial gap of this batch).
 - **Strict-mode toggles for missing/colliding types** (`makinacorpus/php-xsd-gen`'s
   `type_missing_error`/`type_override_error`): hard-fail instead of silently ignoring a missing
-  referenced type or silently overwriting on a type-name collision. Related to, but distinct from,
-  the `$seenGroups` cycle-detection bug ([#4](https://github.com/mario-fehr/xsd-object-mapper/issues/4)).
+  referenced type or silently overwriting on a type-name collision. A distinct concern from the
+  group/attributeGroup cycle detection, which is now scoped per reference path ([#4](https://github.com/mario-fehr/xsd-object-mapper/issues/4)).
 
 Priority, if picked up (value vs. effort, not a commitment to build any of it):
 
