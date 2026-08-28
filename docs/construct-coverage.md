@@ -25,7 +25,7 @@ schema, not only against this test suite's own hand-written fixtures.
 | `xs:sequence`                               | ✅                                                            | ✅             |
 | `xs:choice`                                 | ✅ (nullable properties + an `ExactlyOneOf` class constraint) | ✅             |
 | `xs:all`                                    | ✅ (same code path as sequence/choice)                        | ❌             |
-| `xs:group` (definition + `ref=`)            | ✅ (resolved recursively, cycle detection)                    | ✅             |
+| `xs:group` (definition + `ref=`)            | ✅ (resolved recursively, per-path cycle detection)           | ✅             |
 | `xs:attributeGroup` (`ref=`)                | ✅ (resolved recursively, cached)                             | ✅             |
 | `minOccurs`/`maxOccurs` (incl. `unbounded`) | ✅                                                            | ✅             |
 | `xs:any` (wildcard content)                 | ⚠️ falls back to `string`                                     | ❌             |

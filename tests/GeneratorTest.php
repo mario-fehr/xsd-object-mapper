@@ -543,6 +543,58 @@ final class GeneratorTest extends TestCase
         $this->assertStringContainsString('public ?string $brochure = null,', $code);
     }
 
+    public function testGroupReusedAcrossSiblingGroupsIsNotReportedAsCircular(): void
+    {
+        $this->writeXsd(<<<'XSD'
+            <?xml version="1.0" encoding="utf-8"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                       xmlns="urn:xsd-object-mapper-test"
+                       targetNamespace="urn:xsd-object-mapper-test"
+                       elementFormDefault="qualified">
+              <xs:group name="Inner">
+                <xs:sequence>
+                  <xs:element name="InnerField" type="xs:string"/>
+                </xs:sequence>
+              </xs:group>
+              <xs:group name="OuterA">
+                <xs:sequence>
+                  <xs:element name="AField" type="xs:string"/>
+                  <xs:group ref="Inner"/>
+                </xs:sequence>
+              </xs:group>
+              <xs:group name="OuterB">
+                <xs:sequence>
+                  <xs:element name="BField" type="xs:string"/>
+                  <xs:group ref="Inner"/>
+                </xs:sequence>
+              </xs:group>
+              <xs:complexType name="ComboType">
+                <xs:sequence>
+                  <xs:group ref="OuterA"/>
+                  <xs:group ref="OuterB"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:schema>
+            XSD);
+
+        $generator = $this->makeGenerator();
+        $generator->generate();
+
+        // OuterA and OuterB each legitimately reference the same "Inner" group. That is reuse along
+        // two independent paths, not a cycle. The old tree-wide visited set flagged Inner's second
+        // occurrence as circular; per-path scoping must not, and every field must be generated.
+        $circularWarnings = array_filter(
+            $generator->getWarnings(),
+            static fn (string $w): bool => str_contains($w, 'circular'),
+        );
+        $this->assertSame([], $circularWarnings);
+
+        $code = $this->readGenerated('ComboType.php');
+        $this->assertStringContainsString('public string $aField,', $code);
+        $this->assertStringContainsString('public string $bField,', $code);
+        $this->assertStringContainsString('public string $innerField,', $code);
+    }
+
     public function testRepeatableChoiceSkipsExactlyOneOfConstraint(): void
     {
         $this->writeXsd(<<<'XSD'
@@ -1267,6 +1319,12 @@ final class GeneratorTest extends TestCase
     /** @param array<string, NamespaceMapping>|null $namespaceMap */
     private function generate(?PropertyAttributeStrategy $attributeStrategy = null, ?array $namespaceMap = null): void
     {
+        $this->makeGenerator($attributeStrategy, $namespaceMap)->generate();
+    }
+
+    /** @param array<string, NamespaceMapping>|null $namespaceMap */
+    private function makeGenerator(?PropertyAttributeStrategy $attributeStrategy = null, ?array $namespaceMap = null): Generator
+    {
         $xsdPaths = glob($this->tmpDir.'/xsd/*.xsd');
         $this->assertIsArray($xsdPaths);
 
@@ -1278,7 +1336,7 @@ final class GeneratorTest extends TestCase
             attributeStrategy: $attributeStrategy ?? new SymfonySerializerAttributeStrategy(),
         );
 
-        new Generator($config)->generate();
+        return new Generator($config);
     }
 
     private function readGenerated(string $filename): string

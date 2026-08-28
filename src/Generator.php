@@ -63,6 +63,9 @@ final class Generator
     /** @var \WeakMap<\DOMDocument, \DOMXPath> */
     private \WeakMap $xpathCache;
 
+    /** @var string[] diagnostics emitted during the last generate(), in order */
+    private array $warnings = [];
+
     private readonly Filesystem $filesystem;
 
     public function __construct(private readonly Config $config)
@@ -74,6 +77,7 @@ final class Generator
     /** Wipes every configured output directory, regenerates everything, returns the number of files written. */
     public function generate(): int
     {
+        $this->warnings = [];
         foreach ($this->config->namespaceMap as $mapping) {
             $this->filesystem->remove($mapping->outputDir);
         }
@@ -100,6 +104,17 @@ final class Generator
         }
 
         return $this->written;
+    }
+
+    /**
+     * Diagnostics emitted during the most recent generate() call, in order (the same messages
+     * written to STDERR as `WARN: ...`). Empty before the first generate().
+     *
+     * @return string[]
+     */
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 
     private function namespaceFor(string $xsdNamespaceUri): NamespaceMapping
@@ -194,6 +209,7 @@ final class Generator
 
     private function warn(string $message): void
     {
+        $this->warnings[] = $message;
         fwrite(\STDERR, "WARN: {$message}\n");
     }
 
@@ -203,7 +219,7 @@ final class Generator
     }
 
     /**
-     * @param array<string, true> &$seenGroups
+     * @param array<string, true> $seenGroups
      *
      * @return array{0: \DOMElement, 1: ?\DOMElement}[] [element, enclosing xs:choice particle] pairs,
      *                                                  xs:sequence/xs:choice/xs:all nesting flattened, xs:group refs inlined. The enclosing choice
@@ -212,7 +228,7 @@ final class Generator
      *                                                  exclusive alternatives (nullable, "exactly one of" constraint) instead of independently
      *                                                  required siblings, which xs:sequence-style flattening alone would wrongly imply.
      */
-    private function collectParticleElements(\DOMElement $particle, array &$seenGroups = [], ?\DOMElement $enclosingChoice = null): array
+    private function collectParticleElements(\DOMElement $particle, array $seenGroups = [], ?\DOMElement $enclosingChoice = null): array
     {
         $xp = $this->xpath($this->ownerDocOf($particle));
         $ownChoice = 'choice' === $particle->localName ? $particle : $enclosingChoice;
@@ -240,17 +256,18 @@ final class Generator
 
     /**
      * Resolves a ref="..." attribute (xs:group and xs:attributeGroup share this exact shape:
-     * a named registry lookup with cycle detection via $seen, threaded by reference across one
-     * particle/attribute walk) so empty-ref/circular-ref/unknown-ref diagnostics can't drift
+     * a named registry lookup with cycle detection via $seen, carried by value along one
+     * reference path) so empty-ref/circular-ref/unknown-ref diagnostics can't drift
      * between the two ref kinds the way they previously did (attributeGroup silently swallowed
-     * the first two cases instead of warning).
+     * the first two cases instead of warning). The caller adds the resolved key to the set it
+     * passes when it descends into the ref's body, so sibling refs to the same name are not a cycle.
      *
      * @param array<string, \DOMElement> $registry
      * @param array<string, true>        $seen
      *
      * @return array{0: string, 1: ?\DOMElement} [key, resolved node - null if unresolved]
      */
-    private function resolveNamedRef(\DOMElement $refNode, array $registry, array &$seen, string $kindLabel): array
+    private function resolveNamedRef(\DOMElement $refNode, array $registry, array $seen, string $kindLabel): array
     {
         $refAttr = $refNode->getAttribute('ref');
         if ('' === $refAttr) {
@@ -273,17 +290,15 @@ final class Generator
             return [$key, null];
         }
 
-        $seen[$key] = true;
-
         return [$key, $registry[$key]];
     }
 
     /**
-     * @param array<string, true> &$seenGroups
+     * @param array<string, true> $seenGroups
      *
      * @return array{0: \DOMElement, 1: ?\DOMElement}[]
      */
-    private function collectGroupRefElements(\DOMElement $groupRef, array &$seenGroups): array
+    private function collectGroupRefElements(\DOMElement $groupRef, array $seenGroups): array
     {
         [$key, $group] = $this->resolveNamedRef($groupRef, $this->groups, $seenGroups, 'group');
         if (!$group instanceof \DOMElement) {
@@ -295,17 +310,17 @@ final class Generator
 
         $xp = $this->xpath($this->ownerDocOf($group));
         $groupParticle = $this->query($xp, 'xs:sequence | xs:choice | xs:all', $group)->item(0);
-        $result = $groupParticle instanceof \DOMElement ? $this->collectParticleElements($groupParticle, $seenGroups) : [];
+        $result = $groupParticle instanceof \DOMElement ? $this->collectParticleElements($groupParticle, [...$seenGroups, $key => true]) : [];
 
         return $this->groupElementsCache[$key] = $result;
     }
 
     /**
-     * @param array<string, true> &$seenGroups
+     * @param array<string, true> $seenGroups
      *
      * @return \DOMElement[] xs:attribute nodes, attributeGroup refs resolved recursively
      */
-    private function collectAttributes(\DOMElement $container, array &$seenGroups = []): array
+    private function collectAttributes(\DOMElement $container, array $seenGroups = []): array
     {
         $xp = $this->xpath($this->ownerDocOf($container));
 
@@ -330,7 +345,7 @@ final class Generator
                 $attrs = [...$attrs, ...$this->attributeGroupCache[$key]];
                 continue;
             }
-            $resolved = $this->collectAttributes($attributeGroup, $seenGroups);
+            $resolved = $this->collectAttributes($attributeGroup, [...$seenGroups, $key => true]);
             $this->attributeGroupCache[$key] = $resolved;
             $attrs = [...$attrs, ...$resolved];
         }
