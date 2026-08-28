@@ -58,12 +58,14 @@ final class ExactlyOneOfValidatorTest extends TestCase
         $constraint = new ExactlyOneOf(fields: ['items', 'single']);
 
         $untouched = new class {
+            /** @var list<string> */
             public array $items = [];
             public ?string $single = 'x';
         };
         $this->assertCount(0, $validator->validate($untouched, $constraint));
 
         $populated = new class {
+            /** @var list<string> */
             public array $items = ['a'];
             public ?string $single = null;
         };

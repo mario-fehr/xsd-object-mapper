@@ -51,7 +51,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             new SymfonyValidatorAttributeStrategy(),
         ));
 
-        $code = file_get_contents($this->tmpDir.'/out/ContactType.php');
+        $code = $this->readGenerated('ContactType.php');
 
         // required string -> NotBlank; required non-string -> NotNull;
         // required array (minOccurs>=1) -> Count(min: 1); optional -> nothing.
@@ -86,15 +86,15 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $blankName = new $class(name: '', age: 40, tag: ['x']);
         $violations = $validator->validate($blankName);
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(NotBlank::class, $violations[0]->getConstraint());
-        $this->assertSame('name', $violations[0]->getPropertyPath());
+        $this->assertInstanceOf(NotBlank::class, $violations->get(0)->getConstraint());
+        $this->assertSame('name', $violations->get(0)->getPropertyPath());
 
         // PHP's type system allows an empty array for `array $tag` - only Count(min: 1) catches
         // "must have at least one item", which is exactly why it exists alongside plain typing.
         $emptyTag = new $class(name: 'Mario', age: 40, tag: []);
         $violations = $validator->validate($emptyTag);
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Count::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Count::class, $violations->get(0)->getConstraint());
     }
 
     public function testFacetConstraintsMatchXsdRestrictions(): void
@@ -152,7 +152,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir.'/out/FacetType.php');
+        $code = $this->readGenerated('FacetType.php');
 
         $this->assertStringContainsString("#[Regex(pattern: '#^(?:[0-9a-fA-F]{8})\$#u')]", (string) $code);
         $this->assertStringContainsString('#[Length(min: 2, max: 5)]', (string) $code);
@@ -225,29 +225,29 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
 
         $violations = $validator->validate(new $class(code: 'A', percent: 50, exactCode: 'ABC', score: 5, amount: 12.34));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Length::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Length::class, $violations->get(0)->getConstraint());
 
         $violations = $validator->validate(new $class(code: 'AB', percent: 150, exactCode: 'ABC', score: 5, amount: 12.34));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Range::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Range::class, $violations->get(0)->getConstraint());
 
         $violations = $validator->validate(new $class(code: 'AB', percent: 50, exactCode: 'AB', score: 5, amount: 12.34));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Length::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Length::class, $violations->get(0)->getConstraint());
 
         $violations = $validator->validate(new $class(code: 'AB', percent: 50, exactCode: 'ABC', score: 5, amount: 12.345));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Decimal::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Decimal::class, $violations->get(0)->getConstraint());
 
         // minExclusive/maxExclusive: the boundary values themselves must fail (0 and 10 are
         // excluded, unlike Range's minInclusive/maxInclusive case tested above).
         $violations = $validator->validate(new $class(code: 'AB', percent: 50, exactCode: 'ABC', score: 0, amount: 12.34));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(GreaterThan::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(GreaterThan::class, $violations->get(0)->getConstraint());
 
         $violations = $validator->validate(new $class(code: 'AB', percent: 50, exactCode: 'ABC', score: 10, amount: 12.34));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(LessThan::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(LessThan::class, $violations->get(0)->getConstraint());
     }
 
     public function testValidCascadesIntoBothSingleAndArrayNestedObjects(): void
@@ -272,7 +272,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir.'/out/PersonType.php');
+        $code = $this->readGenerated('PersonType.php');
         $this->assertStringContainsString('use Symfony\Component\Validator\Constraints\Valid;', (string) $code);
         $this->assertStringContainsString('#[Valid()]', (string) $code);
 
@@ -296,14 +296,14 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             otherAddress: [new $addressClass(city: 'Graz')],
         ));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertSame('homeAddress.city', $violations[0]->getPropertyPath());
+        $this->assertSame('homeAddress.city', $violations->get(0)->getPropertyPath());
 
         $violations = $validator->validate(new $personClass(
             homeAddress: new $addressClass(city: 'Vienna'),
             otherAddress: [new $addressClass(city: '')],
         ));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertSame('otherAddress[0].city', $violations[0]->getPropertyPath());
+        $this->assertSame('otherAddress[0].city', $violations->get(0)->getPropertyPath());
     }
 
     public function testFacetsMergeAcrossANamedSimpleTypeRestrictionChain(): void
@@ -339,7 +339,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir.'/out/ChainType.php');
+        $code = $this->readGenerated('ChainType.php');
 
         // NarrowCode adds no pattern of its own - BaseCode's must still apply, merged with
         // NarrowCode's own minLength/maxLength, not lost.
@@ -361,18 +361,18 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         // redeclares a pattern - this is exactly what the merge (not overwrite) fix protects.
         $violations = $validator->validate(new $class(narrow: 'abc', overridden: '123'));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Regex::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Regex::class, $violations->get(0)->getConstraint());
 
         // fails NarrowCode's own minLength/maxLength=3
         $violations = $validator->validate(new $class(narrow: 'AB', overridden: '123'));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Length::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Length::class, $violations->get(0)->getConstraint());
 
         // OverriddenCode's own pattern applies, not BaseCode's ancestor pattern
         $this->assertCount(0, $validator->validate(new $class(narrow: 'ABC', overridden: '456')));
         $violations = $validator->validate(new $class(narrow: 'ABC', overridden: 'XYZ'));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Regex::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Regex::class, $violations->get(0)->getConstraint());
     }
 
     public function testPatternWithBothHashAndTildeGetsASafeDelimiter(): void
@@ -396,7 +396,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
             </xs:schema>
             XSD);
 
-        $code = file_get_contents($this->tmpDir.'/out/MarkerHolderType.php');
+        $code = $this->readGenerated('MarkerHolderType.php');
 
         // neither '#' nor '~' can be the PCRE delimiter here - both appear in the pattern
         // itself; the generator must fall back to the next candidate ('!').
@@ -410,7 +410,7 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         $this->assertCount(0, $validator->validate(new $class(marker: '~')));
         $violations = $validator->validate(new $class(marker: 'x'));
         $this->assertGreaterThanOrEqual(1, \count($violations));
-        $this->assertInstanceOf(Regex::class, $violations[0]->getConstraint());
+        $this->assertInstanceOf(Regex::class, $violations->get(0)->getConstraint());
     }
 
     private function writeXsdAndGenerate(\Xsd2Php\Attribute\PropertyAttributeStrategy $attributeStrategy, ?string $xsd = null): void
@@ -443,5 +443,15 @@ final class SymfonyValidatorAttributeStrategyTest extends TestCase
         );
 
         new Generator($config)->generate();
+    }
+
+    private function readGenerated(string $filename): string
+    {
+        $path = $this->tmpDir.'/out/'.$filename;
+        $this->assertFileExists($path);
+        $contents = file_get_contents($path);
+        $this->assertIsString($contents);
+
+        return $contents;
     }
 }

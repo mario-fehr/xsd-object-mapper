@@ -102,13 +102,13 @@ final class SemanticTypeAttributeStrategyTest extends TestCase
 
             $violations = $validator->validate(new $class(email: 'not-an-email', country: 'AT'));
             $this->assertGreaterThanOrEqual(1, \count($violations));
-            $this->assertInstanceOf(Email::class, $violations[0]->getConstraint());
+            $this->assertInstanceOf(Email::class, $violations->get(0)->getConstraint());
 
             // "XX" matches the schema's own \w{2} pattern (no Regex here since this type has
             // none) but isn't a real ISO-3166 code - exactly the gap Assert\Country closes.
             $violations = $validator->validate(new $class(email: 'test@example.com', country: 'XX'));
             $this->assertGreaterThanOrEqual(1, \count($violations));
-            $this->assertInstanceOf(Country::class, $violations[0]->getConstraint());
+            $this->assertInstanceOf(Country::class, $violations->get(0)->getConstraint());
         } finally {
             $this->removeDir($tmpDir);
         }
