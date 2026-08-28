@@ -575,7 +575,9 @@ final class GeneratorTest extends TestCase
         $this->assertStringContainsString("#[ExactlyOneOf(fields: ['foo', 'bar'])]", $code);
 
         require $this->tmpDir.'/out/CartItemType.php';
-        $reflection = new \ReflectionClass(\TestGen\CartItemType::class);
+        /** @var class-string<object> $className */
+        $className = 'TestGen\CartItemType';
+        $reflection = new \ReflectionClass($className);
         // ReflectionClass::getAttributes() throws if PHP itself rejects a repeated non-repeatable
         // attribute - constructing it at all is the regression check.
         $this->assertCount(2, $reflection->getAttributes());

@@ -7,12 +7,6 @@ parameters:
 			path: tests/Attribute/SemanticTypeAttributeStrategyTest.php
 
 		-
-			message: '#^Class TestGen\\CartItemType not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: tests/GeneratorTest.php
-
-		-
 			message: '#^Cannot call method getConstraint\(\) on Symfony\\Component\\Validator\\ConstraintViolationInterface\|null\.$#'
 			identifier: method.nonObject
 			count: 12
