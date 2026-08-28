@@ -1,5 +1,9 @@
 # 8. Composable attribute strategies, not one monolithic strategy
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 The generator originally emitted only `symfony/serializer` attributes (`SerializedName`/`Context`) via

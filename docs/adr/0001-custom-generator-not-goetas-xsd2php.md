@@ -1,5 +1,9 @@
 # 1. Custom generator instead of adopting goetas-webservices/xsd2php
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 Needed an XSD-to-PHP generator producing `readonly` value objects annotated with `symfony/serializer`

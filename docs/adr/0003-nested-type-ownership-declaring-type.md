@@ -1,13 +1,14 @@
 # 3. Nested-type ownership follows the declaring type, not an extending subclass
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
-`Generator::collectProperties()` recurses into a base `complexType` on `complexContent`/`xs:extension`.
-An inline anonymous nested type (e.g. an element with an inline `complexType`/`simpleType` child, no
-`type="..."` attribute) is generated under a synthesized nested PHP namespace built from an "owner"
-class name. The recursion originally passed the _extending subclass's_ owner down into the base-type
-recursion, not the base type's own identity, so a base type with an inline nested type, extended by
-N subclasses, generated N structurally identical nested classes for the same field instead of one.
+An inline anonymous nested type (an element with an inline `complexType`/`simpleType` child and no `type="..."` attribute) is generated under a synthesized nested PHP namespace built from an "owner" class name. When a base `complexType` declares such a nested type and is extended via `complexContent`/`xs:extension`, its owner must be well-defined: the base that lexically declares the nested type, or each subclass that inherits it? The two answers generate different code: one shared nested class versus one per subclass.
+
+This surfaced as a bug: `Generator::collectProperties()` originally threaded the extending subclass's owner into the base-type recursion, so a base type with an inline nested type, extended by N subclasses, generated N structurally identical nested classes for the same field.
 
 ## Decision
 

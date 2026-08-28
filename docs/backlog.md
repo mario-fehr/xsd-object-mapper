@@ -14,19 +14,11 @@ explains the reasoning for.
 - **`mixed="true"` (text + element mixed content)**: not recognized/handled; would likely silently
   process only the child elements and drop the interleaved text (not verified against a real case).
 - **`xs:redefine` / `xs:override`**: schema redefinition/override mechanism, not handled.
-- **`use="prohibited"` on `xs:attribute`** (mishandled): `$use !== 'required'` treats `prohibited`
-  the same as `optional` (nullable/allowed) instead of forbidding the attribute entirely. A real
-  logic bug, independent of how often any particular schema happens to use `use="prohibited"`.
+- **`use="prohibited"` on `xs:attribute`** (mishandled): tracked as [#3](https://github.com/mario-fehr/xsd-object-mapper/issues/3).
 - **`xs:all` has no dedicated test**: `collectParticleElements()` queries
   `xs:sequence | xs:choice | xs:all` together everywhere, so the code path is shared with
   sequence/choice, but that assumption itself has never been falsified by an isolated test.
-- **`resolveNamedRef()`'s `$seenGroups` cycle detection is too coarse**: threaded by reference
-  through the _entire_ particle tree of one `collectParticleElements()` call, including across
-  sibling branches, not just along one reference path. A group referenced twice from independent
-  places within the same complexType (legitimate reuse, not a real cycle) gets misreported as
-  "circular ref" on the second occurrence and its elements are silently dropped. Fix would need
-  `$seenGroups` scoped per-path instead of tree-wide (e.g. a copy per sequence/choice branch instead
-  of threading the same reference, "seen" only along one ref path).
+- **`resolveNamedRef()`'s `$seenGroups` cycle detection is too coarse**: tracked as [#4](https://github.com/mario-fehr/xsd-object-mapper/issues/4).
 
 ## Generator/package infrastructure
 
@@ -64,7 +56,7 @@ worth considering:
 - **Custom type mapping per named `simpleType`**: `janephp`'s `custom-string-format-mapping`.
   Substitutes a consumer-supplied value-object class for a specific named XSD simple type instead of
   the generator's own scalar mapping. A generic version of the `xs:decimal` → Decimal-value-object
-  idea already in the "Type derivation" section above.
+  fix (see [ADR 0007](adr/0007-custom-decimal-constraint-for-digit-facets.md)).
 - **`skip-null-values`/`include-null-value`**: `janephp`. Serializer-context null-handling flag;
   would need the generator to also emit Symfony Serializer context attributes, which it doesn't yet.
 - **Property accessor style as a config axis**: `makinacorpus/php-xsd-gen`'s
@@ -75,7 +67,7 @@ worth considering:
 - **Strict-mode toggles for missing/colliding types** (`makinacorpus/php-xsd-gen`'s
   `type_missing_error`/`type_override_error`): hard-fail instead of silently ignoring a missing
   referenced type or silently overwriting on a type-name collision. Related to, but distinct from,
-  the `$seenGroups` cycle-detection bug above.
+  the `$seenGroups` cycle-detection bug ([#4](https://github.com/mario-fehr/xsd-object-mapper/issues/4)).
 
 Priority, if picked up (value vs. effort, not a commitment to build any of it):
 
@@ -137,49 +129,4 @@ would be a second, competing hydration mechanism solving the same problem this p
 - **Array-item-wise validation** (`Assert\All` wrapping) for facets/aliases on array properties:
   currently skipped entirely when `isArray === true` (only the array itself, not each item, is
   validated).
-- **`xs:decimal` → PHP `float` mapping, no exact decimal arithmetic**: a known precondition of the
-  generator, not newly introduced. `DecimalValidator` only checks the digit count of the string
-  representation, it can't heal float-imprecision rounding artifacts. A real fix would need
-  `xs:decimal` → a PHP string or a dedicated Decimal value-object instead of `float`, a bigger,
-  breaking change to the generator.
-
-## Resolved
-
-- **`phpstan-baseline.neon` eliminated entirely**: the two remaining root causes from the old
-  "Static analysis" section above are both fixed. `$typeInfo`'s untyped array shape replaced with
-  a `TypeInfo` value object + `TypeKind` enum (mirroring the `Property`/`PropertyRole` pattern),
-  and every remaining raw `\DOMNodeList` iteration site in `Generator.php` got the codebase's
-  existing `instanceof \DOMElement` guard idiom. `vendor/bin/phpstan analyse` runs clean with no
-  baseline at all (see `docs/specs/2026-08-27-phpstan-baseline-zero-design.md`).
-- **`makeProperty()`'s untyped array property bag**: replaced with a `Property` value object +
-  `PropertyRole` enum (`Element`/`Attribute`/`Text` instead of 2 independent `isAttribute`/
-  `isText` booleans, so the 4th impossible combination is now structurally unrepresentable).
-  Shrunk `phpstan-baseline.neon` from 219 to 180 findings (see
-  `docs/specs/2026-08-27-property-value-object-design.md`).
-- **`xs:choice` treated like `xs:sequence`**: fixed. `collectParticleElements()` now tracks the
-  enclosing `xs:choice` particle per element; choice-branch elements become nullable, plus a
-  class-level `#[ExactlyOneOf(fields: [...])]` constraint (`required: false` when the choice itself
-  has `minOccurs="0"`). Known, deliberately warn-and-skip-guarded limits: a repeatable choice
-  (`maxOccurs > 1` on the choice itself), a choice branch with more than one element (a nested
-  `xs:sequence`/`xs:group`/`xs:choice` directly under the choice: one atomic alternative, not N
-  independent "one of" members, not representable), name collisions with a later non-choice
-  property.
-- **Facet inheritance across a chain of nested named-simpleType restrictions was overwritten
-  instead of merged**: `resolveSimpleTypeRef()`/`resolveParticleType()` now merge facets across
-  the whole restriction chain (own facet wins on a key collision), not just the immediate
-  restriction.
-- **`DecimalValidator`'s digit counting had 2 bugs**: scientific/exponential notation
-  (`(string) $value` switching to `"1.234E-5"` outside PHP's `precision` range) was misparsed as
-  fraction digits; leading zeros in the fraction part weren't excluded from `totalDigits` when the
-  integer part is zero (`'0.05'` counted as 2 significant digits instead of 1). Both fixed.
-- **`xs:attribute ref="..."` silently dropped, no warning** (unlike the equivalent element-ref
-  path): now warns and skips, consistent with the element-ref behavior.
-- **`Generator::pathFor()` picked the first matching namespace mapping, not the most specific one**:
-  for two mappings where one's PHP namespace is a prefix of the other's, it now picks the longest
-  (most specific) match.
-- **`SymfonyValidatorAttributeStrategy::toPcrePattern()`'s delimiter fallback could still collide**
-  with the pattern content: now tries a small candidate list instead of a single fallback
-  character.
-- **`xs:default`/`xs:fixed` were completely ignored**: now surfaced as a `(XSD-Default: ...)` /
-  `(XSD-Fixed: ...)` doc-comment hint on the generated property, purely informational (doesn't
-  change nullability, defaults, or serialization behavior).
+- **`xs:decimal` → PHP `float` mapping, no exact decimal arithmetic**: root cause, and why the fix (map to a PHP string or a dedicated Decimal value-object) is deferred — see [ADR 0007](adr/0007-custom-decimal-constraint-for-digit-facets.md).

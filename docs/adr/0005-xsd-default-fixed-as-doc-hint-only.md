@@ -1,5 +1,9 @@
 # 5. `xs:default`/`xs:fixed` surfaced as a doc-comment hint, not a PHP property default
 
+## Status
+
+Accepted (2026-08-27).
+
 ## Context
 
 `xs:default`/`xs:fixed` on elements and attributes were completely ignored by the generator: every
