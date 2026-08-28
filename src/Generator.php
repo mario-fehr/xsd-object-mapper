@@ -673,7 +673,10 @@ final class Generator
                     $choiceGroups[$groupKey] ??= [
                         'particle' => $choiceParticle,
                         'members' => [],
-                        'directChildCount' => $this->query($xp, 'xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
+                        // $choiceParticle may belong to a different XSD file's DOMDocument than
+                        // $ctNode (e.g. an xs:group defined in another xsdPaths entry) - xpath()
+                        // must be rebound to its own document, reusing $xp would crash DOMXPath::query().
+                        'directChildCount' => $this->query($this->xpath($this->ownerDocOf($choiceParticle)), 'xs:element | xs:sequence | xs:choice | xs:all | xs:group', $choiceParticle)->length,
                     ];
                     // $prop's own identity (not a separately-tracked DOM node) is what the
                     // dedup-survivor check below compares against - "did this exact Property
